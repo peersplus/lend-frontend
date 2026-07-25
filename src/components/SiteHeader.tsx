@@ -22,7 +22,7 @@ export function SiteHeader() {
   ] as const;
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-leaf/20 bg-leaf/10 backdrop-blur-md">
+    <nav className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2" aria-label="Peers Plus home">
           <img
@@ -53,7 +53,7 @@ export function SiteHeader() {
             data-header-cta
             className="hidden items-center gap-1.5 rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground shadow-sm shadow-leaf/20 transition-transform hover:-translate-y-0.5 hover:bg-leaf/90 sm:inline-flex"
           >
-            <span aria-hidden>➕</span> Post a Lend
+            <span aria-hidden className="text-base leading-none text-leaf-foreground">+</span> Post a Lend
           </Link>
           <UserMenu />
           <button
