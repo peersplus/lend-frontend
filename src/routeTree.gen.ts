@@ -17,6 +17,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicHooksNotifyRequestRouteImport } from './routes/api/public/hooks/notify-request'
+import { Route as ApiPublicHooksDailyDigestRouteImport } from './routes/api/public/hooks/daily-digest'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -59,6 +61,18 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksNotifyRequestRoute =
+  ApiPublicHooksNotifyRequestRouteImport.update({
+    id: '/api/public/hooks/notify-request',
+    path: '/api/public/hooks/notify-request',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksDailyDigestRoute =
+  ApiPublicHooksDailyDigestRouteImport.update({
+    id: '/api/public/hooks/daily-digest',
+    path: '/api/public/hooks/daily-digest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +80,8 @@ export interface FileRoutesByFullPath {
   '/items': typeof ItemsRoute
   '/requests': typeof RequestsRoute
   '/settings': typeof SettingsRoute
+  '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
+  '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -76,6 +92,8 @@ export interface FileRoutesByTo {
   '/items': typeof ItemsRoute
   '/requests': typeof RequestsRoute
   '/settings': typeof SettingsRoute
+  '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
+  '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -87,6 +105,8 @@ export interface FileRoutesById {
   '/items': typeof ItemsRoute
   '/requests': typeof RequestsRoute
   '/settings': typeof SettingsRoute
+  '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
+  '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -99,6 +119,8 @@ export interface FileRouteTypes {
     | '/items'
     | '/requests'
     | '/settings'
+    | '/api/public/hooks/daily-digest'
+    | '/api/public/hooks/notify-request'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -109,6 +131,8 @@ export interface FileRouteTypes {
     | '/items'
     | '/requests'
     | '/settings'
+    | '/api/public/hooks/daily-digest'
+    | '/api/public/hooks/notify-request'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -119,6 +143,8 @@ export interface FileRouteTypes {
     | '/items'
     | '/requests'
     | '/settings'
+    | '/api/public/hooks/daily-digest'
+    | '/api/public/hooks/notify-request'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -130,6 +156,8 @@ export interface RootRouteChildren {
   ItemsRoute: typeof ItemsRoute
   RequestsRoute: typeof RequestsRoute
   SettingsRoute: typeof SettingsRoute
+  ApiPublicHooksDailyDigestRoute: typeof ApiPublicHooksDailyDigestRoute
+  ApiPublicHooksNotifyRequestRoute: typeof ApiPublicHooksNotifyRequestRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -193,6 +221,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/notify-request': {
+      id: '/api/public/hooks/notify-request'
+      path: '/api/public/hooks/notify-request'
+      fullPath: '/api/public/hooks/notify-request'
+      preLoaderRoute: typeof ApiPublicHooksNotifyRequestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/daily-digest': {
+      id: '/api/public/hooks/daily-digest'
+      path: '/api/public/hooks/daily-digest'
+      fullPath: '/api/public/hooks/daily-digest'
+      preLoaderRoute: typeof ApiPublicHooksDailyDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -202,6 +244,8 @@ const rootRouteChildren: RootRouteChildren = {
   ItemsRoute: ItemsRoute,
   RequestsRoute: RequestsRoute,
   SettingsRoute: SettingsRoute,
+  ApiPublicHooksDailyDigestRoute: ApiPublicHooksDailyDigestRoute,
+  ApiPublicHooksNotifyRequestRoute: ApiPublicHooksNotifyRequestRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
