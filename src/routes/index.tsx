@@ -118,7 +118,7 @@ const flowSteps = [
         <div className="rounded-lg bg-leaf py-2 text-center text-[11px] font-semibold text-leaf-foreground">
           Say thanks & finish
         </div>
-        <p className="text-[10px] text-muted-foreground">+1 trusted exchange · 21 total</p>
+        <p className="text-[10px] text-muted-foreground">Trust grows one exchange at a time</p>
       </div>
     ),
   },
