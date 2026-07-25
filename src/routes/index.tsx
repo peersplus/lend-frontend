@@ -429,6 +429,10 @@ function Home() {
               </Link>
             </div>
           </div>
+        </section>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }
