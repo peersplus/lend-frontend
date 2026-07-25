@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import {
+import { BrandHeader } from './BrandHeader'
   Body,
   Button,
   Container,
@@ -25,6 +26,7 @@ export const RecoveryEmail = ({
     <Preview>Reset your password for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Reset your password</Heading>
         <Text style={text}>
           We received a request to reset your password for {siteName}. Click

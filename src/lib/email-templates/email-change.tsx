@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import {
+import { BrandHeader } from './BrandHeader'
   Body,
   Button,
   Container,
@@ -35,6 +36,7 @@ export const EmailChangeEmail = ({
     <Preview>Confirm your email change for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Confirm your email change</Heading>
         <Text style={text}>
           You requested to change your email address for {siteName} from{' '}
