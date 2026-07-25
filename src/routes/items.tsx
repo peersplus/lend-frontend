@@ -193,23 +193,23 @@ function ItemsPage() {
           </p>
         </div>
 
-        <div className="mb-6 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3">
+        <div className="mb-6 flex items-center gap-2 overflow-x-auto rounded-2xl border border-border bg-card p-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <input
             type="search"
             value={filters.q}
             onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
             placeholder="Search title, description, building…"
-            className="min-w-[220px] flex-1 rounded-full border border-input bg-background px-4 py-2 text-sm outline-none focus:border-leaf"
+            className="min-w-[180px] flex-1 rounded-full border border-input bg-background px-4 py-2 text-sm outline-none focus:border-leaf"
           />
           <select
             value={filters.category}
             onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
-            className="rounded-full border border-input bg-background px-3 py-2 text-sm"
+            className="shrink-0 rounded-full border border-input bg-background px-3 py-2 text-sm"
           >
             <option value="">All categories</option>
             {categories.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <div className="flex overflow-hidden rounded-full border border-input text-sm">
+          <div className="flex shrink-0 overflow-hidden rounded-full border border-input text-sm">
             {(["all","free","rent"] as const).map((p) => (
               <button
                 key={p}
@@ -222,7 +222,7 @@ function ItemsPage() {
             ))}
           </div>
           {user && (
-            <label className="flex items-center gap-2 rounded-full border border-input bg-background px-3 py-2 text-sm">
+            <label className="flex shrink-0 items-center gap-2 rounded-full border border-input bg-background px-3 py-2 text-sm">
               <input type="checkbox" checked={filters.mine} onChange={(e) => setFilters((f) => ({ ...f, mine: e.target.checked }))} />
               Only mine
             </label>
@@ -231,12 +231,12 @@ function ItemsPage() {
             <button
               type="button"
               onClick={() => setFilters({ q: "", category: "", price: "all", mine: false })}
-              className="rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-muted"
+              className="shrink-0 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-muted"
             >
               Clear
             </button>
           )}
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-2">
             <div className="flex overflow-hidden rounded-full border border-input text-sm">
               <button
                 type="button"
@@ -253,11 +253,12 @@ function ItemsPage() {
                 🗺 Map
               </button>
             </div>
-            <span className="text-xs text-muted-foreground">
+            <span className="whitespace-nowrap text-xs text-muted-foreground">
               {loading ? "…" : `${listed.length} of ${items.length}`}
             </span>
           </div>
         </div>
+
 
         {view === "map" && !loading && (
           <div className="mb-6">
