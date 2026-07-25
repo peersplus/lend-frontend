@@ -377,7 +377,7 @@ function RequestsPage() {
                   </div>
 
 
-                  {user && user.id !== r.owner_id && (
+                  {user && user.id !== r.owner_id && r.status === "open" && (
                     <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <button
                         onClick={() => offerHelp(r)}
