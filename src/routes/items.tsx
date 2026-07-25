@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { UserMenu } from "@/components/UserMenu";
+import { haversineKm, formatDistance } from "@/lib/geo";
 import { toast } from "sonner";
 
 type Item = {
@@ -16,6 +18,10 @@ type Item = {
   image_url: string | null;
   owner_id: string;
   created_at: string;
+  lat: number | null;
+  lng: number | null;
+  building_name: string | null;
+  address: string | null;
 };
 
 export const Route = createFileRoute("/items")({
@@ -39,12 +45,32 @@ function ItemsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [requesting, setRequesting] = useState<Item | null>(null);
+  const [me, setMe] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null });
   const [form, setForm] = useState({
     title: "", description: "", category: "Tools",
     price_mode: "free" as "free" | "rent",
     price_amount: "", deposit_amount: "", image_url: "",
+    building_name: "", address: "",
+    lat: "" as string, lng: "" as string,
   });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("lat,lng,building_name,address")
+      .eq("id", user.id).maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        setMe({ lat: data.lat ?? null, lng: data.lng ?? null });
+        setForm((f) => ({
+          ...f,
+          lat: data.lat != null ? String(data.lat) : f.lat,
+          lng: data.lng != null ? String(data.lng) : f.lng,
+          building_name: f.building_name || (data as any).building_name || "",
+          address: f.address || (data as any).address || "",
+        }));
+      });
+  }, [user]);
 
   async function load() {
     setLoading(true);
@@ -55,7 +81,18 @@ function ItemsPage() {
     setItems((data as Item[]) ?? []);
     setLoading(false);
   }
+  const listed = useMemo(() => {
+    if (me.lat == null || me.lng == null) return items.map((i) => ({ i, km: null as number | null }));
+    return items
+      .map((i) => ({ i, km: i.lat != null && i.lng != null ? haversineKm({ lat: me.lat!, lng: me.lng! }, { lat: i.lat!, lng: i.lng! }) : null }))
+      .sort((a, b) => (a.km ?? 1e9) - (b.km ?? 1e9));
+  }, [items, me]);
+
   useEffect(() => { load(); }, []);
+
+
+
+
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -70,19 +107,35 @@ function ItemsPage() {
       price_amount: form.price_mode === "rent" && form.price_amount ? Number(form.price_amount) : null,
       deposit_amount: form.deposit_amount ? Number(form.deposit_amount) : null,
       image_url: form.image_url || null,
-    });
+      building_name: form.building_name || null,
+      address: form.address || null,
+      lat: form.lat ? Number(form.lat) : null,
+      lng: form.lng ? Number(form.lng) : null,
+    } as never);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Listed! Your neighbors can see it now.");
     setShowForm(false);
-    setForm({ title: "", description: "", category: "Tools", price_mode: "free", price_amount: "", deposit_amount: "", image_url: "" });
+    setForm({
+      title: "", description: "", category: "Tools", price_mode: "free",
+      price_amount: "", deposit_amount: "", image_url: "",
+      building_name: form.building_name, address: form.address,
+      lat: form.lat, lng: form.lng,
+    });
     load();
   }
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    toast.success("Signed out");
+  function useMyLocation() {
+    if (!("geolocation" in navigator)) return toast.error("Geolocation not supported.");
+    navigator.geolocation.getCurrentPosition(
+      (p) => {
+        setForm((f) => ({ ...f, lat: p.coords.latitude.toFixed(6), lng: p.coords.longitude.toFixed(6) }));
+        toast.success("Location captured for this listing.");
+      },
+      (err) => toast.error(err.message),
+    );
   }
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,20 +149,12 @@ function ItemsPage() {
             <Link to="/bookings" className="hidden sm:inline rounded-full border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted">
               My bookings
             </Link>
-            {user ? (
-              <>
-                <button onClick={() => setShowForm(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
-                  + Lend something
-                </button>
-                <button onClick={handleSignOut} className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted">
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <Link to="/auth" className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">
-                Sign in
-              </Link>
+            {user && (
+              <button onClick={() => setShowForm(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
+                + Lend something
+              </button>
             )}
+            <UserMenu />
           </div>
         </div>
       </nav>
@@ -140,7 +185,7 @@ function ItemsPage() {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {items.map((item) => (
+            {listed.map(({ i: item, km }) => (
               <article key={item.id} className="group flex flex-col gap-3">
                 <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-black/5">
                   {item.image_url ? (
@@ -155,10 +200,22 @@ function ItemsPage() {
                   }`}>
                     {item.price_mode === "free" ? "Free" : `$${item.price_amount}/day`}
                   </span>
+                  {km != null && (
+                    <span className="absolute right-3 top-3 rounded-md bg-background/90 px-2 py-1 text-[10px] font-semibold backdrop-blur">
+                      📍 {formatDistance(km)}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">{item.title}</h3>
                   <p className="text-sm text-muted-foreground line-clamp-2">{item.description ?? item.category}</p>
+                  {(item.building_name || item.address) && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {item.building_name && <span className="font-medium text-foreground">🏢 {item.building_name}</span>}
+                      {item.building_name && item.address ? " · " : ""}
+                      {item.address && <span className="line-clamp-1">{item.address}</span>}
+                    </p>
+                  )}
                   {item.deposit_amount != null && (
                     <p className="mt-1 text-xs text-muted-foreground">
                       Replacement value if damaged: <strong>${item.deposit_amount}</strong>
@@ -230,6 +287,24 @@ function ItemsPage() {
             <input placeholder="Image URL (optional)"
               value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
               className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+
+            <div className="grid grid-cols-2 gap-3">
+              <input placeholder="Building / society"
+                value={form.building_name} onChange={(e) => setForm({ ...form, building_name: e.target.value })}
+                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+              <input placeholder="Address (shown at pickup only)"
+                value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
+                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+            </div>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={useMyLocation}
+                className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">
+                📍 Use my location
+              </button>
+              <span className="text-xs text-muted-foreground">
+                {form.lat && form.lng ? `Pin set (${Number(form.lat).toFixed(3)}, ${Number(form.lng).toFixed(3)})` : "So neighbors see distance"}
+              </span>
+            </div>
             <div className="flex gap-2 pt-2">
               <button type="button" onClick={() => setShowForm(false)}
                 className="flex-1 rounded-xl border border-border bg-background py-2.5 text-sm font-semibold">

@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import heroHandoff from "@/assets/hero-handoff.jpg";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/NotificationBell";
+import { UserMenu } from "@/components/UserMenu";
 
 
 export const Route = createFileRoute("/")({
@@ -166,21 +166,9 @@ function Home() {
                 >
                   Post request
                 </Link>
-                <Link
-                  to="/settings"
-                  className="rounded-full border border-border bg-card px-3 py-2 text-xs font-medium hover:bg-muted"
-                >
-                  Settings
-                </Link>
-                <button
-                  onClick={() => supabase.auth.signOut()}
-                  className="rounded-full border border-border bg-card px-3 py-2 text-xs font-medium hover:bg-muted"
-                >
-                  Sign out
-                </button>
+                <UserMenu />
               </div>
             ) : (
-
               <Link
                 to="/auth"
                 className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"

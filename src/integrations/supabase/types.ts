@@ -90,6 +90,8 @@ export type Database = {
       }
       items: {
         Row: {
+          address: string | null
+          building_name: string | null
           category: string
           created_at: string
           deposit_amount: number | null
@@ -97,6 +99,8 @@ export type Database = {
           distance_hint: string | null
           id: string
           image_url: string | null
+          lat: number | null
+          lng: number | null
           owner_id: string
           price_amount: number | null
           price_mode: string
@@ -105,6 +109,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
+          building_name?: string | null
           category: string
           created_at?: string
           deposit_amount?: number | null
@@ -112,6 +118,8 @@ export type Database = {
           distance_hint?: string | null
           id?: string
           image_url?: string | null
+          lat?: number | null
+          lng?: number | null
           owner_id: string
           price_amount?: number | null
           price_mode?: string
@@ -120,6 +128,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
+          building_name?: string | null
           category?: string
           created_at?: string
           deposit_amount?: number | null
@@ -127,6 +137,8 @@ export type Database = {
           distance_hint?: string | null
           id?: string
           image_url?: string | null
+          lat?: number | null
+          lng?: number | null
           owner_id?: string
           price_amount?: number | null
           price_mode?: string
@@ -135,6 +147,38 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          booking_id: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          booking_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          booking_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -179,7 +223,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
+          building_name: string | null
           created_at: string
           display_name: string | null
           email_enabled: boolean
@@ -187,13 +233,16 @@ export type Database = {
           lat: number | null
           lng: number | null
           neighborhood: string | null
+          phone: string | null
           push_enabled: boolean
           radius_km: number
           updated_at: string
           verification: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
+          building_name?: string | null
           created_at?: string
           display_name?: string | null
           email_enabled?: boolean
@@ -201,13 +250,16 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           neighborhood?: string | null
+          phone?: string | null
           push_enabled?: boolean
           radius_km?: number
           updated_at?: string
           verification?: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
+          building_name?: string | null
           created_at?: string
           display_name?: string | null
           email_enabled?: boolean
@@ -215,6 +267,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           neighborhood?: string | null
+          phone?: string | null
           push_enabled?: boolean
           radius_km?: number
           updated_at?: string
@@ -302,7 +355,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_chat_on_booking: {
+        Args: { _booking_id: string; _user_id: string }
+        Returns: boolean
+      }
+      get_booking_contact: {
+        Args: { _booking_id: string }
+        Returns: {
+          address: string
+          avatar_url: string
+          building_name: string
+          display_name: string
+          phone: string
+          role: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { UserMenu } from "@/components/UserMenu";
 import { toast } from "sonner";
 
 type Booking = {
@@ -108,9 +109,10 @@ function BookingsPage() {
             <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">P</span>
             <span className="font-display text-2xl text-leaf">Peers+Help</span>
           </Link>
-          <div className="flex gap-2 text-sm">
-            <Link to="/items" className="rounded-full border border-border px-4 py-2 hover:bg-muted">Browse</Link>
-            <Link to="/requests" className="rounded-full border border-border px-4 py-2 hover:bg-muted">Requests</Link>
+          <div className="flex items-center gap-2 text-sm">
+            <Link to="/items" className="hidden sm:inline rounded-full border border-border px-4 py-2 hover:bg-muted">Browse</Link>
+            <Link to="/requests" className="hidden sm:inline rounded-full border border-border px-4 py-2 hover:bg-muted">Requests</Link>
+            <UserMenu />
           </div>
         </div>
       </nav>
@@ -202,6 +204,15 @@ function BookingRow({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
+        {["approved","picked_up","returned","defect_reported","completed"].includes(b.status) && (
+          <Link
+            to="/chat/$bookingId"
+            params={{ bookingId: b.id }}
+            className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background"
+          >
+            💬 Chat & contact
+          </Link>
+        )}
         {role === "lent" && b.status === "requested" && (
           <>
             <button onClick={onApprove} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
