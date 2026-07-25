@@ -46,8 +46,8 @@ const categories = [
 ];
 
 const emergencies = [
-  { need: "Wheelchair for visiting grandparent", who: "David K.", when: "10 min ago" },
-  { need: "Portable generator — power out on 5th Ave", who: "Priya S.", when: "35 min ago" },
+  { need: "Wheelchair for visiting grandparent", who: "Example request", when: "Nearby" },
+  { need: "Portable generator — power out on 5th Ave", who: "Example request", when: "Nearby" },
 ];
 
 const flowSteps = [
