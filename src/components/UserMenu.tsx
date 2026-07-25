@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
 
 type Profile = {
@@ -59,7 +60,7 @@ export function UserMenu() {
         className="flex items-center gap-2 rounded-full border border-border bg-card py-1.5 pl-1.5 pr-3 text-sm font-medium hover:bg-muted"
       >
         {profile?.avatar_url ? (
-          <img src={profile.avatar_url} alt="" className="size-8 rounded-full object-cover" />
+          <PhotoImg path={profile.avatar_url} alt="" className="size-8 rounded-full object-cover" />
         ) : (
           <span className="grid size-8 place-items-center rounded-full bg-leaf/15 text-xs font-semibold text-leaf">
             {initials || "🙂"}
