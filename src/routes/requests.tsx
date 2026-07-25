@@ -422,12 +422,21 @@ function RequestsPage() {
 
                   {user && user.id === r.owner_id && (
                     <div className="mt-3 flex gap-2">
-                      <button
-                        onClick={() => closeRequest(r, "closed")}
-                        className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
-                      >
-                        Mark inactive
-                      </button>
+                      {r.status === "open" ? (
+                        <button
+                          onClick={() => closeRequest(r, "closed")}
+                          className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                        >
+                          Mark inactive
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => closeRequest(r, "open")}
+                          className="flex-1 rounded-full border border-leaf bg-leaf/10 px-3 py-1.5 text-xs font-semibold text-leaf hover:bg-leaf/20"
+                        >
+                          Reopen request
+                        </button>
+                      )}
                       <button
                         onClick={() => deleteRequest(r)}
                         className="flex-1 rounded-full border border-destructive/50 bg-background px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
@@ -436,6 +445,7 @@ function RequestsPage() {
                       </button>
                     </div>
                   )}
+
                 </div>
               </article>
             ))}
