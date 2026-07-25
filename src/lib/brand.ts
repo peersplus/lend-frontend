@@ -1,4 +1,4 @@
-import logoAsset from "@/assets/peers-plus-logo.jpeg.asset.json";
+import logoAsset from "@/assets/peers-plus-logo-transparent.png.asset.json";
 
 /** Public site origin — used to build absolute URLs (emails, OG tags). */
 export const SITE_URL = "https://project--ded194ea-5232-4886-86cb-a35e37bf8690.lovable.app";
