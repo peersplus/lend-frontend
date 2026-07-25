@@ -17,6 +17,7 @@ type Request = {
   urgency: "normal" | "urgent";
   needed_by: string | null;
   radius_km: number;
+  image_url: string | null;
   status: string;
   created_at: string;
 };
