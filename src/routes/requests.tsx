@@ -364,6 +364,7 @@ function RequestsPage() {
                   accent: r.urgency === "urgent" ? "urgent" : "leaf",
                 }))}
                 height={500}
+                showKeyDebug
               />
               {withCoords.length === 0 && (
                 <p className="mt-3 text-center text-sm text-muted-foreground">

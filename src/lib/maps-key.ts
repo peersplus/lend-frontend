@@ -44,22 +44,40 @@ function hostKey(hostname: string): string {
 }
 
 export function getMapsBrowserKey(hostname = typeof window !== "undefined" ? window.location.hostname : ""): string | undefined {
+  return getMapsBrowserKeyWithSource(hostname).key;
+}
+
+export type MapsKeySource =
+  | { type: "host"; var: string }
+  | { type: "bucket"; env: MapsEnv; var: string }
+  | { type: "managed"; var: string }
+  | { type: "missing" };
+
+export function getMapsBrowserKeyWithSource(
+  hostname = typeof window !== "undefined" ? window.location.hostname : "",
+): { key: string | undefined; source: MapsKeySource; hostname: string } {
   // 1. Per-host override
-  const perHost = readEnv(`VITE_MAPS_KEY_${hostKey(hostname)}`);
-  if (perHost) return perHost;
+  const hostVar = `VITE_MAPS_KEY_${hostKey(hostname)}`;
+  const perHost = readEnv(hostVar);
+  if (perHost) return { key: perHost, source: { type: "host", var: hostVar }, hostname };
 
   // 2. Environment bucket
   const env = detectMapsEnv(hostname);
-  const bucket =
+  const bucketVar =
     env === "production"
-      ? readEnv("VITE_MAPS_KEY_PROD")
+      ? "VITE_MAPS_KEY_PROD"
       : env === "staging"
-      ? readEnv("VITE_MAPS_KEY_STAGING")
-      : readEnv("VITE_MAPS_KEY_DEV");
-  if (bucket) return bucket;
+      ? "VITE_MAPS_KEY_STAGING"
+      : "VITE_MAPS_KEY_DEV";
+  const bucket = readEnv(bucketVar);
+  if (bucket) return { key: bucket, source: { type: "bucket", env, var: bucketVar }, hostname };
 
   // 3. Fallback: Lovable-managed connector key (only works on *.lovable.app / *.lovableproject.com)
-  return readEnv("VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY");
+  const managedVar = "VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY";
+  const managed = readEnv(managedVar);
+  if (managed) return { key: managed, source: { type: "managed", var: managedVar }, hostname };
+
+  return { key: undefined, source: { type: "missing" }, hostname };
 }
 
 export function getMapsChannel(): string | undefined {

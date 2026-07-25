@@ -1,6 +1,6 @@
 /// <reference types="google.maps" />
-import { useEffect, useRef } from "react";
-import { getMapsBrowserKey, getMapsChannel, detectMapsEnv } from "@/lib/maps-key";
+import { useEffect, useRef, useState } from "react";
+import { getMapsBrowserKeyWithSource, getMapsChannel, type MapsKeySource } from "@/lib/maps-key";
 
 export type MapMarker = {
   id: string;
@@ -16,23 +16,36 @@ type Props = {
   me?: { lat: number; lng: number } | null;
   height?: number;
   onMarkerClick?: (id: string) => void;
+  showKeyDebug?: boolean;
 };
 
 // Global loader — shared across all MapView instances.
 let mapsLoader: Promise<typeof google.maps> | null = null;
+
+function sourceLabel(source: MapsKeySource): string {
+  switch (source.type) {
+    case "host":
+      return `host override: ${source.var}`;
+    case "bucket":
+      return `env bucket: ${source.var}`;
+    case "managed":
+      return `managed fallback: ${source.var}`;
+    case "missing":
+      return "no key configured";
+  }
+}
 
 function loadGoogleMaps(): Promise<typeof google.maps> {
   if (typeof window === "undefined") return Promise.reject(new Error("No window"));
   if ((window as any).google?.maps) return Promise.resolve((window as any).google.maps);
   if (mapsLoader) return mapsLoader;
 
-  const key = getMapsBrowserKey();
+  const { key, source, hostname } = getMapsBrowserKeyWithSource();
   const channel = getMapsChannel();
   if (!key) {
-    const env = detectMapsEnv();
     return Promise.reject(
       new Error(
-        `Google Maps browser key missing for "${env}" environment (${window.location.hostname}). Set VITE_MAPS_KEY_${env.toUpperCase()} in build settings.`,
+        `Google Maps browser key missing on ${hostname}. Checked ${sourceLabel(source)}. Set a matching VITE_MAPS_KEY_* env var in build settings.`,
       ),
     );
   }
@@ -52,10 +65,18 @@ function loadGoogleMaps(): Promise<typeof google.maps> {
   return mapsLoader;
 }
 
-export function MapView({ markers, me, height = 480, onMarkerClick }: Props) {
+export function MapView({ markers, me, height = 480, onMarkerClick, showKeyDebug = false }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const markerObjs = useRef<google.maps.Marker[]>([]);
+  const [keyDebug, setKeyDebug] = useState<{ hostname: string; source: MapsKeySource; configured: boolean } | null>(null);
+
+  // Capture key source for debug banner (client-only).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const { source, hostname, key } = getMapsBrowserKeyWithSource();
+    setKeyDebug({ hostname, source, configured: !!key && key.length > 0 });
+  }, []);
 
   // Initialize map once.
   useEffect(() => {
@@ -153,7 +174,29 @@ export function MapView({ markers, me, height = 480, onMarkerClick }: Props) {
     }
   }, [markers, me, onMarkerClick]);
 
-  return <div ref={ref} style={{ width: "100%", height, borderRadius: 16, overflow: "hidden" }} />;
+  return (
+    <div className="relative" style={{ width: "100%", height, borderRadius: 16, overflow: "hidden" }}>
+      <div ref={ref} className="absolute inset-0" />
+      {showKeyDebug && keyDebug && (
+        <div className="absolute top-3 left-3 z-10 max-w-[calc(100%-24px)] rounded-lg border bg-background/95 px-3 py-2 text-xs shadow-sm backdrop-blur-sm">
+          <div className="flex items-center gap-2 font-medium">
+            <span
+              className={`inline-block h-2 w-2 rounded-full ${
+                keyDebug.configured ? "bg-leaf" : "bg-urgent"
+              }`}
+            />
+            <span>Maps key {keyDebug.configured ? "configured" : "missing"}</span>
+          </div>
+          <div className="mt-1 text-muted-foreground">
+            host: <span className="font-mono text-foreground">{keyDebug.hostname}</span>
+          </div>
+          <div className="text-muted-foreground">
+            source: <span className="font-mono text-foreground">{sourceLabel(keyDebug.source)}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function escapeHtml(s: string) {
