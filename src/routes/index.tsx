@@ -127,6 +127,8 @@ const flowSteps = [
 
 function Home() {
   const { user } = useAuth();
+  useReveal();
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
