@@ -439,6 +439,7 @@ function RequestsPage() {
           </p>
         </footer>
       </main>
+      <SiteFooter />
     </div>
   );
 }
