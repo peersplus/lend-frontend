@@ -130,7 +130,8 @@ function RequestsPage() {
   async function closeRequest(r: Request, status: "closed" | "open") {
     const { error } = await supabase.from("requests").update({ status }).eq("id", r.id);
     if (error) return toast.error(error.message);
-    setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, status } : x)));
+    // The feed only shows open requests, so drop the row when it's closed.
+    setRows((prev) => (status === "closed" ? prev.filter((x) => x.id !== r.id) : prev.map((x) => (x.id === r.id ? { ...x, status } : x))));
     notifyUpdate(r, status);
     toast.success(status === "closed" ? "Request marked inactive — helpers notified." : "Request reopened — helpers notified.");
   }
