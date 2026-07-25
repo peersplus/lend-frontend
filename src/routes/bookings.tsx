@@ -53,6 +53,16 @@ function BookingsPage() {
   const [tab, setTab] = useState<"borrowed" | "lent">("borrowed");
   const [rows, setRows] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [askHandoff, setAskHandoff] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("profiles").select("require_handoff_person").eq("id", user.id).maybeSingle();
+      setAskHandoff(!!data?.require_handoff_person);
+    })();
+  }, [user]);
+
 
   const load = useCallback(async () => {
     if (!user) return;
