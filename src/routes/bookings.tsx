@@ -243,6 +243,11 @@ function BookingRow({
             Mark returned
           </button>
         )}
+        {role === "borrowed" && (b.status === "requested" || b.status === "approved") && (
+          <button onClick={onCancel} className="rounded-full border border-border px-4 py-2 text-sm">
+            Cancel
+          </button>
+        )}
       </div>
 
       {(b.pickup_photo_url || b.return_photo_url) && (
