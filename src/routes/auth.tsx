@@ -93,12 +93,10 @@ function AuthPage() {
   return (
     <div className="min-h-screen bg-cream px-6 py-12">
       <div className="mx-auto max-w-md">
-        <Link to="/" className="mb-8 flex items-center gap-2">
-          <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">
-            P
-          </span>
-          <span className="font-display text-2xl italic text-leaf">Peers Plus</span>
+        <Link to="/" className="mb-8 flex items-center gap-2" aria-label="Peers Plus home">
+          <img src={LOGO_URL} alt="Peers Plus" className="h-10 w-auto" />
         </Link>
+
 
         <div className="rounded-3xl border border-border bg-card p-8 shadow-xl">
           <h1 className="mb-2 font-display text-3xl">
