@@ -88,6 +88,10 @@ function ItemsPage() {
       .sort((a, b) => (a.km ?? 1e9) - (b.km ?? 1e9));
   }, [items, me]);
 
+  useEffect(() => { load(); }, []);
+
+
+
 
 
   async function handleCreate(e: React.FormEvent) {
