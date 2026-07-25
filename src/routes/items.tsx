@@ -98,6 +98,21 @@ function ItemsPage() {
 
   useEffect(() => { load(); }, []);
 
+  // Prefill "Lend something" form when arriving from a request card.
+  useEffect(() => {
+    if (!user) return;
+    if (search.lend || search.cat) {
+      setForm((f) => ({
+        ...f,
+        title: search.lend ?? f.title,
+        category: search.cat ?? f.category,
+      }));
+      setShowForm(true);
+      toast.info("A neighbor requested this — list it to lend.");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, search.lend, search.cat]);
+
 
 
 
