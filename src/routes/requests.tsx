@@ -9,6 +9,7 @@ import { NotificationPermissionPrompt } from "@/components/NotificationPermissio
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
+import { MapView, type MapMarker } from "@/components/MapView";
 
 type Offer = { id: string; request_id: string; helper_id: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
 
