@@ -62,7 +62,8 @@ function ProfilePage() {
     } as never).eq("id", user.id);
     setSaving(false);
     if (error) toast.error(error.message);
-    else toast.success("Profile saved.");
+    else toast.success("✅ Profile saved", { description: "Your changes are live for neighbors to see." });
+
   }
 
   if (loading || !ready) return <div className="p-8 text-muted-foreground">Loading…</div>;
