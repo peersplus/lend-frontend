@@ -117,7 +117,7 @@ function ItemsPage() {
     } as never);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Listed! Your neighbors can see it now.");
+    toast.success("✅ Item listed", { description: "Neighbors nearby can now request to borrow it." });
     setShowForm(false);
     setForm({
       title: "", description: "", category: "Tools", price_mode: "free",
