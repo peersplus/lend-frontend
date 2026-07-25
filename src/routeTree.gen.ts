@@ -21,6 +21,7 @@ import { Route as CommunityRouteImport } from './routes/community'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatBookingIdRouteImport } from './routes/chat.$bookingId'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -95,6 +96,10 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -106,9 +111,9 @@ const ChatBookingIdRoute = ChatBookingIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/_authenticated/admin',
+  id: '/admin',
   path: '/admin',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
@@ -226,6 +231,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/bookings': typeof BookingsRoute
@@ -309,6 +315,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/about'
     | '/auth'
     | '/bookings'
@@ -337,6 +344,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   BookingsRoute: typeof BookingsRoute
@@ -349,7 +357,6 @@ export interface RootRouteChildren {
   SafetyRoute: typeof SafetyRoute
   SettingsRoute: typeof SettingsRoute
   VerificationRoute: typeof VerificationRoute
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   ChatBookingIdRoute: typeof ChatBookingIdRoute
   ApiPublicHooksBookingPickupRoute: typeof ApiPublicHooksBookingPickupRoute
   ApiPublicHooksDailyDigestRoute: typeof ApiPublicHooksDailyDigestRoute
@@ -449,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -468,7 +482,7 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
@@ -543,8 +557,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   BookingsRoute: BookingsRoute,
@@ -557,7 +583,6 @@ const rootRouteChildren: RootRouteChildren = {
   SafetyRoute: SafetyRoute,
   SettingsRoute: SettingsRoute,
   VerificationRoute: VerificationRoute,
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   ChatBookingIdRoute: ChatBookingIdRoute,
   ApiPublicHooksBookingPickupRoute: ApiPublicHooksBookingPickupRoute,
   ApiPublicHooksDailyDigestRoute: ApiPublicHooksDailyDigestRoute,
@@ -573,13 +598,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
