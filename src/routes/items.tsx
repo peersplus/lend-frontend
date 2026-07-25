@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { UserMenu } from "@/components/UserMenu";
+import { haversineKm, formatDistance } from "@/lib/geo";
 import { toast } from "sonner";
 
 type Item = {
@@ -16,6 +18,10 @@ type Item = {
   image_url: string | null;
   owner_id: string;
   created_at: string;
+  lat: number | null;
+  lng: number | null;
+  building_name: string | null;
+  address: string | null;
 };
 
 export const Route = createFileRoute("/items")({
