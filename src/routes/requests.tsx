@@ -47,6 +47,7 @@ function RequestsPage() {
     category: "Tools",
     urgency: "normal" as "normal" | "urgent",
     radius_km: 5,
+    image_url: "" as string,
   });
 
   useEffect(() => {
