@@ -533,3 +533,90 @@ function RequestConsentModal({
     </div>
   );
 }
+
+function EditItemModal({
+  item,
+  onClose,
+  onSaved,
+}: {
+  item: Item;
+  onClose: () => void;
+  onSaved: (updated: Item) => void;
+}) {
+  const [form, setForm] = useState({
+    title: item.title,
+    description: item.description ?? "",
+    category: item.category,
+    price_mode: item.price_mode,
+    price_amount: item.price_amount != null ? String(item.price_amount) : "",
+    deposit_amount: item.deposit_amount != null ? String(item.deposit_amount) : "",
+    building_name: item.building_name ?? "",
+    address: item.address ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    const patch = {
+      title: form.title,
+      description: form.description || null,
+      category: form.category,
+      price_mode: form.price_mode,
+      price_amount: form.price_mode === "rent" && form.price_amount ? Number(form.price_amount) : null,
+      deposit_amount: form.deposit_amount ? Number(form.deposit_amount) : null,
+      building_name: form.building_name || null,
+      address: form.address || null,
+    };
+    const { data, error } = await supabase.from("items").update(patch).eq("id", item.id).select("*").maybeSingle();
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Item updated.");
+    onSaved((data as Item) ?? ({ ...item, ...patch } as Item));
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
+      <form onClick={(e) => e.stopPropagation()} onSubmit={submit} className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-8 shadow-2xl">
+        <h2 className="font-display text-2xl">Edit listing</h2>
+        <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+          className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+        <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+          className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+        <div className="grid grid-cols-2 gap-3">
+          <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+            className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
+            {["Tools","Electronics","Garden","Medical","Party","Baby","Kitchen","Camping","Cleaning","Sports","Pets","Furniture","Emergency"].map((c) => <option key={c}>{c}</option>)}
+          </select>
+          <select value={form.price_mode} onChange={(e) => setForm({ ...form, price_mode: e.target.value as "free" | "rent" })}
+            className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
+            <option value="free">Free to borrow</option>
+            <option value="rent">Rent per day</option>
+          </select>
+        </div>
+        {form.price_mode === "rent" && (
+          <input type="number" min="1" placeholder="Price per day (USD)"
+            value={form.price_amount} onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
+            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+        )}
+        <input type="number" min="0" placeholder="Replacement value if damaged (USD)"
+          value={form.deposit_amount} onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })}
+          className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+        <div className="grid grid-cols-2 gap-3">
+          <input placeholder="Building / society" value={form.building_name}
+            onChange={(e) => setForm({ ...form, building_name: e.target.value })}
+            className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+          <input placeholder="Address" value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
+            className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+        </div>
+        <div className="flex gap-2 pt-2">
+          <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-border bg-background py-2.5 text-sm font-semibold">Cancel</button>
+          <button disabled={saving} className="flex-1 rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground">
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
