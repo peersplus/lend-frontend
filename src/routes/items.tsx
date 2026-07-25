@@ -9,6 +9,7 @@ import { PhotoImg } from "@/components/PhotoImg";
 import { haversineKm, formatDistance } from "@/lib/geo";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "sonner";
+import { MapView, type MapMarker } from "@/components/MapView";
 
 type Item = {
   id: string;
