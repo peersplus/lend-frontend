@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
@@ -9,6 +10,7 @@ import { PhotoImg } from "@/components/PhotoImg";
 import { haversineKm, formatDistance } from "@/lib/geo";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "sonner";
+
 
 
 type Item = {
@@ -49,12 +51,15 @@ const categories = ["Tools","Electronics","Garden","Medical","Party","Baby","Kit
 
 function ItemsPage() {
   const { user } = useAuth();
+  const { isSuperadmin } = useRole();
   const navigate = useNavigate();
   const search = Route.useSearch();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [requesting, setRequesting] = useState<Item | null>(null);
+  const [editing, setEditing] = useState<Item | null>(null);
+
   const [me, setMe] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null });
   const [form, setForm] = useState({
     title: "", description: "", category: "Tools",
