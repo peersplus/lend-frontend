@@ -45,12 +45,32 @@ function ItemsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [requesting, setRequesting] = useState<Item | null>(null);
+  const [me, setMe] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null });
   const [form, setForm] = useState({
     title: "", description: "", category: "Tools",
     price_mode: "free" as "free" | "rent",
     price_amount: "", deposit_amount: "", image_url: "",
+    building_name: "", address: "",
+    lat: "" as string, lng: "" as string,
   });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("lat,lng,building_name,address")
+      .eq("id", user.id).maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        setMe({ lat: data.lat ?? null, lng: data.lng ?? null });
+        setForm((f) => ({
+          ...f,
+          lat: data.lat != null ? String(data.lat) : f.lat,
+          lng: data.lng != null ? String(data.lng) : f.lng,
+          building_name: f.building_name || (data as any).building_name || "",
+          address: f.address || (data as any).address || "",
+        }));
+      });
+  }, [user]);
 
   async function load() {
     setLoading(true);
