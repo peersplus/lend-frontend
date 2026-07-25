@@ -69,8 +69,9 @@ function BookingsPage() {
     load();
   }
 
-  async function dispatchNow(b: Booking) {
-    await update(b.id, { status: "picked_up", pickup_at: new Date().toISOString() });
+  async function dispatchNow(b: Booking, photo: string | null) {
+    if (!photo) return toast.error("Capture a pickup photo first — this protects both of you.");
+    await update(b.id, { status: "picked_up", pickup_at: new Date().toISOString(), pickup_photo_url: photo });
     // fire confirmation email to borrower
     fetch("/api/public/hooks/booking-pickup", {
       method: "POST",
@@ -80,7 +81,8 @@ function BookingsPage() {
     toast.success("Dispatched. Confirmation emailed to borrower.");
   }
 
-  async function markReturned(b: Booking, defect: boolean, notes: string) {
+  async function markReturned(b: Booking, defect: boolean, notes: string, photo: string | null) {
+    if (!photo) return toast.error("Capture a return photo first.");
     const rentTotal = Number(b.agreed_rent_per_day ?? 0) * Number(b.agreed_days ?? 1);
     const amount = defect ? Number(b.agreed_deposit) + rentTotal : rentTotal;
     await update(b.id, {
@@ -89,6 +91,7 @@ function BookingsPage() {
       has_defect: defect,
       defect_notes: defect ? notes : null,
       amount_paid: amount,
+      return_photo_url: photo,
     });
     toast.success(defect
       ? `Return logged. Borrower owes $${amount} in cash (rent + full replacement).`
