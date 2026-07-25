@@ -3,6 +3,8 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { UserMenu } from "@/components/UserMenu";
+import { PhotoUpload } from "@/components/PhotoUpload";
+import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
 
 type Booking = {
@@ -21,6 +23,8 @@ type Booking = {
   has_defect: boolean;
   defect_notes: string | null;
   amount_paid: number | null;
+  pickup_photo_url: string | null;
+  return_photo_url: string | null;
   created_at: string;
   items: { title: string; image_url: string | null } | null;
 };
