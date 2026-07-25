@@ -138,20 +138,12 @@ function ItemsPage() {
             <Link to="/bookings" className="hidden sm:inline rounded-full border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted">
               My bookings
             </Link>
-            {user ? (
-              <>
-                <button onClick={() => setShowForm(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
-                  + Lend something
-                </button>
-                <button onClick={handleSignOut} className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted">
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <Link to="/auth" className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">
-                Sign in
-              </Link>
+            {user && (
+              <button onClick={() => setShowForm(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
+                + Lend something
+              </button>
             )}
+            <UserMenu />
           </div>
         </div>
       </nav>
