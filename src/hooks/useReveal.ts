@@ -46,6 +46,9 @@ export function useReveal() {
     let raf = 0;
     const updateScrub = () => {
       const vh = window.innerHeight || 1;
+      // Global page scroll progress (0 at top → 1 after ~600px).
+      const pageP = Math.max(0, Math.min(1, window.scrollY / 600));
+      document.documentElement.style.setProperty("--page-scrub", pageP.toFixed(3));
       scrubEls.forEach((el) => {
         const r = el.getBoundingClientRect();
         // Progress: 0 when element top is at bottom of viewport, 1 when it has scrolled past top.
