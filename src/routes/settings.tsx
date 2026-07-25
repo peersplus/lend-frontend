@@ -45,7 +45,7 @@ function SettingsPage() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("neighborhood,lat,lng,radius_km,push_enabled,email_enabled")
+        .select("neighborhood,lat,lng,radius_km,push_enabled,email_enabled,require_handoff_person")
         .eq("id", user.id)
         .maybeSingle();
       if (data) {
@@ -56,6 +56,7 @@ function SettingsPage() {
           radius_km: data.radius_km ?? 5,
           push_enabled: data.push_enabled ?? true,
           email_enabled: data.email_enabled ?? true,
+          require_handoff_person: data.require_handoff_person ?? false,
         });
       }
       setReady(true);
@@ -87,8 +88,10 @@ function SettingsPage() {
         radius_km: form.radius_km,
         push_enabled: form.push_enabled,
         email_enabled: form.email_enabled,
+        require_handoff_person: form.require_handoff_person,
       })
       .eq("id", user.id);
+
     setSaving(false);
     if (error) toast.error(error.message);
     else toast.success("Saved.");
