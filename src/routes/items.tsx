@@ -287,6 +287,24 @@ function ItemsPage() {
             <input placeholder="Image URL (optional)"
               value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
               className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+
+            <div className="grid grid-cols-2 gap-3">
+              <input placeholder="Building / society"
+                value={form.building_name} onChange={(e) => setForm({ ...form, building_name: e.target.value })}
+                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+              <input placeholder="Address (shown at pickup only)"
+                value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
+                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+            </div>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={useMyLocation}
+                className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">
+                📍 Use my location
+              </button>
+              <span className="text-xs text-muted-foreground">
+                {form.lat && form.lng ? `Pin set (${Number(form.lat).toFixed(3)}, ${Number(form.lng).toFixed(3)})` : "So neighbors see distance"}
+              </span>
+            </div>
             <div className="flex gap-2 pt-2">
               <button type="button" onClick={() => setShowForm(false)}
                 className="flex-1 rounded-xl border border-border bg-background py-2.5 text-sm font-semibold">
