@@ -155,6 +155,7 @@ function ProfilePage() {
           </div>
         </form>
       </main>
+      <SiteFooter />
     </div>
   );
 }

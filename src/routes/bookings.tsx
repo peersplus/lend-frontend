@@ -185,6 +185,7 @@ function BookingsPage() {
           </ul>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

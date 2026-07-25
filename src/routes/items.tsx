@@ -251,6 +251,7 @@ function ItemsPage() {
           </div>
         )}
       </main>
+      <SiteFooter />
 
       {requesting && user && (
         <RequestConsentModal
