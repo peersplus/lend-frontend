@@ -294,12 +294,12 @@ function RequestsPage() {
           <select
             value={filterCat}
             onChange={(e) => setFilterCat(e.target.value)}
-            className="rounded-md border border-input bg-background px-2 py-2 text-sm"
+            className="shrink-0 rounded-md border border-input bg-background px-2 py-2 text-sm"
           >
             <option>All</option>
             {categories.map((c) => <option key={c}>{c}</option>)}
           </select>
-          <div className="flex overflow-hidden rounded-md border border-input text-sm">
+          <div className="flex shrink-0 overflow-hidden rounded-md border border-input text-sm">
             {(["all", "urgent", "normal"] as const).map((u) => (
               <button
                 key={u}
