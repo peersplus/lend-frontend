@@ -212,9 +212,10 @@ function Home() {
                 <Link
                   key={c.label}
                   to="/items"
+                  id={`cat-${c.label.toLowerCase()}`}
                   data-reveal="scale"
                   data-reveal-delay={String((i % 6) * 60)}
-                  className="group flex aspect-square flex-col justify-between rounded-2xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-1 hover:shadow-md"
+                  className="group flex aspect-square flex-col justify-between rounded-2xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-1 hover:shadow-md scroll-mt-24"
                 >
                   <div className={`grid size-11 place-items-center rounded-xl text-xl ${c.tone}`}>
                     <span aria-hidden>{c.emoji}</span>
