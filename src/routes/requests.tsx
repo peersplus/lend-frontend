@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { NotificationBell } from "@/components/NotificationBell";
+import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { toast } from "sonner";
 
 type Request = {
@@ -118,6 +119,9 @@ function RequestsPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8">
+        <div className="mb-6">
+          <NotificationPermissionPrompt />
+        </div>
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <h1 className="font-serif text-4xl italic">Neighborhood requests</h1>

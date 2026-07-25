@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebPush } from "@/hooks/useWebPush";
+import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({
@@ -115,6 +116,10 @@ function SettingsPage() {
         <p className="mt-2 text-muted-foreground">
           Tell us where you live and how you want to hear about nearby requests.
         </p>
+
+        <div className="mt-6">
+          <NotificationPermissionPrompt />
+        </div>
 
         <form onSubmit={save} className="mt-8 space-y-8">
           <section className="rounded-lg border border-border bg-card p-6">
