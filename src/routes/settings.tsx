@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebPush } from "@/hooks/useWebPush";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
+import { requestLocation } from "@/lib/geolocate";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({
