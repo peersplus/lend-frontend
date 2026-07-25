@@ -360,7 +360,12 @@ function RequestsPage() {
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-medium">{r.title}</h3>
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{r.category}</span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {r.status !== "open" && (
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold uppercase text-muted-foreground">Inactive</span>
+                      )}
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{r.category}</span>
+                    </div>
                   </div>
                   {r.description && (
                     <p className="mt-2 text-sm text-muted-foreground">{r.description}</p>
@@ -370,6 +375,7 @@ function RequestsPage() {
                     <span>within {r.radius_km}km</span>
                     <span>· {new Date(r.created_at).toLocaleDateString()}</span>
                   </div>
+
 
                   {user && user.id !== r.owner_id && (
                     <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
