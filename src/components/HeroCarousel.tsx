@@ -112,8 +112,16 @@ export function HeroCarousel() {
             />
           ))}
 
+          {/* Clickable overlay: scrolls to matching category card */}
+          <button
+            type="button"
+            onClick={() => scrollToTarget(SLIDES[i].target)}
+            aria-label={`Jump to ${SLIDES[i].category} in categories`}
+            className="absolute inset-0 z-[1] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cream/70"
+          />
+
           {/* Bottom gradient + caption */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-bark/85 via-bark/40 to-transparent p-6 pt-24 text-cream">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-bark/85 via-bark/40 to-transparent p-6 pt-24 text-cream">
             <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-cream/80">
               <span aria-hidden className="text-base">
                 {SLIDES[i].emoji}
@@ -123,6 +131,9 @@ export function HeroCarousel() {
             <p className="mt-1 font-display text-xl italic leading-snug md:text-2xl">
               "{SLIDES[i].caption}"
             </p>
+            <p className="mt-2 text-[11px] font-medium text-cream/80">
+              Tap to jump to {SLIDES[i].category} →
+            </p>
           </div>
 
           {/* Prev / next */}
@@ -130,7 +141,7 @@ export function HeroCarousel() {
             type="button"
             onClick={() => setI((v) => (v - 1 + SLIDES.length) % SLIDES.length)}
             aria-label="Previous story"
-            className="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-cream/85 text-bark shadow-md backdrop-blur transition hover:bg-cream"
+            className="absolute left-3 top-1/2 z-[3] grid size-10 -translate-y-1/2 place-items-center rounded-full bg-cream/85 text-bark shadow-md backdrop-blur transition hover:bg-cream"
           >
             ‹
           </button>
@@ -138,7 +149,7 @@ export function HeroCarousel() {
             type="button"
             onClick={() => setI((v) => (v + 1) % SLIDES.length)}
             aria-label="Next story"
-            className="absolute right-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-cream/85 text-bark shadow-md backdrop-blur transition hover:bg-cream"
+            className="absolute right-3 top-1/2 z-[3] grid size-10 -translate-y-1/2 place-items-center rounded-full bg-cream/85 text-bark shadow-md backdrop-blur transition hover:bg-cream"
           >
             ›
           </button>
