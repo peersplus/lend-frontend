@@ -30,7 +30,9 @@ function SettingsPage() {
     radius_km: 5,
     push_enabled: true,
     email_enabled: true,
+    require_handoff_person: false,
   });
+
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
 
