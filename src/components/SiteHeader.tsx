@@ -47,14 +47,13 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           {user && <NotificationBell />}
-          {user ? (
-            <Link
-              to="/requests"
-              className="hidden rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90 sm:inline"
-            >
-              Post request
-            </Link>
-          ) : null}
+          <Link
+            to="/items"
+            search={{ lend: "1" }}
+            className="hidden items-center gap-1.5 rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground shadow-sm shadow-leaf/20 transition-transform hover:-translate-y-0.5 hover:bg-leaf/90 sm:inline-flex"
+          >
+            <span aria-hidden>➕</span> Post a Lend
+          </Link>
           <UserMenu />
           <button
             type="button"

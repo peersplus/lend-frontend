@@ -3,6 +3,7 @@ import heroHandoff from "@/assets/hero-handoff.jpg";
 import { useAuth } from "@/hooks/useAuth";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { useReveal } from "@/hooks/useReveal";
 
 
 export const Route = createFileRoute("/")({
@@ -126,6 +127,8 @@ const flowSteps = [
 
 function Home() {
   const { user } = useAuth();
+  useReveal();
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -135,7 +138,7 @@ function Home() {
         {/* Hero */}
         <section className="px-6 pt-16 pb-20 md:pt-24">
           <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-12">
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-7" data-reveal="left">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
                 <span className="size-1.5 rounded-full bg-accent" />
                 Neighbors helping neighbors, one shed at a time
@@ -184,7 +187,7 @@ function Home() {
               </div>
             </div>
 
-            <div className="relative lg:col-span-5">
+            <div className="relative lg:col-span-5" data-reveal="right" data-reveal-delay="120">
               <div className="overflow-hidden rounded-[2rem] ring-1 ring-black/5 shadow-2xl shadow-bark/10">
                 <img
                   src={heroHandoff}
@@ -218,7 +221,7 @@ function Home() {
         {/* Categories */}
         <section id="browse" className="bg-muted/40 px-6 py-20">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-10 flex items-end justify-between gap-6">
+            <div className="mb-10 flex items-end justify-between gap-6" data-reveal>
               <div>
                 <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   (01) Collections
@@ -230,10 +233,12 @@ function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              {categories.map((c) => (
+              {categories.map((c, i) => (
                 <Link
                   key={c.label}
                   to="/items"
+                  data-reveal="scale"
+                  data-reveal-delay={String((i % 6) * 60)}
                   className="group flex aspect-square flex-col justify-between rounded-2xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-1 hover:shadow-md"
                 >
                   <div className={`grid size-11 place-items-center rounded-xl text-xl ${c.tone}`}>
@@ -252,7 +257,7 @@ function Home() {
         {/* Mobile flow: register → take → return */}
         <section id="how" className="px-6 py-24">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-14 max-w-2xl">
+            <div className="mb-14 max-w-2xl" data-reveal>
               <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 (02) The neighborhood handshake
               </p>
@@ -266,8 +271,13 @@ function Home() {
             </div>
 
             <div className="grid gap-10 lg:grid-cols-3">
-              {flowSteps.map((step) => (
-                <div key={step.n} className="flex flex-col items-center text-center">
+              {flowSteps.map((step, i) => (
+                <div
+                  key={step.n}
+                  className="flex flex-col items-center text-center"
+                  data-reveal="scale"
+                  data-reveal-delay={String(i * 140)}
+                >
                   <div className="mb-6 font-mono text-xs font-bold uppercase tracking-[0.3em] text-clay">
                     Step {step.n}
                   </div>
@@ -307,7 +317,7 @@ function Home() {
         {/* Emergency band */}
         <section className="bg-cream px-6 pb-24">
           <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-3">
-            <div className="rounded-3xl border border-accent/20 bg-accent/5 p-8 lg:col-span-1">
+            <div className="rounded-3xl border border-accent/20 bg-accent/5 p-8 lg:col-span-1" data-reveal="left">
               <div className="mb-4 flex items-center gap-2">
                 <span className="size-2 animate-pulse rounded-full bg-accent" />
                 <span className="text-xs font-bold uppercase tracking-widest text-accent">
@@ -337,7 +347,7 @@ function Home() {
               </Link>
             </div>
 
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2" data-reveal="right" data-reveal-delay="120">
               <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 (03) Why neighbors choose us
               </p>
@@ -347,8 +357,13 @@ function Home() {
                   { n: "🤝", t: "Real people", d: "Every neighbor is address-verified. No anonymous accounts, no strangers." },
                   { n: "📸", t: "Photo protection", d: "Both sides snap a photo at pickup and return — no arguments later." },
                   { n: "💚", t: "Free or fair", d: "Most items are free. Rentals are capped, and 100% goes to the lender." },
-                ].map((s) => (
-                  <div key={s.t} className="rounded-2xl border border-border bg-card p-6">
+                ].map((s, i) => (
+                  <div
+                    key={s.t}
+                    className="rounded-2xl border border-border bg-card p-6"
+                    data-reveal="scale"
+                    data-reveal-delay={String(200 + i * 120)}
+                  >
                     <div className="mb-4 grid size-12 place-items-center rounded-full bg-leaf/10 text-2xl">
                       {s.n}
                     </div>
@@ -364,7 +379,7 @@ function Home() {
         {/* Trust band */}
         <section id="safety" className="bg-leaf px-6 py-16 text-leaf-foreground">
           <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-4">
-            <div className="md:col-span-1">
+            <div className="md:col-span-1" data-reveal="left">
               <h3 className="font-display text-3xl italic">Trust, verified.</h3>
               <p className="mt-3 text-sm text-leaf-foreground/70">
                 Four levels of verification keep the community safe.
@@ -375,8 +390,13 @@ function Home() {
               { t: "Address", d: "Mail-verified home address" },
               { t: "ID", d: "Government ID matched" },
               { t: "Trusted", d: "20+ positive exchanges" },
-            ].map((v) => (
-              <div key={v.t} className="border-l border-leaf-foreground/20 pl-4">
+            ].map((v, i) => (
+              <div
+                key={v.t}
+                className="border-l border-leaf-foreground/20 pl-4"
+                data-reveal
+                data-reveal-delay={String(120 + i * 100)}
+              >
                 <div className="mb-2 grid size-9 place-items-center rounded-full border border-leaf-foreground/30 text-sm">
                   ✓
                 </div>
@@ -389,7 +409,7 @@ function Home() {
 
         {/* CTA */}
         <section className="px-6 py-24">
-          <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto max-w-3xl text-center" data-reveal="scale">
             <h2 className="mb-4 font-display text-4xl md:text-5xl">
               Your block has <span className="italic text-leaf">everything you need.</span>
             </h2>
