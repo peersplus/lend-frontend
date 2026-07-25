@@ -363,6 +363,18 @@ function ItemsPage() {
         />
       )}
 
+      {editing && (
+        <EditItemModal
+          item={editing}
+          onClose={() => setEditing(null)}
+          onSaved={(updated) => {
+            setItems((prev) => prev.map((x) => (x.id === updated.id ? { ...x, ...updated } : x)));
+            setEditing(null);
+          }}
+        />
+      )}
+
+
       {showForm && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setShowForm(false)}>
           <form onClick={(e) => e.stopPropagation()} onSubmit={handleCreate} className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-8 shadow-2xl">
