@@ -275,6 +275,7 @@ function ItemsPage() {
                   accent: i.price_mode === "free" ? "leaf" : "muted",
                 }))}
               height={500}
+              showKeyDebug
             />
             {listed.filter(({ i }) => i.lat != null && i.lng != null).length === 0 && (
               <p className="mt-3 text-center text-sm text-muted-foreground">
