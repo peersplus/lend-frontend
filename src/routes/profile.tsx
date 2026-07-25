@@ -2,7 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserMenu } from "@/components/UserMenu";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
@@ -73,15 +74,8 @@ function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">P</span>
-            <span className="font-display text-2xl text-leaf">Peers+Help</span>
-          </Link>
-          <UserMenu />
-        </div>
-      </nav>
+      <SiteHeader />
+
 
       <main className="mx-auto max-w-3xl px-6 py-10">
         <h1 className="font-display text-4xl">Your profile</h1>

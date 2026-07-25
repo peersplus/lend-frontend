@@ -277,6 +277,7 @@ function SettingsPage() {
           </button>
         </form>
       </main>
+      <SiteFooter />
     </div>
   );
 }

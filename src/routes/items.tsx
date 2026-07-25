@@ -2,7 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserMenu } from "@/components/UserMenu";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { haversineKm, formatDistance } from "@/lib/geo";
@@ -159,25 +160,17 @@ function ItemsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">P</span>
-            <span className="font-display text-2xl text-leaf">Peers+Help</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link to="/bookings" className="hidden sm:inline rounded-full border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted">
-              My bookings
-            </Link>
-            {user && (
-              <button onClick={() => setShowForm(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
-                + Lend something
-              </button>
-            )}
-            <UserMenu />
+      <SiteHeader />
+      {user && (
+        <div className="border-b border-border/60 bg-card/40">
+          <div className="mx-auto flex max-w-7xl justify-end px-6 py-2">
+            <button onClick={() => setShowForm(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90">
+              + Lend something
+            </button>
           </div>
         </div>
-      </nav>
+      )}
+
 
       <main className="mx-auto max-w-7xl px-6 py-12">
         <div className="mb-8">
