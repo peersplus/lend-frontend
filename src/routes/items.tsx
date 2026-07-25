@@ -191,7 +191,7 @@ function ItemsPage() {
               <article key={item.id} className="group flex flex-col gap-3">
                 <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-black/5">
                   {item.image_url ? (
-                    <img src={item.image_url} alt={item.title} className="h-full w-full object-cover" />
+                    <PhotoImg path={item.image_url} alt={item.title} className="h-full w-full object-cover" />
                   ) : (
                     <div className="grid h-full w-full place-items-center bg-gradient-to-br from-muted to-cream">
                       <span className="font-display text-3xl text-muted-foreground/60">{item.category}</span>
