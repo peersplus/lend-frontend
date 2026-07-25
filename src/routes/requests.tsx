@@ -289,9 +289,43 @@ function RequestsPage() {
                     <span>within {r.radius_km}km</span>
                     <span>· {new Date(r.created_at).toLocaleDateString()}</span>
                   </div>
+
+                  {user && user.id !== r.owner_id && (
+                    <button
+                      onClick={() => offerHelp(r)}
+                      className="mt-4 w-full rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90"
+                    >
+                      🤝 I can help — open chat
+                    </button>
+                  )}
+
+                  {user && user.id === r.owner_id && (
+                    <div className="mt-4 rounded-lg border border-border bg-background/60 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {(offersByReq[r.id]?.length ?? 0)} neighbor{(offersByReq[r.id]?.length ?? 0) === 1 ? "" : "s"} offered help
+                      </p>
+                      {(offersByReq[r.id] ?? []).length > 0 && (
+                        <ul className="mt-2 space-y-1.5">
+                          {offersByReq[r.id]!.map((o) => (
+                            <li key={o.id} className="flex items-center justify-between gap-2 text-sm">
+                              <span className="truncate">{o.profiles?.display_name ?? "Neighbor"}</span>
+                              <Link
+                                to="/chat/request/$requestId/$peerId"
+                                params={{ requestId: r.id, peerId: o.helper_id }}
+                                className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background"
+                              >
+                                Chat
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                 </div>
               </article>
             ))}
+
           </div>
         )}
       </main>
