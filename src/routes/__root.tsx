@@ -117,12 +117,16 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Mount the toaster only after hydration to avoid SSR/CSR HTML mismatches
+  // (portals + document access) that can silently break sonner.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <Toaster position="top-center" richColors closeButton />
+      {mounted && <Toaster position="top-center" richColors closeButton />}
     </QueryClientProvider>
   );
 }
