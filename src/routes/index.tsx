@@ -138,7 +138,7 @@ function Home() {
         {/* Hero */}
         <section className="px-6 pt-16 pb-20 md:pt-24">
           <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-12">
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-7" data-reveal="left">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
                 <span className="size-1.5 rounded-full bg-accent" />
                 Neighbors helping neighbors, one shed at a time
@@ -187,7 +187,7 @@ function Home() {
               </div>
             </div>
 
-            <div className="relative lg:col-span-5">
+            <div className="relative lg:col-span-5" data-reveal="right" data-reveal-delay="120">
               <div className="overflow-hidden rounded-[2rem] ring-1 ring-black/5 shadow-2xl shadow-bark/10">
                 <img
                   src={heroHandoff}
