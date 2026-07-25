@@ -41,7 +41,9 @@ const categories = ["Tools", "Electronics", "Medical", "Companionship", "Party",
 
 function RequestsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<Request[]>([]);
+  const [offersByReq, setOffersByReq] = useState<Record<string, Offer[]>>({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -53,6 +55,19 @@ function RequestsPage() {
     image_url: "" as string,
   });
 
+  async function loadOffers(requestIds: string[]) {
+    if (requestIds.length === 0) return;
+    const { data } = await supabase
+      .from("request_offers")
+      .select("id, request_id, helper_id, created_at, profiles:helper_id(display_name, avatar_url)")
+      .in("request_id", requestIds);
+    const grouped: Record<string, Offer[]> = {};
+    (data as unknown as Offer[] | null)?.forEach((o) => {
+      (grouped[o.request_id] ||= []).push(o);
+    });
+    setOffersByReq(grouped);
+  }
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -62,10 +77,28 @@ function RequestsPage() {
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(50);
-      setRows((data as Request[]) ?? []);
+      const list = (data as Request[]) ?? [];
+      setRows(list);
       setLoading(false);
+      await loadOffers(list.map((r) => r.id));
     })();
-  }, []);
+  }, [user?.id]);
+
+  async function offerHelp(r: Request) {
+    if (!user) return navigate({ to: "/auth" });
+    const { error } = await supabase
+      .from("request_offers")
+      .insert({ request_id: r.id, helper_id: user.id })
+      .select("id")
+      .maybeSingle();
+    if (error && !error.message.toLowerCase().includes("duplicate")) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("You offered to help. Opening chat…");
+    navigate({ to: "/chat/request/$requestId/$peerId", params: { requestId: r.id, peerId: r.owner_id } });
+  }
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
