@@ -153,8 +153,8 @@ function BookingsPage() {
                 key={b.id}
                 b={b}
                 role={tab}
-                onDispatch={() => dispatchNow(b)}
-                onReturn={(defect, notes) => markReturned(b, defect, notes)}
+                onDispatch={(photo) => dispatchNow(b, photo)}
+                onReturn={(defect, notes, photo) => markReturned(b, defect, notes, photo)}
                 onCancel={() => update(b.id, { status: "cancelled" })}
                 onApprove={() => update(b.id, { status: "approved" })}
                 onDecline={() => update(b.id, { status: "declined" })}
