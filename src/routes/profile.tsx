@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { UserMenu } from "@/components/UserMenu";
+import { PhotoUpload } from "@/components/PhotoUpload";
+import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/profile")({
@@ -87,16 +89,20 @@ function ProfilePage() {
         <form onSubmit={save} className="mt-8 space-y-6">
           <section className="flex items-center gap-4 rounded-2xl border border-border bg-card p-5">
             {form.avatar_url ? (
-              <img src={form.avatar_url} alt="" className="size-20 rounded-full object-cover ring-2 ring-border" />
+              <PhotoImg path={form.avatar_url} alt="" className="size-20 rounded-full object-cover ring-2 ring-border" />
             ) : (
               <div className="grid size-20 place-items-center rounded-full bg-leaf/15 text-2xl font-display text-leaf">
                 {initials || "🙂"}
               </div>
             )}
             <div className="flex-1">
-              <label className="block text-sm font-medium">Photo URL</label>
-              <input value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
-                placeholder="https://…" className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+              <label className="block text-sm font-medium mb-2">Profile photo</label>
+              <PhotoUpload
+                value={form.avatar_url || null}
+                onChange={(p) => setForm({ ...form, avatar_url: p ?? "" })}
+                folder="avatars"
+                label="Upload profile photo"
+              />
             </div>
           </section>
 

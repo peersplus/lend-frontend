@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { NotificationBell } from "@/components/NotificationBell";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
+import { PhotoUpload } from "@/components/PhotoUpload";
+import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
 
 type Request = {
@@ -15,6 +17,7 @@ type Request = {
   urgency: "normal" | "urgent";
   needed_by: string | null;
   radius_km: number;
+  image_url: string | null;
   status: string;
   created_at: string;
 };
@@ -44,6 +47,7 @@ function RequestsPage() {
     category: "Tools",
     urgency: "normal" as "normal" | "urgent",
     radius_km: 5,
+    image_url: "" as string,
   });
 
   useEffect(() => {
@@ -78,6 +82,7 @@ function RequestsPage() {
         category: form.category,
         urgency: form.urgency,
         radius_km: form.radius_km,
+        image_url: form.image_url || null,
         lat: prof?.lat ?? null,
         lng: prof?.lng ?? null,
       })
@@ -89,7 +94,7 @@ function RequestsPage() {
     }
     setRows((prev) => [data as Request, ...prev]);
     setShowForm(false);
-    setForm({ title: "", description: "", category: "Tools", urgency: "normal", radius_km: 5 });
+    setForm({ title: "", description: "", category: "Tools", urgency: "normal", radius_km: 5, image_url: "" });
     toast.success("Request posted — your neighborhood has been notified.");
   };
 
@@ -194,6 +199,15 @@ function RequestsPage() {
                 />
               </div>
             </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Photo (optional — helps neighbors recognize the item)</label>
+              <PhotoUpload
+                value={form.image_url || null}
+                onChange={(p) => setForm({ ...form, image_url: p ?? "" })}
+                folder="requests"
+                label="Snap what you need"
+              />
+            </div>
             <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
               Notify my neighbors
             </button>
@@ -219,21 +233,26 @@ function RequestsPage() {
             {rows.map((r) => (
               <article
                 key={r.id}
-                className={`rounded-lg border p-5 ${
+                className={`overflow-hidden rounded-lg border ${
                   r.urgency === "urgent" ? "border-destructive/50 bg-destructive/5" : "border-border bg-card"
                 }`}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-medium">{r.title}</h3>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{r.category}</span>
-                </div>
-                {r.description && (
-                  <p className="mt-2 text-sm text-muted-foreground">{r.description}</p>
+                {r.image_url && (
+                  <PhotoImg path={r.image_url} alt={r.title} className="h-40 w-full object-cover" />
                 )}
-                <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-                  {r.urgency === "urgent" && <span className="font-semibold text-destructive">🚨 URGENT</span>}
-                  <span>within {r.radius_km}km</span>
-                  <span>· {new Date(r.created_at).toLocaleDateString()}</span>
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-medium">{r.title}</h3>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{r.category}</span>
+                  </div>
+                  {r.description && (
+                    <p className="mt-2 text-sm text-muted-foreground">{r.description}</p>
+                  )}
+                  <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                    {r.urgency === "urgent" && <span className="font-semibold text-destructive">🚨 URGENT</span>}
+                    <span>within {r.radius_km}km</span>
+                    <span>· {new Date(r.created_at).toLocaleDateString()}</span>
+                  </div>
                 </div>
               </article>
             ))}

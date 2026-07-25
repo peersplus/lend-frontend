@@ -3,6 +3,8 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { UserMenu } from "@/components/UserMenu";
+import { PhotoUpload } from "@/components/PhotoUpload";
+import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
 
 type Booking = {
@@ -21,6 +23,8 @@ type Booking = {
   has_defect: boolean;
   defect_notes: string | null;
   amount_paid: number | null;
+  pickup_photo_url: string | null;
+  return_photo_url: string | null;
   created_at: string;
   items: { title: string; image_url: string | null } | null;
 };
@@ -65,8 +69,9 @@ function BookingsPage() {
     load();
   }
 
-  async function dispatchNow(b: Booking) {
-    await update(b.id, { status: "picked_up", pickup_at: new Date().toISOString() });
+  async function dispatchNow(b: Booking, photo: string | null) {
+    if (!photo) return toast.error("Capture a pickup photo first — this protects both of you.");
+    await update(b.id, { status: "picked_up", pickup_at: new Date().toISOString(), pickup_photo_url: photo });
     // fire confirmation email to borrower
     fetch("/api/public/hooks/booking-pickup", {
       method: "POST",
@@ -76,7 +81,8 @@ function BookingsPage() {
     toast.success("Dispatched. Confirmation emailed to borrower.");
   }
 
-  async function markReturned(b: Booking, defect: boolean, notes: string) {
+  async function markReturned(b: Booking, defect: boolean, notes: string, photo: string | null) {
+    if (!photo) return toast.error("Capture a return photo first.");
     const rentTotal = Number(b.agreed_rent_per_day ?? 0) * Number(b.agreed_days ?? 1);
     const amount = defect ? Number(b.agreed_deposit) + rentTotal : rentTotal;
     await update(b.id, {
@@ -85,6 +91,7 @@ function BookingsPage() {
       has_defect: defect,
       defect_notes: defect ? notes : null,
       amount_paid: amount,
+      return_photo_url: photo,
     });
     toast.success(defect
       ? `Return logged. Borrower owes $${amount} in cash (rent + full replacement).`
@@ -146,8 +153,8 @@ function BookingsPage() {
                 key={b.id}
                 b={b}
                 role={tab}
-                onDispatch={() => dispatchNow(b)}
-                onReturn={(defect, notes) => markReturned(b, defect, notes)}
+                onDispatch={(photo) => dispatchNow(b, photo)}
+                onReturn={(defect, notes, photo) => markReturned(b, defect, notes, photo)}
                 onCancel={() => update(b.id, { status: "cancelled" })}
                 onApprove={() => update(b.id, { status: "approved" })}
                 onDecline={() => update(b.id, { status: "declined" })}
@@ -165,15 +172,18 @@ function BookingRow({
 }: {
   b: Booking;
   role: "borrowed" | "lent";
-  onDispatch: () => void;
-  onReturn: (defect: boolean, notes: string) => void;
+  onDispatch: (photo: string | null) => void;
+  onReturn: (defect: boolean, notes: string, photo: string | null) => void;
   onCancel: () => void;
   onApprove: () => void;
   onDecline: () => void;
 }) {
   const [showReturn, setShowReturn] = useState(false);
+  const [showDispatch, setShowDispatch] = useState(false);
   const [defect, setDefect] = useState(false);
   const [notes, setNotes] = useState("");
+  const [pickupPhoto, setPickupPhoto] = useState<string | null>(null);
+  const [returnPhoto, setReturnPhoto] = useState<string | null>(null);
 
   const rentTotal = Number(b.agreed_rent_per_day ?? 0) * Number(b.agreed_days ?? 1);
 
@@ -182,7 +192,7 @@ function BookingRow({
       <div className="flex flex-wrap items-start gap-4">
         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
           {b.items?.image_url ? (
-            <img src={b.items.image_url} alt="" className="h-full w-full object-cover" />
+            <PhotoImg path={b.items.image_url} alt="" className="h-full w-full object-cover" />
           ) : null}
         </div>
         <div className="flex-1 min-w-[200px]">
@@ -224,7 +234,7 @@ function BookingRow({
           </>
         )}
         {role === "lent" && b.status === "approved" && (
-          <button onClick={onDispatch} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
+          <button onClick={() => setShowDispatch(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
             Dispatch / Mark picked up
           </button>
         )}
@@ -239,6 +249,41 @@ function BookingRow({
           </button>
         )}
       </div>
+
+      {(b.pickup_photo_url || b.return_photo_url) && (
+        <div className="mt-3 flex gap-3">
+          {b.pickup_photo_url && (
+            <div>
+              <p className="mb-1 text-xs text-muted-foreground">Pickup photo</p>
+              <PhotoImg path={b.pickup_photo_url} alt="pickup" className="h-20 w-20 rounded-lg object-cover" />
+            </div>
+          )}
+          {b.return_photo_url && (
+            <div>
+              <p className="mb-1 text-xs text-muted-foreground">Return photo</p>
+              <PhotoImg path={b.return_photo_url} alt="return" className="h-20 w-20 rounded-lg object-cover" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {showDispatch && (
+        <div className="mt-4 rounded-xl border border-border bg-background p-4">
+          <p className="mb-2 text-sm font-medium">Capture a photo of the item at pickup</p>
+          <PhotoUpload value={pickupPhoto} onChange={setPickupPhoto} folder="bookings" label="Snap pickup photo" />
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={() => { onDispatch(pickupPhoto); setShowDispatch(false); }}
+              className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
+            >
+              Confirm dispatch
+            </button>
+            <button onClick={() => setShowDispatch(false)} className="rounded-full border border-border px-4 py-2 text-sm">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {showReturn && (
         <div className="mt-4 rounded-xl border border-border bg-background p-4">
@@ -260,9 +305,13 @@ function BookingRow({
               </p>
             </>
           )}
+          <div className="mt-3">
+            <p className="mb-2 text-sm font-medium">Capture a return photo</p>
+            <PhotoUpload value={returnPhoto} onChange={setReturnPhoto} folder="bookings" label="Snap return photo" />
+          </div>
           <div className="mt-3 flex gap-2">
             <button
-              onClick={() => { onReturn(defect, notes); setShowReturn(false); }}
+              onClick={() => { onReturn(defect, notes, returnPhoto); setShowReturn(false); }}
               className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
             >
               Confirm return

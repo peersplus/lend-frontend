@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { UserMenu } from "@/components/UserMenu";
+import { PhotoUpload } from "@/components/PhotoUpload";
+import { PhotoImg } from "@/components/PhotoImg";
 import { haversineKm, formatDistance } from "@/lib/geo";
 import { toast } from "sonner";
 
@@ -189,7 +191,7 @@ function ItemsPage() {
               <article key={item.id} className="group flex flex-col gap-3">
                 <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-black/5">
                   {item.image_url ? (
-                    <img src={item.image_url} alt={item.title} className="h-full w-full object-cover" />
+                    <PhotoImg path={item.image_url} alt={item.title} className="h-full w-full object-cover" />
                   ) : (
                     <div className="grid h-full w-full place-items-center bg-gradient-to-br from-muted to-cream">
                       <span className="font-display text-3xl text-muted-foreground/60">{item.category}</span>
@@ -284,9 +286,15 @@ function ItemsPage() {
                 Borrower will be shown this amount up-front and asked to consent. If the item comes back damaged, they pay this full amount in cash at return.
               </p>
             </div>
-            <input placeholder="Image URL (optional)"
-              value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-              className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+            <div>
+              <label className="mb-2 block text-xs font-semibold text-muted-foreground uppercase tracking-wide">Item photo</label>
+              <PhotoUpload
+                value={form.image_url || null}
+                onChange={(p) => setForm({ ...form, image_url: p ?? "" })}
+                folder="items"
+                label="Snap or upload the item"
+              />
+            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <input placeholder="Building / society"
