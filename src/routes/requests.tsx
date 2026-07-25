@@ -233,21 +233,26 @@ function RequestsPage() {
             {rows.map((r) => (
               <article
                 key={r.id}
-                className={`rounded-lg border p-5 ${
+                className={`overflow-hidden rounded-lg border ${
                   r.urgency === "urgent" ? "border-destructive/50 bg-destructive/5" : "border-border bg-card"
                 }`}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-medium">{r.title}</h3>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{r.category}</span>
-                </div>
-                {r.description && (
-                  <p className="mt-2 text-sm text-muted-foreground">{r.description}</p>
+                {r.image_url && (
+                  <PhotoImg path={r.image_url} alt={r.title} className="h-40 w-full object-cover" />
                 )}
-                <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-                  {r.urgency === "urgent" && <span className="font-semibold text-destructive">🚨 URGENT</span>}
-                  <span>within {r.radius_km}km</span>
-                  <span>· {new Date(r.created_at).toLocaleDateString()}</span>
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-medium">{r.title}</h3>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{r.category}</span>
+                  </div>
+                  {r.description && (
+                    <p className="mt-2 text-sm text-muted-foreground">{r.description}</p>
+                  )}
+                  <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                    {r.urgency === "urgent" && <span className="font-semibold text-destructive">🚨 URGENT</span>}
+                    <span>within {r.radius_km}km</span>
+                    <span>· {new Date(r.created_at).toLocaleDateString()}</span>
+                  </div>
                 </div>
               </article>
             ))}
