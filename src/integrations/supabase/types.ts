@@ -14,10 +14,85 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          agreed_days: number | null
+          agreed_deposit: number
+          agreed_rent_per_day: number | null
+          amount_paid: number | null
+          borrower_id: string
+          borrower_notes: string | null
+          consent_accepted_at: string | null
+          created_at: string
+          defect_notes: string | null
+          has_defect: boolean
+          id: string
+          item_id: string
+          owner_id: string
+          owner_notes: string | null
+          pickup_at: string | null
+          return_due: string | null
+          returned_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agreed_days?: number | null
+          agreed_deposit?: number
+          agreed_rent_per_day?: number | null
+          amount_paid?: number | null
+          borrower_id: string
+          borrower_notes?: string | null
+          consent_accepted_at?: string | null
+          created_at?: string
+          defect_notes?: string | null
+          has_defect?: boolean
+          id?: string
+          item_id: string
+          owner_id: string
+          owner_notes?: string | null
+          pickup_at?: string | null
+          return_due?: string | null
+          returned_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agreed_days?: number | null
+          agreed_deposit?: number
+          agreed_rent_per_day?: number | null
+          amount_paid?: number | null
+          borrower_id?: string
+          borrower_notes?: string | null
+          consent_accepted_at?: string | null
+          created_at?: string
+          defect_notes?: string | null
+          has_defect?: boolean
+          id?: string
+          item_id?: string
+          owner_id?: string
+          owner_notes?: string | null
+          pickup_at?: string | null
+          return_due?: string | null
+          returned_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       items: {
         Row: {
           category: string
           created_at: string
+          deposit_amount: number | null
           description: string | null
           distance_hint: string | null
           id: string
@@ -32,6 +107,7 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
+          deposit_amount?: number | null
           description?: string | null
           distance_hint?: string | null
           id?: string
@@ -46,6 +122,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
+          deposit_amount?: number | null
           description?: string | null
           distance_hint?: string | null
           id?: string
