@@ -11,10 +11,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Your profile — Peers+Help" },
-      { name: "description", content: "Manage how neighbors see you on Peers+Help — name, photo, phone, building and address." },
-      { property: "og:title", content: "Your profile — Peers+Help" },
-      { property: "og:description", content: "Edit your Peers+Help neighbor profile." },
+      { title: "Your profile — Peers Plus" },
+      { name: "description", content: "Manage how neighbors see you on Peers Plus — name, photo, phone, building and address." },
+      { property: "og:title", content: "Your profile — Peers Plus" },
+      { property: "og:description", content: "Edit your Peers Plus neighbor profile." },
     ],
   }),
   component: ProfilePage,

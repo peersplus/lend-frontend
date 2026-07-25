@@ -5,10 +5,10 @@ import { SiteFooter } from "@/components/SiteFooter";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About us — Peers+Help" },
-      { name: "description", content: "Peers+Help is a free community platform where neighbors share things, help each other, and keep useful items out of landfills." },
-      { property: "og:title", content: "About us — Peers+Help" },
-      { property: "og:description", content: "Why we built Peers+Help — and the small idea that runs the whole thing." },
+      { title: "About us — Peers Plus" },
+      { name: "description", content: "Peers Plus is a free community platform where neighbors share things, help each other, and keep useful items out of landfills." },
+      { property: "og:title", content: "About us — Peers Plus" },
+      { property: "og:description", content: "Why we built Peers Plus — and the small idea that runs the whole thing." },
     ],
   }),
   component: AboutPage,
@@ -20,9 +20,9 @@ function AboutPage() {
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-6 py-12">
         <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Our story</p>
-        <h1 className="mt-2 font-display text-4xl italic">About Peers+Help</h1>
+        <h1 className="mt-2 font-display text-4xl italic">About Peers Plus</h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          Peers+Help is a free community platform for neighbors — a friendly place to borrow a ladder, lend a
+          Peers Plus is a free community platform for neighbors — a friendly place to borrow a ladder, lend a
           wheelchair, ask for a lift to the hospital, or simply share things you rarely use.
         </p>
 
@@ -44,7 +44,7 @@ function AboutPage() {
 
         <h2 className="mt-10 font-display text-2xl italic">How we make it work</h2>
         <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-          Peers+Help provides the platform, the safety guardrails, and the notification plumbing so nearby
+          Peers Plus provides the platform, the safety guardrails, and the notification plumbing so nearby
           neighbors hear about a request the moment it's posted. All conversations, exchanges and payments
           happen directly between users — we're not responsible for the outcome, but we're always available
           to support you if something goes wrong.

@@ -5,9 +5,9 @@ import { SiteFooter } from "@/components/SiteFooter";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact support — Peers+Help" },
-      { name: "description", content: "Reach the Peers+Help team by email for support, safety reports, and partnership questions." },
-      { property: "og:title", content: "Contact support — Peers+Help" },
+      { title: "Contact support — Peers Plus" },
+      { name: "description", content: "Reach the Peers Plus team by email for support, safety reports, and partnership questions." },
+      { property: "og:title", content: "Contact support — Peers Plus" },
       { property: "og:description", content: "Email peersplushr@gmail.com — we're a small team and we read every message." },
     ],
   }),
@@ -65,7 +65,7 @@ function ContactPage() {
         <ul className="mt-3 list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-muted-foreground">
           <li>Check the <Link to="/safety" className="text-leaf underline">safety guide</Link> and the <Link to="/community" className="text-leaf underline">community code</Link>.</li>
           <li>For anything urgent involving physical safety, call your local emergency number first.</li>
-          <li>Peers+Help does not mediate cash payments — but we do help investigate abuse or fraud reports.</li>
+          <li>Peers Plus does not mediate cash payments — but we do help investigate abuse or fraud reports.</li>
         </ul>
       </main>
       <SiteFooter />

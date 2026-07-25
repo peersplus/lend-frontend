@@ -9,4 +9,4 @@ export const LOGO_URL = logoAsset.url;
 /** Absolute CDN URL — required for email clients. */
 export const LOGO_ABSOLUTE_URL = `${SITE_URL}${logoAsset.url}`;
 
-export const SITE_NAME = "Peers+Help";
+export const SITE_NAME = "Peers Plus";

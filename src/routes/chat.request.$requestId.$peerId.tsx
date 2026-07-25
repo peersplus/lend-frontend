@@ -8,7 +8,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/chat/request/$requestId/$peerId")({
   head: () => ({
     meta: [
-      { title: "Neighbor chat — Peers+Help" },
+      { title: "Neighbor chat — Peers Plus" },
       { name: "description", content: "Coordinate with a neighbor who offered to help on your request." },
     ],
   }),
@@ -171,7 +171,7 @@ function RequestChatPage() {
             )}
           </div>
           <div className="rounded-3xl border border-dashed border-border p-5 text-xs text-muted-foreground">
-            Keep first meetings in a public spot when possible. Peers+Help never handles cash.
+            Keep first meetings in a public spot when possible. Peers Plus never handles cash.
           </div>
         </aside>
       </main>

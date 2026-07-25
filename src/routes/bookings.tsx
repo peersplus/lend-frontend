@@ -40,9 +40,9 @@ type Booking = {
 export const Route = createFileRoute("/bookings")({
   head: () => ({
     meta: [
-      { title: "Your bookings — Peers+Help" },
+      { title: "Your bookings — Peers Plus" },
       { name: "description", content: "Track items you've borrowed and lent to neighbors: pickup, return, and payment." },
-      { property: "og:title", content: "Your bookings — Peers+Help" },
+      { property: "og:title", content: "Your bookings — Peers Plus" },
       { property: "og:description", content: "Manage pickup, return, and cash payment for community rentals." },
     ],
   }),

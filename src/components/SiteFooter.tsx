@@ -7,7 +7,7 @@ export function SiteFooter() {
     <footer className="mt-16 border-t border-leaf/20 bg-leaf/10">
       <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 text-sm md:grid-cols-4">
         <div>
-          <img src={LOGO_URL} alt="Peers+Help" className="h-8 w-auto" />
+          <img src={LOGO_URL} alt="Peers Plus" className="h-8 w-auto" />
           <p className="mt-3 text-xs text-muted-foreground">
             A free community platform for neighbors to share, borrow and help.
           </p>
@@ -37,7 +37,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-border/60 px-6 py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Peers+Help — Neighbors helping neighbors.
+        © {new Date().getFullYear()} Peers Plus — Neighbors helping neighbors.
       </div>
     </footer>
   );

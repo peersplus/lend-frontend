@@ -7,13 +7,13 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Join Peers+Help — Sign in or create your neighbor account" },
+      { title: "Join Peers Plus — Sign in or create your neighbor account" },
       {
         name: "description",
         content:
           "Verify your address, meet the neighbors, and start borrowing or lending items nearby.",
       },
-      { property: "og:title", content: "Join Peers+Help" },
+      { property: "og:title", content: "Join Peers Plus" },
       {
         property: "og:description",
         content: "Sign in or create your verified neighbor account.",
@@ -97,7 +97,7 @@ function AuthPage() {
           <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">
             P
           </span>
-          <span className="font-display text-2xl italic text-leaf">Peers+Help</span>
+          <span className="font-display text-2xl italic text-leaf">Peers Plus</span>
         </Link>
 
         <div className="rounded-3xl border border-border bg-card p-8 shadow-xl">

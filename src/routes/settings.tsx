@@ -12,10 +12,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Notification settings — Peers+Help" },
+      { title: "Notification settings — Peers Plus" },
       { name: "description", content: "Set your neighborhood, radius, and how you want to be pinged when neighbors need help." },
-      { property: "og:title", content: "Notification settings — Peers+Help" },
-      { property: "og:description", content: "Control your Peers+Help alerts — in-app, push, and email." },
+      { property: "og:title", content: "Notification settings — Peers Plus" },
+      { property: "og:description", content: "Control your Peers Plus alerts — in-app, push, and email." },
     ],
   }),
   component: SettingsPage,
@@ -197,7 +197,7 @@ function SettingsPage() {
                 <div className="flex-1">
                   <p className="text-sm font-medium">Web push notifications</p>
                   <p className="text-xs text-muted-foreground">
-                    Get pop-up alerts even when Peers+Help isn't open.
+                    Get pop-up alerts even when Peers Plus isn't open.
                   </p>
                   {push.supported ? (
                     push.subscribed ? (

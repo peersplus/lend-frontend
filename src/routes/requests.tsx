@@ -33,9 +33,9 @@ type Request = {
 export const Route = createFileRoute("/requests")({
   head: () => ({
     meta: [
-      { title: "Neighborhood requests — Peers+Help" },
+      { title: "Neighborhood requests — Peers Plus" },
       { name: "description", content: "Ask nearby neighbors for what you need — tools, medical gear, urgent help." },
-      { property: "og:title", content: "Neighborhood requests — Peers+Help" },
+      { property: "og:title", content: "Neighborhood requests — Peers Plus" },
       { property: "og:description", content: "Post a request and every neighbor inside your radius gets notified." },
     ],
   }),
@@ -483,10 +483,10 @@ function RequestsPage() {
         })()}
 
         <footer className="mt-16 rounded-2xl border border-dashed border-border bg-muted/40 p-6 text-xs leading-relaxed text-muted-foreground">
-          <p className="font-semibold text-foreground">Peers+Help is a free community platform.</p>
+          <p className="font-semibold text-foreground">Peers Plus is a free community platform.</p>
           <p className="mt-1">
             We help neighbors connect and communicate. All conversations, exchanges, payments and pickups happen directly between users —
-            Peers+Help is <strong>not responsible</strong> for any communication, agreement, damage, or loss between neighbors.
+            Peers Plus is <strong>not responsible</strong> for any communication, agreement, damage, or loss between neighbors.
             We only provide the platform to post and connect, free of cost, and support you when things go wrong.
           </p>
         </footer>

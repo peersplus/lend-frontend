@@ -32,7 +32,7 @@ const Email = ({
           </Text>
         )}
         <Text style={footer}>
-          You're getting this because you offered to help. Peers+Help is a free community platform.
+          You're getting this because you offered to help. Peers Plus is a free community platform.
         </Text>
       </Container>
     </Body>

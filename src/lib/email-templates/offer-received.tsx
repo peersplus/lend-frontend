@@ -35,7 +35,7 @@ const Email = ({
           </Text>
         )}
         <Text style={footer}>
-          Peers+Help is a free community platform — we help you connect, but all communication and exchange happen directly between neighbors.
+          Peers Plus is a free community platform — we help you connect, but all communication and exchange happen directly between neighbors.
         </Text>
       </Container>
     </Body>

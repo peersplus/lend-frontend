@@ -5,10 +5,10 @@ import { SiteFooter } from "@/components/SiteFooter";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy — Peers+Help" },
-      { name: "description", content: "What Peers+Help collects, how we use it, and the controls you have over your neighborhood data." },
-      { property: "og:title", content: "Privacy — Peers+Help" },
-      { property: "og:description", content: "Plain-language summary of the data Peers+Help stores and how it's used." },
+      { title: "Privacy — Peers Plus" },
+      { name: "description", content: "What Peers Plus collects, how we use it, and the controls you have over your neighborhood data." },
+      { property: "og:title", content: "Privacy — Peers Plus" },
+      { property: "og:description", content: "Plain-language summary of the data Peers Plus stores and how it's used." },
     ],
   }),
   component: PrivacyPage,
@@ -24,9 +24,9 @@ function PrivacyPage() {
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-6 py-12">
         <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Privacy</p>
-        <h1 className="mt-2 font-display text-4xl italic">Your data on Peers+Help</h1>
+        <h1 className="mt-2 font-display text-4xl italic">Your data on Peers Plus</h1>
         <p className="mt-3 text-muted-foreground">
-          This page is maintained by the Peers+Help team to answer common questions about what we store and how we
+          This page is maintained by the Peers Plus team to answer common questions about what we store and how we
           use it. It is a plain-language summary, not a legal contract.
         </p>
 
@@ -70,7 +70,7 @@ function PrivacyPage() {
         <H>Security</H>
         <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
           Traffic is served over HTTPS. Passwords are hashed. Photos are stored privately and served through
-          short-lived signed links. Access to user data is limited to the small team that operates Peers+Help.
+          short-lived signed links. Access to user data is limited to the small team that operates Peers Plus.
         </p>
 
         <H>Contact</H>

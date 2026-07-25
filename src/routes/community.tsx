@@ -5,9 +5,9 @@ import { SiteFooter } from "@/components/SiteFooter";
 export const Route = createFileRoute("/community")({
   head: () => ({
     meta: [
-      { title: "Community code — Peers+Help" },
-      { name: "description", content: "The shared values that keep Peers+Help kind, honest and welcoming for every neighbor." },
-      { property: "og:title", content: "Community code — Peers+Help" },
+      { title: "Community code — Peers Plus" },
+      { name: "description", content: "The shared values that keep Peers Plus kind, honest and welcoming for every neighbor." },
+      { property: "og:title", content: "Community code — Peers Plus" },
       { property: "og:description", content: "Be kind. Be honest. Be on time. Take care of borrowed things. Speak up." },
     ],
   }),
@@ -31,7 +31,7 @@ function CommunityPage() {
         <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Our shared values</p>
         <h1 className="mt-2 font-display text-4xl italic">Community code</h1>
         <p className="mt-3 text-muted-foreground">
-          Peers+Help works because neighbors show up for each other. By joining, you agree to hold these small
+          Peers Plus works because neighbors show up for each other. By joining, you agree to hold these small
           promises with everyone you meet here.
         </p>
 

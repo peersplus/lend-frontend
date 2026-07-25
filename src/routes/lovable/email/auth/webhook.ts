@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "Share \u0026 Lend Locally"
+const SITE_NAME = "Peers Plus Lend Locally"
 const SENDER_DOMAIN = "notify.tottalesapp.com"
 const ROOT_DOMAIN = "tottalesapp.com"
 const FROM_DOMAIN = "notify.tottalesapp.com"

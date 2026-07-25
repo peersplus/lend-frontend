@@ -8,7 +8,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/chat/$bookingId")({
   head: ({ params }) => ({
     meta: [
-      { title: `Chat — Peers+Help` },
+      { title: `Chat — Peers Plus` },
       { name: "description", content: `Private conversation with your neighbor about booking ${params.bookingId}.` },
     ],
   }),
@@ -193,7 +193,7 @@ function ChatPage() {
           </div>
 
           <div className="rounded-3xl border border-dashed border-border p-5 text-xs text-muted-foreground">
-            Meet in a public spot when possible. Peers+Help never handles cash — payment happens in person at return.
+            Meet in a public spot when possible. Peers Plus never handles cash — payment happens in person at return.
           </div>
         </aside>
       </main>

@@ -46,7 +46,7 @@ const Email = ({
           Open the request
         </Button>
         <Text style={footer}>
-          You're getting this because you're within your alert radius on Peers+Help.
+          You're getting this because you're within your alert radius on Peers Plus.
           Adjust your radius or turn off email alerts in your settings.
         </Text>
       </Container>

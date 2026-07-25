@@ -5,9 +5,9 @@ import { SiteFooter } from "@/components/SiteFooter";
 export const Route = createFileRoute("/verification")({
   head: () => ({
     meta: [
-      { title: "Verification — Peers+Help" },
-      { name: "description", content: "How Peers+Help verifies neighbors so you know who you're borrowing from and lending to." },
-      { property: "og:title", content: "Verification — Peers+Help" },
+      { title: "Verification — Peers Plus" },
+      { name: "description", content: "How Peers Plus verifies neighbors so you know who you're borrowing from and lending to." },
+      { property: "og:title", content: "Verification — Peers Plus" },
       { property: "og:description", content: "Email, phone, address, and photo checks that build trust between neighbors." },
     ],
   }),
@@ -29,7 +29,7 @@ function VerificationPage() {
         <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Trust & safety</p>
         <h1 className="mt-2 font-display text-4xl italic">Verification</h1>
         <p className="mt-3 text-muted-foreground">
-          Peers+Help asks every neighbor to verify a few basics. It's how a stranger becomes someone you'd hand a
+          Peers Plus asks every neighbor to verify a few basics. It's how a stranger becomes someone you'd hand a
           ladder to.
         </p>
 

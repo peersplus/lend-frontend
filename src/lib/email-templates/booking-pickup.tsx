@@ -64,7 +64,7 @@ const Email = ({
           </Text>
 
           <Text style={footer}>
-            Peers+Help — neighbors sharing, saving money, reducing waste.
+            Peers Plus — neighbors sharing, saving money, reducing waste.
           </Text>
         </Container>
       </Body>

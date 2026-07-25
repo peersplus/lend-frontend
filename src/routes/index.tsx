@@ -200,7 +200,7 @@ function Home() {
                     P
                   </div>
                   <div>
-                    <p className="text-sm font-semibold">Peers+Help</p>
+                    <p className="text-sm font-semibold">Peers Plus</p>
                     <p className="text-[11px] text-muted-foreground">New on your block</p>
                   </div>
                 </div>
