@@ -423,8 +423,14 @@ function RequestsPage() {
                     </div>
                   )}
 
-                  {user && user.id === r.owner_id && (
-                    <div className="mt-3 flex gap-2">
+                  {user && (user.id === r.owner_id || isSuperadmin) && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setEditing(r)}
+                        className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                      >
+                        ✏️ Edit
+                      </button>
                       {r.status === "open" ? (
                         <button
                           onClick={() => closeRequest(r, "closed")}
@@ -448,6 +454,7 @@ function RequestsPage() {
                       </button>
                     </div>
                   )}
+
 
                 </div>
               </article>
