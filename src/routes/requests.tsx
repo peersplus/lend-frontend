@@ -130,7 +130,8 @@ function RequestsPage() {
   async function closeRequest(r: Request, status: "closed" | "open") {
     const { error } = await supabase.from("requests").update({ status }).eq("id", r.id);
     if (error) return toast.error(error.message);
-    setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, status } : x)));
+    // The feed only shows open requests, so drop the row when it's closed.
+    setRows((prev) => (status === "closed" ? prev.filter((x) => x.id !== r.id) : prev.map((x) => (x.id === r.id ? { ...x, status } : x))));
     notifyUpdate(r, status);
     toast.success(status === "closed" ? "Request marked inactive — helpers notified." : "Request reopened — helpers notified.");
   }
@@ -189,17 +190,17 @@ function RequestsPage() {
         <div className="mb-6">
           <NotificationPermissionPrompt />
         </div>
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-4xl italic">Neighborhood requests</h1>
-            <p className="mt-2 text-muted-foreground">
+        <div className="mb-8 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 sm:items-end sm:gap-4">
+          <div className="min-w-0">
+            <h1 className="font-serif text-3xl italic sm:text-4xl">Neighborhood requests</h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               Post what you need. Every neighbor inside your radius gets a ping — in the app, by push, and by email.
             </p>
           </div>
           {user && (
             <button
               onClick={() => setShowForm((s) => !s)}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
             >
               {showForm ? "Cancel" : "+ Post a request"}
             </button>
