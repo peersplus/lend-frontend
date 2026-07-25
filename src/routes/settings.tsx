@@ -60,22 +60,16 @@ function SettingsPage() {
   }, [user, loading, navigate]);
 
   const useMyLocation = () => {
-    if (!("geolocation" in navigator)) {
-      toast.error("Geolocation not supported in this browser.");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setForm((f) => ({
-          ...f,
-          lat: pos.coords.latitude.toFixed(6),
-          lng: pos.coords.longitude.toFixed(6),
-        }));
-        toast.success("Location captured.");
-      },
-      (err) => toast.error(err.message),
-    );
+    requestLocation(({ lat, lng }) => {
+      setForm((f) => ({
+        ...f,
+        lat: lat.toFixed(6),
+        lng: lng.toFixed(6),
+      }));
+      toast.success("Location captured.");
+    });
   };
+
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
