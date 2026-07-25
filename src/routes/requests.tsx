@@ -90,18 +90,21 @@ function RequestsPage() {
   useEffect(() => {
     (async () => {
       setLoading(true);
+      // Load open requests, plus every request the current user owns (any status) so they can reopen.
+      const filter = user?.id ? `status.eq.open,owner_id.eq.${user.id}` : "status.eq.open";
       const { data } = await supabase
         .from("requests")
         .select("*")
-        .eq("status", "open")
+        .or(filter)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(80);
       const list = (data as Request[]) ?? [];
       setRows(list);
       setLoading(false);
       await loadOffers(list.map((r) => r.id));
     })();
   }, [user?.id]);
+
 
   async function offerHelp(r: Request) {
     if (!user) return navigate({ to: "/auth" });
@@ -130,8 +133,7 @@ function RequestsPage() {
   async function closeRequest(r: Request, status: "closed" | "open") {
     const { error } = await supabase.from("requests").update({ status }).eq("id", r.id);
     if (error) return toast.error(error.message);
-    // The feed only shows open requests, so drop the row when it's closed.
-    setRows((prev) => (status === "closed" ? prev.filter((x) => x.id !== r.id) : prev.map((x) => (x.id === r.id ? { ...x, status } : x))));
+    setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, status } : x)));
     notifyUpdate(r, status);
     toast.success(status === "closed" ? "Request marked inactive — helpers notified." : "Request reopened — helpers notified.");
   }
@@ -358,7 +360,12 @@ function RequestsPage() {
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-medium">{r.title}</h3>
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{r.category}</span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {r.status !== "open" && (
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold uppercase text-muted-foreground">Inactive</span>
+                      )}
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{r.category}</span>
+                    </div>
                   </div>
                   {r.description && (
                     <p className="mt-2 text-sm text-muted-foreground">{r.description}</p>
@@ -369,7 +376,8 @@ function RequestsPage() {
                     <span>· {new Date(r.created_at).toLocaleDateString()}</span>
                   </div>
 
-                  {user && user.id !== r.owner_id && (
+
+                  {user && user.id !== r.owner_id && r.status === "open" && (
                     <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <button
                         onClick={() => offerHelp(r)}
@@ -414,12 +422,21 @@ function RequestsPage() {
 
                   {user && user.id === r.owner_id && (
                     <div className="mt-3 flex gap-2">
-                      <button
-                        onClick={() => closeRequest(r, "closed")}
-                        className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
-                      >
-                        Mark inactive
-                      </button>
+                      {r.status === "open" ? (
+                        <button
+                          onClick={() => closeRequest(r, "closed")}
+                          className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                        >
+                          Mark inactive
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => closeRequest(r, "open")}
+                          className="flex-1 rounded-full border border-leaf bg-leaf/10 px-3 py-1.5 text-xs font-semibold text-leaf hover:bg-leaf/20"
+                        >
+                          Reopen request
+                        </button>
+                      )}
                       <button
                         onClick={() => deleteRequest(r)}
                         className="flex-1 rounded-full border border-destructive/50 bg-background px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
@@ -428,6 +445,7 @@ function RequestsPage() {
                       </button>
                     </div>
                   )}
+
                 </div>
               </article>
             ))}
