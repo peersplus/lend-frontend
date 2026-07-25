@@ -172,15 +172,18 @@ function BookingRow({
 }: {
   b: Booking;
   role: "borrowed" | "lent";
-  onDispatch: () => void;
-  onReturn: (defect: boolean, notes: string) => void;
+  onDispatch: (photo: string | null) => void;
+  onReturn: (defect: boolean, notes: string, photo: string | null) => void;
   onCancel: () => void;
   onApprove: () => void;
   onDecline: () => void;
 }) {
   const [showReturn, setShowReturn] = useState(false);
+  const [showDispatch, setShowDispatch] = useState(false);
   const [defect, setDefect] = useState(false);
   const [notes, setNotes] = useState("");
+  const [pickupPhoto, setPickupPhoto] = useState<string | null>(null);
+  const [returnPhoto, setReturnPhoto] = useState<string | null>(null);
 
   const rentTotal = Number(b.agreed_rent_per_day ?? 0) * Number(b.agreed_days ?? 1);
 
@@ -189,7 +192,7 @@ function BookingRow({
       <div className="flex flex-wrap items-start gap-4">
         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
           {b.items?.image_url ? (
-            <img src={b.items.image_url} alt="" className="h-full w-full object-cover" />
+            <PhotoImg path={b.items.image_url} alt="" className="h-full w-full object-cover" />
           ) : null}
         </div>
         <div className="flex-1 min-w-[200px]">
