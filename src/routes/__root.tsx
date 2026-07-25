@@ -126,10 +126,12 @@ function RootComponent() {
         position="top-center"
         richColors
         closeButton
-        expand
         visibleToasts={3}
-        offset="80px"
-        toastOptions={{ style: { zIndex: 999999 } }}
+        offset={16}
+        toastOptions={{
+          className: "peers-toast",
+          style: { zIndex: 2147483647 },
+        }}
       />
     </QueryClientProvider>
   );
