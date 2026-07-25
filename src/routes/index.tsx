@@ -409,7 +409,7 @@ function Home() {
 
         {/* CTA */}
         <section className="px-6 py-24">
-          <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto max-w-3xl text-center" data-reveal="scale">
             <h2 className="mb-4 font-display text-4xl md:text-5xl">
               Your block has <span className="italic text-leaf">everything you need.</span>
             </h2>
@@ -429,10 +429,6 @@ function Home() {
               </Link>
             </div>
           </div>
-        </section>
-      </main>
-
-      <SiteFooter />
     </div>
   );
 }
