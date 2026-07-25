@@ -12,6 +12,7 @@ type Slide = {
   emoji: string;
   category: string;
   caption: string;
+  target: string;
 };
 
 const SLIDES: Slide[] = [
@@ -21,6 +22,7 @@ const SLIDES: Slide[] = [
     emoji: "🔧",
     category: "Tools",
     caption: "Borrow the ladder you use twice a year.",
+    target: "cat-tools",
   },
   {
     src: heroHospital,
@@ -28,6 +30,7 @@ const SLIDES: Slide[] = [
     emoji: "🩺",
     category: "Hospital companion",
     caption: "Someone to go with you to the hospital.",
+    target: "cat-medical",
   },
   {
     src: heroBaby,
@@ -35,6 +38,7 @@ const SLIDES: Slide[] = [
     emoji: "🍼",
     category: "Baby & family",
     caption: "Strollers, cribs & baby gear for the day.",
+    target: "cat-baby",
   },
   {
     src: heroKitchen,
@@ -42,6 +46,7 @@ const SLIDES: Slide[] = [
     emoji: "🍳",
     category: "Kitchen",
     caption: "One mixer. Every birthday cake on the street.",
+    target: "cat-kitchen",
   },
   {
     src: heroGarden,
@@ -49,6 +54,7 @@ const SLIDES: Slide[] = [
     emoji: "🌿",
     category: "Garden",
     caption: "Trim the hedge without buying the trimmer.",
+    target: "cat-garden",
   },
   {
     src: heroElectronics,
@@ -56,8 +62,20 @@ const SLIDES: Slide[] = [
     emoji: "💻",
     category: "Electronics",
     caption: "Movie night gear, from your neighbor's shelf.",
+    target: "browse",
   },
 ];
+
+function scrollToTarget(id: string) {
+  if (typeof document === "undefined") return;
+  const el = document.getElementById(id) ?? document.getElementById("browse");
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  el.classList.add("ring-2", "ring-leaf", "ring-offset-2", "ring-offset-background", "rounded-2xl");
+  window.setTimeout(() => {
+    el.classList.remove("ring-2", "ring-leaf", "ring-offset-2", "ring-offset-background", "rounded-2xl");
+  }, 1600);
+}
 
 export function HeroCarousel() {
   const [i, setI] = useState(0);
