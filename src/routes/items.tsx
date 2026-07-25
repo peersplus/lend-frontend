@@ -28,6 +28,10 @@ type Item = {
 };
 
 export const Route = createFileRoute("/items")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    lend: typeof s.lend === "string" ? s.lend : undefined,
+    cat: typeof s.cat === "string" ? s.cat : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Browse nearby items — Peers+Help" },

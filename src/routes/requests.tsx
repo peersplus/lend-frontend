@@ -316,24 +316,34 @@ function RequestsPage() {
                   </div>
 
                   {user && user.id !== r.owner_id && (
-                    <button
-                      onClick={() => offerHelp(r)}
-                      className="mt-4 w-full rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90"
-                    >
-                      🤝 I can help — open chat
-                    </button>
+                    <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <button
+                        onClick={() => offerHelp(r)}
+                        className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90"
+                      >
+                        🤝 I can help — chat
+                      </button>
+                      <Link
+                        to="/items"
+                        search={{ lend: r.title, cat: r.category } as never}
+                        className="rounded-full border border-leaf bg-background px-4 py-2 text-center text-sm font-semibold text-leaf hover:bg-leaf/10"
+                      >
+                        🎁 I have this — lend it
+                      </Link>
+                    </div>
                   )}
 
-                  {user && user.id === r.owner_id && (
+                  {/* Public responses — every neighbor can see who offered help */}
+                  {(offersByReq[r.id]?.length ?? 0) > 0 && (
                     <div className="mt-4 rounded-lg border border-border bg-background/60 p-3">
                       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         {(offersByReq[r.id]?.length ?? 0)} neighbor{(offersByReq[r.id]?.length ?? 0) === 1 ? "" : "s"} offered help
                       </p>
-                      {(offersByReq[r.id] ?? []).length > 0 && (
-                        <ul className="mt-2 space-y-1.5">
-                          {offersByReq[r.id]!.map((o) => (
-                            <li key={o.id} className="flex items-center justify-between gap-2 text-sm">
-                              <span className="truncate">{o.profiles?.display_name ?? "Neighbor"}</span>
+                      <ul className="mt-2 space-y-1.5">
+                        {offersByReq[r.id]!.map((o) => (
+                          <li key={o.id} className="flex items-center justify-between gap-2 text-sm">
+                            <span className="truncate">{o.profiles?.display_name ?? "Neighbor"}</span>
+                            {user && user.id === r.owner_id && (
                               <Link
                                 to="/chat/request/$requestId/$peerId"
                                 params={{ requestId: r.id, peerId: o.helper_id }}
@@ -341,10 +351,27 @@ function RequestsPage() {
                               >
                                 Chat
                               </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {user && user.id === r.owner_id && (
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() => closeRequest(r, "closed")}
+                        className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                      >
+                        Mark inactive
+                      </button>
+                      <button
+                        onClick={() => deleteRequest(r)}
+                        className="flex-1 rounded-full border border-destructive/50 bg-background px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
+                      >
+                        Delete
+                      </button>
                     </div>
                   )}
                 </div>
@@ -353,7 +380,17 @@ function RequestsPage() {
 
           </div>
         )}
+
+        <footer className="mt-16 rounded-2xl border border-dashed border-border bg-muted/40 p-6 text-xs leading-relaxed text-muted-foreground">
+          <p className="font-semibold text-foreground">Peers+Help is a free community platform.</p>
+          <p className="mt-1">
+            We help neighbors connect and communicate. All conversations, exchanges, payments and pickups happen directly between users —
+            Peers+Help is <strong>not responsible</strong> for any communication, agreement, damage, or loss between neighbors.
+            We only provide the platform to post and connect, free of cost, and support you when things go wrong.
+          </p>
+        </footer>
       </main>
     </div>
   );
 }
+
