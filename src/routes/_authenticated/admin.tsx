@@ -43,12 +43,32 @@ function AdminPage() {
       .select("*")
       .order("created_at", { ascending: false })
       .limit(200)
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error) toast.error(error.message);
-        setRows((data as any[]) ?? []);
+        const list = (data as any[]) ?? [];
+        const ownerIds = Array.from(
+          new Set(
+            list
+              .map((r) => r.owner_id ?? r.borrower_id ?? (tab === "users" ? r.id : null))
+              .filter(Boolean),
+          ),
+        );
+        if (ownerIds.length) {
+          const { data: profs } = await supabase
+            .from("profiles")
+            .select("id, display_name")
+            .in("id", ownerIds as string[]);
+          const nameById = new Map((profs ?? []).map((p: any) => [p.id, p.display_name]));
+          list.forEach((r) => {
+            const oid = r.owner_id ?? r.borrower_id ?? (tab === "users" ? r.id : null);
+            r.__ownerName = (oid && nameById.get(oid)) || null;
+          });
+        }
+        setRows(list);
         setLoading(false);
       });
   }, [tab, isSuperadmin]);
+
 
   async function del(id: string) {
     if (!confirm("Delete this row?")) return;
@@ -112,8 +132,9 @@ function AdminPage() {
                       {r.title ?? r.display_name ?? r.id}
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {r.owner_id ?? r.borrower_id ?? r.id}
+                      {r.__ownerName ?? r.display_name ?? r.owner_id ?? r.borrower_id ?? "—"}
                     </td>
+
                     <td className="px-4 py-3 text-xs">{r.status ?? "—"}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       {r.created_at ? new Date(r.created_at).toLocaleDateString() : "—"}
