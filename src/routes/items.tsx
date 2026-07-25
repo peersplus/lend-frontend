@@ -63,6 +63,7 @@ function ItemsPage() {
     lat: "" as string, lng: "" as string,
   });
   const [saving, setSaving] = useState(false);
+  const [filters, setFilters] = useState({ q: "", category: "", price: "all" as "all" | "free" | "rent", mine: false });
 
   useEffect(() => {
     if (!user) return;
@@ -91,11 +92,20 @@ function ItemsPage() {
     setLoading(false);
   }
   const listed = useMemo(() => {
-    if (me.lat == null || me.lng == null) return items.map((i) => ({ i, km: null as number | null }));
-    return items
-      .map((i) => ({ i, km: i.lat != null && i.lng != null ? haversineKm({ lat: me.lat!, lng: me.lng! }, { lat: i.lat!, lng: i.lng! }) : null }))
-      .sort((a, b) => (a.km ?? 1e9) - (b.km ?? 1e9));
-  }, [items, me]);
+    const base = me.lat == null || me.lng == null
+      ? items.map((i) => ({ i, km: null as number | null }))
+      : items
+          .map((i) => ({ i, km: i.lat != null && i.lng != null ? haversineKm({ lat: me.lat!, lng: me.lng! }, { lat: i.lat!, lng: i.lng! }) : null }))
+          .sort((a, b) => (a.km ?? 1e9) - (b.km ?? 1e9));
+    const q = filters.q.trim().toLowerCase();
+    return base.filter(({ i }) => {
+      if (filters.category && i.category !== filters.category) return false;
+      if (filters.price !== "all" && i.price_mode !== filters.price) return false;
+      if (filters.mine && (!user || i.owner_id !== user.id)) return false;
+      if (q && !(`${i.title} ${i.description ?? ""} ${i.building_name ?? ""} ${i.address ?? ""}`.toLowerCase().includes(q))) return false;
+      return true;
+    });
+  }, [items, me, filters, user]);
 
   useEffect(() => { load(); }, []);
 
