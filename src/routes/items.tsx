@@ -65,6 +65,7 @@ function ItemsPage() {
   });
   const [saving, setSaving] = useState(false);
   const [filters, setFilters] = useState({ q: "", category: "", price: "all" as "all" | "free" | "rent", mine: false });
+  const [view, setView] = useState<"list" | "map">("list");
 
   useEffect(() => {
     if (!user) return;
