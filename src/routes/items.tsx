@@ -185,7 +185,7 @@ function ItemsPage() {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {items.map((item) => (
+            {listed.map(({ i: item, km }) => (
               <article key={item.id} className="group flex flex-col gap-3">
                 <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-black/5">
                   {item.image_url ? (
@@ -200,10 +200,22 @@ function ItemsPage() {
                   }`}>
                     {item.price_mode === "free" ? "Free" : `$${item.price_amount}/day`}
                   </span>
+                  {km != null && (
+                    <span className="absolute right-3 top-3 rounded-md bg-background/90 px-2 py-1 text-[10px] font-semibold backdrop-blur">
+                      📍 {formatDistance(km)}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">{item.title}</h3>
                   <p className="text-sm text-muted-foreground line-clamp-2">{item.description ?? item.category}</p>
+                  {(item.building_name || item.address) && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {item.building_name && <span className="font-medium text-foreground">🏢 {item.building_name}</span>}
+                      {item.building_name && item.address ? " · " : ""}
+                      {item.address && <span className="line-clamp-1">{item.address}</span>}
+                    </p>
+                  )}
                   {item.deposit_amount != null && (
                     <p className="mt-1 text-xs text-muted-foreground">
                       Replacement value if damaged: <strong>${item.deposit_amount}</strong>
