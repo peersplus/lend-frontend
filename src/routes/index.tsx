@@ -221,14 +221,14 @@ function Home() {
                     <span className="size-7 rounded-full border-2 border-background bg-sky-400/40" />
                   </span>
                   <span>
-                    <b className="text-foreground">2,400+</b> verified neighbors
+                    <b className="text-foreground">Be among the first</b> verified neighbors
                   </span>
                 </div>
                 <div>
-                  <b className="text-foreground">$180k+</b> saved this year
+                  <b className="text-foreground">Free</b> to join & lend
                 </div>
                 <div>
-                  <b className="text-foreground">450 tons</b> kept out of landfills
+                  <b className="text-foreground">Verified</b> people only
                 </div>
               </div>
             </div>
