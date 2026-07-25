@@ -221,7 +221,7 @@ function Home() {
         {/* Categories */}
         <section id="browse" className="bg-muted/40 px-6 py-20">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-10 flex items-end justify-between gap-6">
+            <div className="mb-10 flex items-end justify-between gap-6" data-reveal>
               <div>
                 <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   (01) Collections
