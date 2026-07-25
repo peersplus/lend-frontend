@@ -21,6 +21,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ChatRequestRequestIdPeerIdRouteImport } from './routes/chat.request.$requestId.$peerId'
+import { Route as ApiPublicHooksRequestUpdatedRouteImport } from './routes/api/public/hooks/request-updated'
 import { Route as ApiPublicHooksOfferCreatedRouteImport } from './routes/api/public/hooks/offer-created'
 import { Route as ApiPublicHooksNotifyRequestRouteImport } from './routes/api/public/hooks/notify-request'
 import { Route as ApiPublicHooksDailyDigestRouteImport } from './routes/api/public/hooks/daily-digest'
@@ -88,6 +89,12 @@ const ChatRequestRequestIdPeerIdRoute =
     path: '/chat/request/$requestId/$peerId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRequestUpdatedRoute =
+  ApiPublicHooksRequestUpdatedRouteImport.update({
+    id: '/api/public/hooks/request-updated',
+    path: '/api/public/hooks/request-updated',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksOfferCreatedRoute =
   ApiPublicHooksOfferCreatedRouteImport.update({
     id: '/api/public/hooks/offer-created',
@@ -126,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/api/public/hooks/offer-created': typeof ApiPublicHooksOfferCreatedRoute
+  '/api/public/hooks/request-updated': typeof ApiPublicHooksRequestUpdatedRoute
   '/chat/request/$requestId/$peerId': typeof ChatRequestRequestIdPeerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -144,6 +152,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/api/public/hooks/offer-created': typeof ApiPublicHooksOfferCreatedRoute
+  '/api/public/hooks/request-updated': typeof ApiPublicHooksRequestUpdatedRoute
   '/chat/request/$requestId/$peerId': typeof ChatRequestRequestIdPeerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -163,6 +172,7 @@ export interface FileRoutesById {
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/api/public/hooks/offer-created': typeof ApiPublicHooksOfferCreatedRoute
+  '/api/public/hooks/request-updated': typeof ApiPublicHooksRequestUpdatedRoute
   '/chat/request/$requestId/$peerId': typeof ChatRequestRequestIdPeerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/notify-request'
     | '/api/public/hooks/offer-created'
+    | '/api/public/hooks/request-updated'
     | '/chat/request/$requestId/$peerId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/notify-request'
     | '/api/public/hooks/offer-created'
+    | '/api/public/hooks/request-updated'
     | '/chat/request/$requestId/$peerId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -219,6 +231,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/notify-request'
     | '/api/public/hooks/offer-created'
+    | '/api/public/hooks/request-updated'
     | '/chat/request/$requestId/$peerId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -238,6 +251,7 @@ export interface RootRouteChildren {
   ApiPublicHooksDailyDigestRoute: typeof ApiPublicHooksDailyDigestRoute
   ApiPublicHooksNotifyRequestRoute: typeof ApiPublicHooksNotifyRequestRoute
   ApiPublicHooksOfferCreatedRoute: typeof ApiPublicHooksOfferCreatedRoute
+  ApiPublicHooksRequestUpdatedRoute: typeof ApiPublicHooksRequestUpdatedRoute
   ChatRequestRequestIdPeerIdRoute: typeof ChatRequestRequestIdPeerIdRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -330,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatRequestRequestIdPeerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/request-updated': {
+      id: '/api/public/hooks/request-updated'
+      path: '/api/public/hooks/request-updated'
+      fullPath: '/api/public/hooks/request-updated'
+      preLoaderRoute: typeof ApiPublicHooksRequestUpdatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/offer-created': {
       id: '/api/public/hooks/offer-created'
       path: '/api/public/hooks/offer-created'
@@ -374,6 +395,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksDailyDigestRoute: ApiPublicHooksDailyDigestRoute,
   ApiPublicHooksNotifyRequestRoute: ApiPublicHooksNotifyRequestRoute,
   ApiPublicHooksOfferCreatedRoute: ApiPublicHooksOfferCreatedRoute,
+  ApiPublicHooksRequestUpdatedRoute: ApiPublicHooksRequestUpdatedRoute,
   ChatRequestRequestIdPeerIdRoute: ChatRequestRequestIdPeerIdRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

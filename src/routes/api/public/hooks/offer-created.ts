@@ -39,6 +39,19 @@ export const Route = createFileRoute('/api/public/hooks/offer-created')({
           new URL(request.url).origin,
         ).toString()
 
+        // In-app inbox notification for the requester
+        try {
+          await supabaseAdmin.from('notifications').insert({
+            recipient_id: req.owner_id,
+            request_id: req.id,
+            kind: 'offer_received',
+            title: `🤝 ${helperProfile?.display_name ?? 'A neighbor'} offered to help`,
+            body: `On your request: ${req.title}`,
+          })
+        } catch (e) {
+          console.error('offer notification insert failed', e)
+        }
+
         try {
           await sendTemplateEmail('offer-received', email, {
             idempotencyKey: `offer-${offer.id}`,
