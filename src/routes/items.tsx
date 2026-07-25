@@ -324,6 +324,29 @@ function ItemsPage() {
                       Request this item
                     </button>
                   )}
+                  {user && (user.id === item.owner_id || isSuperadmin) && (
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() => setEditing(item)}
+                        className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm("Delete this listing?")) return;
+                          const { error } = await supabase.from("items").delete().eq("id", item.id);
+                          if (error) return toast.error(error.message);
+                          setItems((prev) => prev.filter((x) => x.id !== item.id));
+                          toast.success("Item deleted.");
+                        }}
+                        className="flex-1 rounded-full border border-destructive/50 bg-background px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+
                 </div>
               </article>
             ))}
