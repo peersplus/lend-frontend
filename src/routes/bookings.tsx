@@ -204,6 +204,15 @@ function BookingRow({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
+        {["approved","picked_up","returned","defect_reported","completed"].includes(b.status) && (
+          <Link
+            to="/chat/$bookingId"
+            params={{ bookingId: b.id }}
+            className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background"
+          >
+            💬 Chat & contact
+          </Link>
+        )}
         {role === "lent" && b.status === "requested" && (
           <>
             <button onClick={onApprove} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
