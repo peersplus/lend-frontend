@@ -286,9 +286,15 @@ function ItemsPage() {
                 Borrower will be shown this amount up-front and asked to consent. If the item comes back damaged, they pay this full amount in cash at return.
               </p>
             </div>
-            <input placeholder="Image URL (optional)"
-              value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-              className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+            <div>
+              <label className="mb-2 block text-xs font-semibold text-muted-foreground uppercase tracking-wide">Item photo</label>
+              <PhotoUpload
+                value={form.image_url || null}
+                onChange={(p) => setForm({ ...form, image_url: p ?? "" })}
+                folder="items"
+                label="Snap or upload the item"
+              />
+            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <input placeholder="Building / society"
