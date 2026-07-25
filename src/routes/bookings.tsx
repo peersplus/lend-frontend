@@ -234,7 +234,7 @@ function BookingRow({
           </>
         )}
         {role === "lent" && b.status === "approved" && (
-          <button onClick={onDispatch} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
+          <button onClick={() => setShowDispatch(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
             Dispatch / Mark picked up
           </button>
         )}
@@ -243,6 +243,42 @@ function BookingRow({
             Mark returned
           </button>
         )}
+      </div>
+
+      {(b.pickup_photo_url || b.return_photo_url) && (
+        <div className="mt-3 flex gap-3">
+          {b.pickup_photo_url && (
+            <div>
+              <p className="mb-1 text-xs text-muted-foreground">Pickup photo</p>
+              <PhotoImg path={b.pickup_photo_url} alt="pickup" className="h-20 w-20 rounded-lg object-cover" />
+            </div>
+          )}
+          {b.return_photo_url && (
+            <div>
+              <p className="mb-1 text-xs text-muted-foreground">Return photo</p>
+              <PhotoImg path={b.return_photo_url} alt="return" className="h-20 w-20 rounded-lg object-cover" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {showDispatch && (
+        <div className="mt-4 rounded-xl border border-border bg-background p-4">
+          <p className="mb-2 text-sm font-medium">Capture a photo of the item at pickup</p>
+          <PhotoUpload value={pickupPhoto} onChange={setPickupPhoto} folder="bookings" label="Snap pickup photo" />
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={() => { onDispatch(pickupPhoto); setShowDispatch(false); }}
+              className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
+            >
+              Confirm dispatch
+            </button>
+            <button onClick={() => setShowDispatch(false)} className="rounded-full border border-border px-4 py-2 text-sm">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
         {role === "borrowed" && (b.status === "requested" || b.status === "approved") && (
           <button onClick={onCancel} className="rounded-full border border-border px-4 py-2 text-sm">
             Cancel
