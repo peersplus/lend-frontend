@@ -485,6 +485,8 @@ function Home() {
             and communicate at no cost. All conversations, exchanges, payments and pickups happen directly between users —
             Peers+Help is <strong>not responsible</strong> for any communication, agreement, damage, or loss between neighbors.
             We provide the platform and support you when things go wrong.
+          </p>
+        </div>
       </footer>
     </div>
   );
