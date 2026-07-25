@@ -20,6 +20,12 @@ type Booking = {
   pickup_at: string | null;
   return_due: string | null;
   returned_at: string | null;
+  pickup_scheduled_at: string | null;
+  return_scheduled_at: string | null;
+  pickup_person_name: string | null;
+  pickup_person_photo: string | null;
+  return_person_name: string | null;
+  return_person_photo: string | null;
   has_defect: boolean;
   defect_notes: string | null;
   amount_paid: number | null;
@@ -28,6 +34,7 @@ type Booking = {
   created_at: string;
   items: { title: string; image_url: string | null } | null;
 };
+
 
 export const Route = createFileRoute("/bookings")({
   head: () => ({
