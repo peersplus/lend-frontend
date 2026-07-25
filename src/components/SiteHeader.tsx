@@ -50,6 +50,7 @@ export function SiteHeader() {
           <Link
             to="/items"
             search={{ lend: "1" }}
+            data-header-cta
             className="hidden items-center gap-1.5 rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground shadow-sm shadow-leaf/20 transition-transform hover:-translate-y-0.5 hover:bg-leaf/90 sm:inline-flex"
           >
             <span aria-hidden>➕</span> Post a Lend

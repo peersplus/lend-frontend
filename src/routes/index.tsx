@@ -187,7 +187,7 @@ function Home() {
               </div>
             </div>
 
-            <div className="relative lg:col-span-5" data-reveal="right" data-reveal-delay="120">
+            <div className="relative lg:col-span-5" data-reveal="right" data-reveal-delay="120" data-scrub="parallax-slow">
               <div className="overflow-hidden rounded-[2rem] ring-1 ring-black/5 shadow-2xl shadow-bark/10">
                 <img
                   src={heroHandoff}
@@ -277,6 +277,7 @@ function Home() {
                   className="flex flex-col items-center text-center"
                   data-reveal="scale"
                   data-reveal-delay={String(i * 140)}
+                  data-scrub="tilt"
                 >
                   <div className="mb-6 font-mono text-xs font-bold uppercase tracking-[0.3em] text-clay">
                     Step {step.n}
@@ -300,10 +301,11 @@ function Home() {
               ))}
             </div>
 
-            <div className="mt-14 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-14 flex flex-wrap items-center justify-center gap-3" data-scrub="rise">
               <Link
                 to={user ? "/items" : "/auth"}
                 className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20"
+                data-scrub="cta"
               >
                 {user ? "Open my feed" : "Register in 30 seconds"}
               </Link>
@@ -317,7 +319,7 @@ function Home() {
         {/* Emergency band */}
         <section className="bg-cream px-6 pb-24">
           <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-3">
-            <div className="rounded-3xl border border-accent/20 bg-accent/5 p-8 lg:col-span-1" data-reveal="left">
+            <div className="rounded-3xl border border-accent/20 bg-accent/5 p-8 lg:col-span-1" data-reveal="left" data-scrub="rise">
               <div className="mb-4 flex items-center gap-2">
                 <span className="size-2 animate-pulse rounded-full bg-accent" />
                 <span className="text-xs font-bold uppercase tracking-widest text-accent">
@@ -409,7 +411,7 @@ function Home() {
 
         {/* CTA */}
         <section className="px-6 py-24">
-          <div className="mx-auto max-w-3xl text-center" data-reveal="scale">
+          <div className="mx-auto max-w-3xl text-center" data-reveal="scale" data-scrub="zoom">
             <h2 className="mb-4 font-display text-4xl md:text-5xl">
               Your block has <span className="italic text-leaf">everything you need.</span>
             </h2>
@@ -421,10 +423,11 @@ function Home() {
               <Link
                 to={user ? "/items" : "/auth"}
                 className="rounded-full bg-leaf px-8 py-3.5 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20"
+                data-scrub="cta"
               >
                 {user ? "Open the app" : "Get started — it's free"}
               </Link>
-              <Link to="/items" className="rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold">
+              <Link to="/items" className="rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold" data-scrub="cta">
                 See what's nearby
               </Link>
             </div>

@@ -157,4 +157,45 @@
   [data-reveal="right"].reveal-init.is-revealed {
     transform: translateX(0);
   }
+
+  /* Scrub-scrolling: elements with [data-scrub] receive --scrub (0..1) from useReveal */
+  [data-scrub] {
+    --scrub: 0;
+    will-change: transform, opacity, filter;
+  }
+  [data-scrub="rise"] {
+    transform: translate3d(0, calc((1 - var(--scrub)) * 40px), 0);
+    opacity: calc(0.35 + var(--scrub) * 0.65);
+  }
+  [data-scrub="parallax"] {
+    transform: translate3d(0, calc((0.5 - var(--scrub)) * -60px), 0);
+  }
+  [data-scrub="parallax-slow"] {
+    transform: translate3d(0, calc((0.5 - var(--scrub)) * -30px), 0);
+  }
+  [data-scrub="zoom"] {
+    transform: scale(calc(0.94 + var(--scrub) * 0.06));
+    opacity: calc(0.4 + var(--scrub) * 0.6);
+  }
+  [data-scrub="tilt"] {
+    transform: perspective(1000px) rotateX(calc((1 - var(--scrub)) * 8deg))
+      translate3d(0, calc((1 - var(--scrub)) * 24px), 0);
+    opacity: calc(0.4 + var(--scrub) * 0.6);
+  }
+  [data-scrub="cta"] {
+    transform: scale(calc(1 + var(--scrub) * 0.04));
+    box-shadow: 0 calc(var(--scrub) * 18px) calc(var(--scrub) * 40px)
+      rgba(47, 94, 52, calc(var(--scrub) * 0.35));
+  }
+
+  /* Header CTA reacts to global page scroll (set on <html> as --page-scrub). */
+  [data-header-cta] {
+    --p: var(--page-scrub, 0);
+    transform: translateY(calc(var(--p) * -1px)) scale(calc(1 + var(--p) * 0.06));
+    box-shadow:
+      0 calc(4px + var(--p) * 14px) calc(10px + var(--p) * 26px)
+        rgba(47, 94, 52, calc(0.18 + var(--p) * 0.35)),
+      0 0 0 calc(var(--p) * 3px) rgba(47, 94, 52, calc(var(--p) * 0.15));
+    transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+  }
 }
