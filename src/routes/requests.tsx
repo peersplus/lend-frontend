@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { NotificationBell } from "@/components/NotificationBell";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
+import { PhotoUpload } from "@/components/PhotoUpload";
+import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
 
 type Request = {
