@@ -34,7 +34,7 @@ export const Route = createFileRoute("/requests")({
   component: RequestsPage,
 });
 
-const categories = ["Tools", "Medical", "Party", "Baby", "Kitchen", "Camping", "Emergency", "Other"];
+const categories = ["Tools", "Electronics", "Medical", "Companionship", "Party", "Baby", "Kitchen", "Camping", "Emergency", "Other"];
 
 function RequestsPage() {
   const { user } = useAuth();
