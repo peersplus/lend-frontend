@@ -30,7 +30,9 @@ function SettingsPage() {
     radius_km: 5,
     push_enabled: true,
     email_enabled: true,
+    require_handoff_person: false,
   });
+
   const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
 
@@ -43,7 +45,7 @@ function SettingsPage() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("neighborhood,lat,lng,radius_km,push_enabled,email_enabled")
+        .select("neighborhood,lat,lng,radius_km,push_enabled,email_enabled,require_handoff_person")
         .eq("id", user.id)
         .maybeSingle();
       if (data) {
@@ -54,6 +56,7 @@ function SettingsPage() {
           radius_km: data.radius_km ?? 5,
           push_enabled: data.push_enabled ?? true,
           email_enabled: data.email_enabled ?? true,
+          require_handoff_person: data.require_handoff_person ?? false,
         });
       }
       setReady(true);
@@ -85,8 +88,10 @@ function SettingsPage() {
         radius_km: form.radius_km,
         push_enabled: form.push_enabled,
         email_enabled: form.email_enabled,
+        require_handoff_person: form.require_handoff_person,
       })
       .eq("id", user.id);
+
     setSaving(false);
     if (error) toast.error(error.message);
     else toast.success("Saved.");
@@ -246,6 +251,28 @@ function SettingsPage() {
               </label>
             </div>
           </section>
+
+          <section className="rounded-lg border border-border bg-card p-6">
+            <h2 className="font-semibold">Handoff safety</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              For extra peace of mind when lending, ask for the name and a quick photo of the person who actually picks up or returns your item.
+            </p>
+            <label className="mt-4 flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={form.require_handoff_person}
+                onChange={(e) => setForm({ ...form, require_handoff_person: e.target.checked })}
+                className="mt-1"
+              />
+              <div>
+                <p className="text-sm font-medium">Ask for handoff person details</p>
+                <p className="text-xs text-muted-foreground">
+                  On pickup and return, capture their name (optional) and a photo (optional). Stays on the booking record.
+                </p>
+              </div>
+            </label>
+          </section>
+
 
           <button
             disabled={saving}

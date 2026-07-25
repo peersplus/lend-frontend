@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,9 @@ import { NotificationPermissionPrompt } from "@/components/NotificationPermissio
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
+
+type Offer = { id: string; request_id: string; helper_id: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
+
 
 type Request = {
   id: string;
@@ -38,7 +41,9 @@ const categories = ["Tools", "Electronics", "Medical", "Companionship", "Party",
 
 function RequestsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<Request[]>([]);
+  const [offersByReq, setOffersByReq] = useState<Record<string, Offer[]>>({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -50,6 +55,19 @@ function RequestsPage() {
     image_url: "" as string,
   });
 
+  async function loadOffers(requestIds: string[]) {
+    if (requestIds.length === 0) return;
+    const { data } = await supabase
+      .from("request_offers")
+      .select("id, request_id, helper_id, created_at, profiles:helper_id(display_name, avatar_url)")
+      .in("request_id", requestIds);
+    const grouped: Record<string, Offer[]> = {};
+    (data as unknown as Offer[] | null)?.forEach((o) => {
+      (grouped[o.request_id] ||= []).push(o);
+    });
+    setOffersByReq(grouped);
+  }
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -59,10 +77,28 @@ function RequestsPage() {
         .eq("status", "open")
         .order("created_at", { ascending: false })
         .limit(50);
-      setRows((data as Request[]) ?? []);
+      const list = (data as Request[]) ?? [];
+      setRows(list);
       setLoading(false);
+      await loadOffers(list.map((r) => r.id));
     })();
-  }, []);
+  }, [user?.id]);
+
+  async function offerHelp(r: Request) {
+    if (!user) return navigate({ to: "/auth" });
+    const { error } = await supabase
+      .from("request_offers")
+      .insert({ request_id: r.id, helper_id: user.id })
+      .select("id")
+      .maybeSingle();
+    if (error && !error.message.toLowerCase().includes("duplicate")) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("You offered to help. Opening chat…");
+    navigate({ to: "/chat/request/$requestId/$peerId", params: { requestId: r.id, peerId: r.owner_id } });
+  }
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -253,9 +289,43 @@ function RequestsPage() {
                     <span>within {r.radius_km}km</span>
                     <span>· {new Date(r.created_at).toLocaleDateString()}</span>
                   </div>
+
+                  {user && user.id !== r.owner_id && (
+                    <button
+                      onClick={() => offerHelp(r)}
+                      className="mt-4 w-full rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90"
+                    >
+                      🤝 I can help — open chat
+                    </button>
+                  )}
+
+                  {user && user.id === r.owner_id && (
+                    <div className="mt-4 rounded-lg border border-border bg-background/60 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {(offersByReq[r.id]?.length ?? 0)} neighbor{(offersByReq[r.id]?.length ?? 0) === 1 ? "" : "s"} offered help
+                      </p>
+                      {(offersByReq[r.id] ?? []).length > 0 && (
+                        <ul className="mt-2 space-y-1.5">
+                          {offersByReq[r.id]!.map((o) => (
+                            <li key={o.id} className="flex items-center justify-between gap-2 text-sm">
+                              <span className="truncate">{o.profiles?.display_name ?? "Neighbor"}</span>
+                              <Link
+                                to="/chat/request/$requestId/$peerId"
+                                params={{ requestId: r.id, peerId: o.helper_id }}
+                                className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background"
+                              >
+                                Chat
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                 </div>
               </article>
             ))}
+
           </div>
         )}
       </main>

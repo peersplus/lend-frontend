@@ -20,6 +20,12 @@ type Booking = {
   pickup_at: string | null;
   return_due: string | null;
   returned_at: string | null;
+  pickup_scheduled_at: string | null;
+  return_scheduled_at: string | null;
+  pickup_person_name: string | null;
+  pickup_person_photo: string | null;
+  return_person_name: string | null;
+  return_person_photo: string | null;
   has_defect: boolean;
   defect_notes: string | null;
   amount_paid: number | null;
@@ -28,6 +34,7 @@ type Booking = {
   created_at: string;
   items: { title: string; image_url: string | null } | null;
 };
+
 
 export const Route = createFileRoute("/bookings")({
   head: () => ({
@@ -46,6 +53,16 @@ function BookingsPage() {
   const [tab, setTab] = useState<"borrowed" | "lent">("borrowed");
   const [rows, setRows] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [askHandoff, setAskHandoff] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("profiles").select("require_handoff_person").eq("id", user.id).maybeSingle();
+      setAskHandoff(!!data?.require_handoff_person);
+    })();
+  }, [user]);
+
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -69,10 +86,15 @@ function BookingsPage() {
     load();
   }
 
-  async function dispatchNow(b: Booking, photo: string | null) {
+  async function dispatchNow(b: Booking, photo: string | null, personName: string, personPhoto: string | null) {
     if (!photo) return toast.error("Capture a pickup photo first — this protects both of you.");
-    await update(b.id, { status: "picked_up", pickup_at: new Date().toISOString(), pickup_photo_url: photo });
-    // fire confirmation email to borrower
+    await update(b.id, {
+      status: "picked_up",
+      pickup_at: new Date().toISOString(),
+      pickup_photo_url: photo,
+      pickup_person_name: personName || null,
+      pickup_person_photo: personPhoto || null,
+    });
     fetch("/api/public/hooks/booking-pickup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -81,7 +103,7 @@ function BookingsPage() {
     toast.success("Dispatched. Confirmation emailed to borrower.");
   }
 
-  async function markReturned(b: Booking, defect: boolean, notes: string, photo: string | null) {
+  async function markReturned(b: Booking, defect: boolean, notes: string, photo: string | null, personName: string, personPhoto: string | null) {
     if (!photo) return toast.error("Capture a return photo first.");
     const rentTotal = Number(b.agreed_rent_per_day ?? 0) * Number(b.agreed_days ?? 1);
     const amount = defect ? Number(b.agreed_deposit) + rentTotal : rentTotal;
@@ -92,10 +114,17 @@ function BookingsPage() {
       defect_notes: defect ? notes : null,
       amount_paid: amount,
       return_photo_url: photo,
+      return_person_name: personName || null,
+      return_person_photo: personPhoto || null,
     });
     toast.success(defect
       ? `Return logged. Borrower owes $${amount} in cash (rent + full replacement).`
       : `Return logged. Borrower owes $${amount} in cash.`);
+  }
+
+  async function saveSchedule(id: string, pickupISO: string | null, returnISO: string | null) {
+    await update(id, { pickup_scheduled_at: pickupISO, return_scheduled_at: returnISO });
+    toast.success("Schedule updated.");
   }
 
   if (!user) {
@@ -153,12 +182,15 @@ function BookingsPage() {
                 key={b.id}
                 b={b}
                 role={tab}
-                onDispatch={(photo) => dispatchNow(b, photo)}
-                onReturn={(defect, notes, photo) => markReturned(b, defect, notes, photo)}
+                askHandoff={askHandoff}
+                onDispatch={(photo, name, personPhoto) => dispatchNow(b, photo, name, personPhoto)}
+                onReturn={(defect, notes, photo, name, personPhoto) => markReturned(b, defect, notes, photo, name, personPhoto)}
                 onCancel={() => update(b.id, { status: "cancelled" })}
                 onApprove={() => update(b.id, { status: "approved" })}
                 onDecline={() => update(b.id, { status: "declined" })}
+                onSaveSchedule={(pickup, ret) => saveSchedule(b.id, pickup, ret)}
               />
+
             ))}
           </ul>
         )}
@@ -167,16 +199,33 @@ function BookingsPage() {
   );
 }
 
+function toLocalInput(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const off = d.getTimezoneOffset();
+  return new Date(d.getTime() - off * 60000).toISOString().slice(0, 16);
+}
+function toISO(local: string): string | null {
+  if (!local) return null;
+  return new Date(local).toISOString();
+}
+function fmt(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+}
+
 function BookingRow({
-  b, role, onDispatch, onReturn, onCancel, onApprove, onDecline,
+  b, role, askHandoff, onDispatch, onReturn, onCancel, onApprove, onDecline, onSaveSchedule,
 }: {
   b: Booking;
   role: "borrowed" | "lent";
-  onDispatch: (photo: string | null) => void;
-  onReturn: (defect: boolean, notes: string, photo: string | null) => void;
+  askHandoff: boolean;
+  onDispatch: (photo: string | null, personName: string, personPhoto: string | null) => void;
+  onReturn: (defect: boolean, notes: string, photo: string | null, personName: string, personPhoto: string | null) => void;
   onCancel: () => void;
   onApprove: () => void;
   onDecline: () => void;
+  onSaveSchedule: (pickupISO: string | null, returnISO: string | null) => void;
 }) {
   const [showReturn, setShowReturn] = useState(false);
   const [showDispatch, setShowDispatch] = useState(false);
@@ -184,8 +233,16 @@ function BookingRow({
   const [notes, setNotes] = useState("");
   const [pickupPhoto, setPickupPhoto] = useState<string | null>(null);
   const [returnPhoto, setReturnPhoto] = useState<string | null>(null);
+  const [pickupPersonName, setPickupPersonName] = useState("");
+  const [pickupPersonPhoto, setPickupPersonPhoto] = useState<string | null>(null);
+  const [returnPersonName, setReturnPersonName] = useState("");
+  const [returnPersonPhoto, setReturnPersonPhoto] = useState<string | null>(null);
+  const [editSchedule, setEditSchedule] = useState(false);
+  const [pickupSched, setPickupSched] = useState(toLocalInput(b.pickup_scheduled_at));
+  const [returnSched, setReturnSched] = useState(toLocalInput(b.return_scheduled_at));
 
   const rentTotal = Number(b.agreed_rent_per_day ?? 0) * Number(b.agreed_days ?? 1);
+  const canEditSchedule = role === "lent" && ["requested", "approved"].includes(b.status);
 
   return (
     <li className="rounded-2xl border border-border bg-card p-5">
@@ -212,6 +269,69 @@ function BookingRow({
           {b.status.replace("_", " ")}
         </span>
       </div>
+
+      <div className="mt-3 grid gap-2 rounded-xl border border-border/60 bg-background/50 p-3 text-sm sm:grid-cols-2">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">📅 Pickup</p>
+          <p className="font-medium">{fmt(b.pickup_scheduled_at)}</p>
+          {b.pickup_at && <p className="text-xs text-muted-foreground">Actual: {fmt(b.pickup_at)}</p>}
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">↩️ Return</p>
+          <p className="font-medium">{fmt(b.return_scheduled_at)}</p>
+          {b.returned_at && <p className="text-xs text-muted-foreground">Actual: {fmt(b.returned_at)}</p>}
+        </div>
+        {canEditSchedule && (
+          <div className="sm:col-span-2">
+            {editSchedule ? (
+              <div className="flex flex-wrap items-end gap-2">
+                <label className="text-xs">
+                  Pickup date & time
+                  <input type="datetime-local" value={pickupSched} onChange={(e) => setPickupSched(e.target.value)}
+                    className="mt-1 block rounded-md border border-input bg-background px-2 py-1 text-sm" />
+                </label>
+                <label className="text-xs">
+                  Return date & time
+                  <input type="datetime-local" value={returnSched} onChange={(e) => setReturnSched(e.target.value)}
+                    className="mt-1 block rounded-md border border-input bg-background px-2 py-1 text-sm" />
+                </label>
+                <button
+                  onClick={() => { onSaveSchedule(toISO(pickupSched), toISO(returnSched)); setEditSchedule(false); }}
+                  className="rounded-full bg-leaf px-3 py-1 text-xs font-semibold text-leaf-foreground"
+                >Save</button>
+                <button onClick={() => setEditSchedule(false)} className="rounded-full border border-border px-3 py-1 text-xs">Cancel</button>
+              </div>
+            ) : (
+              <button onClick={() => setEditSchedule(true)} className="text-xs font-medium text-leaf underline">
+                {b.pickup_scheduled_at || b.return_scheduled_at ? "Edit schedule" : "Set pickup & return date/time"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {(b.pickup_person_name || b.pickup_person_photo || b.return_person_name || b.return_person_photo) && (
+        <div className="mt-3 grid gap-3 rounded-xl border border-border/60 bg-background/50 p-3 sm:grid-cols-2">
+          {(b.pickup_person_name || b.pickup_person_photo) && (
+            <div className="flex items-center gap-3">
+              {b.pickup_person_photo && <PhotoImg path={b.pickup_person_photo} alt="pickup person" className="h-12 w-12 rounded-full object-cover" />}
+              <div className="text-sm">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Picked up by</p>
+                <p className="font-medium">{b.pickup_person_name || "—"}</p>
+              </div>
+            </div>
+          )}
+          {(b.return_person_name || b.return_person_photo) && (
+            <div className="flex items-center gap-3">
+              {b.return_person_photo && <PhotoImg path={b.return_person_photo} alt="return person" className="h-12 w-12 rounded-full object-cover" />}
+              <div className="text-sm">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Returned by</p>
+                <p className="font-medium">{b.return_person_name || "—"}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mt-4 flex flex-wrap gap-2">
         {["approved","picked_up","returned","defect_reported","completed"].includes(b.status) && (
@@ -271,9 +391,21 @@ function BookingRow({
         <div className="mt-4 rounded-xl border border-border bg-background p-4">
           <p className="mb-2 text-sm font-medium">Capture a photo of the item at pickup</p>
           <PhotoUpload value={pickupPhoto} onChange={setPickupPhoto} folder="bookings" label="Snap pickup photo" />
+          {askHandoff && (
+            <div className="mt-4 space-y-3 rounded-lg border border-dashed border-border p-3">
+              <p className="text-xs font-medium text-muted-foreground">Handoff person details (optional)</p>
+              <input
+                value={pickupPersonName}
+                onChange={(e) => setPickupPersonName(e.target.value)}
+                placeholder="Name of person picking up"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+              <PhotoUpload value={pickupPersonPhoto} onChange={setPickupPersonPhoto} folder="handoff" label="Snap their photo" />
+            </div>
+          )}
           <div className="mt-3 flex gap-2">
             <button
-              onClick={() => { onDispatch(pickupPhoto); setShowDispatch(false); }}
+              onClick={() => { onDispatch(pickupPhoto, pickupPersonName, pickupPersonPhoto); setShowDispatch(false); }}
               className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
             >
               Confirm dispatch
@@ -309,9 +441,21 @@ function BookingRow({
             <p className="mb-2 text-sm font-medium">Capture a return photo</p>
             <PhotoUpload value={returnPhoto} onChange={setReturnPhoto} folder="bookings" label="Snap return photo" />
           </div>
+          {askHandoff && (
+            <div className="mt-4 space-y-3 rounded-lg border border-dashed border-border p-3">
+              <p className="text-xs font-medium text-muted-foreground">Handoff person details (optional)</p>
+              <input
+                value={returnPersonName}
+                onChange={(e) => setReturnPersonName(e.target.value)}
+                placeholder="Name of person returning"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+              <PhotoUpload value={returnPersonPhoto} onChange={setReturnPersonPhoto} folder="handoff" label="Snap their photo" />
+            </div>
+          )}
           <div className="mt-3 flex gap-2">
             <button
-              onClick={() => { onReturn(defect, notes, returnPhoto); setShowReturn(false); }}
+              onClick={() => { onReturn(defect, notes, returnPhoto, returnPersonName, returnPersonPhoto); setShowReturn(false); }}
               className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
             >
               Confirm return
@@ -325,3 +469,4 @@ function BookingRow({
     </li>
   );
 }
+
