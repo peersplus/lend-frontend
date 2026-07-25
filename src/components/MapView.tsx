@@ -1,5 +1,6 @@
 /// <reference types="google.maps" />
 import { useEffect, useRef } from "react";
+import { getMapsBrowserKey, getMapsChannel, detectMapsEnv } from "@/lib/maps-key";
 
 export type MapMarker = {
   id: string;
@@ -25,9 +26,16 @@ function loadGoogleMaps(): Promise<typeof google.maps> {
   if ((window as any).google?.maps) return Promise.resolve((window as any).google.maps);
   if (mapsLoader) return mapsLoader;
 
-  const key = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY as string | undefined;
-  const channel = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID as string | undefined;
-  if (!key) return Promise.reject(new Error("Google Maps browser key missing"));
+  const key = getMapsBrowserKey();
+  const channel = getMapsChannel();
+  if (!key) {
+    const env = detectMapsEnv();
+    return Promise.reject(
+      new Error(
+        `Google Maps browser key missing for "${env}" environment (${window.location.hostname}). Set VITE_MAPS_KEY_${env.toUpperCase()} in build settings.`,
+      ),
+    );
+  }
 
   mapsLoader = new Promise((resolve, reject) => {
     const cbName = "__peersplusInitMap";
