@@ -8,7 +8,7 @@ export const BrandHeader = () => (
     <Link href={SITE_URL}>
       <Img
         src={LOGO_ABSOLUTE_URL}
-        alt="Peers+Help"
+        alt="Peers Plus"
         width="180"
         height="55"
         style={{ display: 'inline-block', border: 0, outline: 'none', textDecoration: 'none' }}

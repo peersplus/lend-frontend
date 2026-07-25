@@ -36,9 +36,9 @@ export const Route = createFileRoute("/items")({
   }),
   head: () => ({
     meta: [
-      { title: "Browse nearby items — Peers+Help" },
+      { title: "Browse nearby items — Peers Plus" },
       { name: "description", content: "Discover tools, medical gear, party supplies and more available to borrow or rent from verified neighbors." },
-      { property: "og:title", content: "Browse nearby items — Peers+Help" },
+      { property: "og:title", content: "Browse nearby items — Peers Plus" },
       { property: "og:description", content: "Borrow or rent household items from verified neighbors near you." },
     ],
   }),

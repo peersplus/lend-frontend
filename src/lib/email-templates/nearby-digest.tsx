@@ -43,7 +43,7 @@ const Email = ({
         <BrandHeader />
         <Heading style={h1}>Your neighborhood, today</Heading>
         <Text style={text}>
-          Hi {recipientName}, here's what your neighbors on Peers+Help asked for in the
+          Hi {recipientName}, here's what your neighbors on Peers Plus asked for in the
           last 24 hours.
         </Text>
 
@@ -78,7 +78,7 @@ const Email = ({
 export const template = {
   component: Email,
   subject: (d: Record<string, any>) =>
-    `${d.count ?? 0} nearby request${(d.count ?? 0) === 1 ? '' : 's'} today on Peers+Help`,
+    `${d.count ?? 0} nearby request${(d.count ?? 0) === 1 ? '' : 's'} today on Peers Plus`,
   displayName: 'Daily neighborhood digest',
   previewData: {
     recipientName: 'Priya',

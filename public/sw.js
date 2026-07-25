@@ -1,9 +1,9 @@
-// Peers+Help push service worker
+// Peers Plus push service worker
 self.addEventListener("install", (e) => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 
 self.addEventListener("push", (event) => {
-  let data = { title: "Peers+Help", body: "New nearby activity", url: "/requests" };
+  let data = { title: "Peers Plus", body: "New nearby activity", url: "/requests" };
   try {
     if (event.data) data = { ...data, ...event.data.json() };
   } catch (_) {
