@@ -199,6 +199,15 @@ function RequestsPage() {
                 />
               </div>
             </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">Photo (optional — helps neighbors recognize the item)</label>
+              <PhotoUpload
+                value={form.image_url || null}
+                onChange={(p) => setForm({ ...form, image_url: p ?? "" })}
+                folder="requests"
+                label="Snap what you need"
+              />
+            </div>
             <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
               Notify my neighbors
             </button>
