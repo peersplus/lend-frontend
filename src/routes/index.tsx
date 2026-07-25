@@ -3,6 +3,7 @@ import heroHandoff from "@/assets/hero-handoff.jpg";
 import { useAuth } from "@/hooks/useAuth";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { useReveal } from "@/hooks/useReveal";
 
 
 export const Route = createFileRoute("/")({
