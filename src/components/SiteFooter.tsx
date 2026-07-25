@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { LOGO_URL } from "@/lib/brand";
 
 /** Shared footer with links to trust pages and support contact. */
 export function SiteFooter() {
@@ -6,10 +7,7 @@ export function SiteFooter() {
     <footer className="mt-16 border-t border-border/60 bg-card/60">
       <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 text-sm md:grid-cols-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="grid size-7 place-items-center rounded-full bg-leaf text-leaf-foreground font-display">P</span>
-            <span className="font-display text-lg italic text-leaf">Peers+Help</span>
-          </div>
+          <img src={LOGO_URL} alt="Peers+Help" className="h-8 w-auto" />
           <p className="mt-3 text-xs text-muted-foreground">
             A free community platform for neighbors to share, borrow and help.
           </p>

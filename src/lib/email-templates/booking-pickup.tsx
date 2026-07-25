@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from '@react-email/components'
+import { BrandHeader } from './BrandHeader'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -38,6 +39,7 @@ const Email = ({
       <Preview>Pickup confirmed for {itemTitle} — please read the return terms</Preview>
       <Body style={main}>
         <Container style={container}>
+        <BrandHeader />
           <Heading style={h1}>Pickup confirmed</Heading>
           <Text style={text}>
             Hi {borrowerName}, you're picking up <strong>{itemTitle}</strong> from{' '}

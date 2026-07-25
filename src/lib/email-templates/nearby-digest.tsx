@@ -11,6 +11,7 @@ import {
   Section,
   Text,
 } from '@react-email/components'
+import { BrandHeader } from './BrandHeader'
 import type { TemplateEntry } from './registry'
 
 interface Item {
@@ -39,6 +40,7 @@ const Email = ({
     <Preview>{`${count} nearby request${count === 1 ? '' : 's'} from your neighbors`}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Your neighborhood, today</Heading>
         <Text style={text}>
           Hi {recipientName}, here's what your neighbors on Peers+Help asked for in the

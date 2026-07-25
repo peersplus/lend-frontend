@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from '@react-email/components'
+import { BrandHeader } from './BrandHeader'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -32,6 +33,7 @@ const Email = ({
     <Preview>🚨 Urgent nearby: {title}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Section style={badge}>
           <Text style={badgeText}>🚨 URGENT NEARBY</Text>
         </Section>

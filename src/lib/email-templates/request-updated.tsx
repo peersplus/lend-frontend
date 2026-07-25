@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Body, Container, Head, Heading, Html, Preview, Text } from '@react-email/components'
+import { BrandHeader } from './BrandHeader'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -20,6 +21,7 @@ const Email = ({
     <Preview>{requestTitle} was {statusLabel}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>📣 Request update</Heading>
         <Text style={text}>
           <strong>{ownerName}</strong>'s request <strong>{requestTitle}</strong> was <strong>{statusLabel}</strong>.
