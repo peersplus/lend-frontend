@@ -298,15 +298,66 @@ function RequestsPage() {
           </div>
         )}
 
-        {loading ? (
-          <p className="text-muted-foreground">Loading…</p>
-        ) : rows.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border p-12 text-center text-muted-foreground">
-            No open requests yet. Be the first to ask your neighborhood.
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="🔎 Search title or details…"
+            className="min-w-[200px] flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
+          <select
+            value={filterCat}
+            onChange={(e) => setFilterCat(e.target.value)}
+            className="rounded-md border border-input bg-background px-2 py-2 text-sm"
+          >
+            <option>All</option>
+            {categories.map((c) => <option key={c}>{c}</option>)}
+          </select>
+          <div className="flex overflow-hidden rounded-md border border-input text-sm">
+            {(["all", "urgent", "normal"] as const).map((u) => (
+              <button
+                key={u}
+                onClick={() => setFilterUrg(u)}
+                className={`px-3 py-2 ${filterUrg === u ? "bg-primary text-primary-foreground" : "bg-background hover:bg-muted"}`}
+              >
+                {u === "all" ? "All" : u === "urgent" ? "🚨 Urgent" : "Normal"}
+              </button>
+            ))}
           </div>
-        ) : (
+          {user && (
+            <label className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
+              Only mine
+            </label>
+          )}
+          {(query || filterCat !== "All" || filterUrg !== "all" || onlyMine) && (
+            <button
+              onClick={() => { setQuery(""); setFilterCat("All"); setFilterUrg("all"); setOnlyMine(false); }}
+              className="rounded-md border border-input px-3 py-2 text-sm hover:bg-muted"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {(() => {
+          const q = query.trim().toLowerCase();
+          const filtered = rows.filter((r) => {
+            if (filterCat !== "All" && r.category !== filterCat) return false;
+            if (filterUrg !== "all" && r.urgency !== filterUrg) return false;
+            if (onlyMine && r.owner_id !== user?.id) return false;
+            if (q && !(r.title.toLowerCase().includes(q) || (r.description ?? "").toLowerCase().includes(q))) return false;
+            return true;
+          });
+          if (loading) return <p className="text-muted-foreground">Loading…</p>;
+          if (filtered.length === 0) return (
+            <div className="rounded-lg border border-dashed border-border p-12 text-center text-muted-foreground">
+              {rows.length === 0 ? "No open requests yet. Be the first to ask your neighborhood." : "No requests match your filters."}
+            </div>
+          );
+          return (
           <div className="grid gap-4 md:grid-cols-2">
-            {rows.map((r) => (
+            {filtered.map((r) => (
               <article
                 key={r.id}
                 className={`overflow-hidden rounded-lg border ${
