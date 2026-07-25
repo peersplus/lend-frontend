@@ -48,6 +48,7 @@ const categories = ["Tools","Electronics","Garden","Medical","Party","Baby","Kit
 function ItemsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
