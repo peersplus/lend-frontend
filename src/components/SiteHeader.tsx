@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import { NotificationBell } from "@/components/NotificationBell";
 import { UserMenu } from "@/components/UserMenu";
 import { LOGO_URL } from "@/lib/brand";
@@ -11,6 +12,7 @@ import { LOGO_URL } from "@/lib/brand";
  */
 export function SiteHeader() {
   const { user } = useAuth();
+  const { isSuperadmin } = useRole();
   const [open, setOpen] = useState(false);
 
   const primary = [
@@ -19,7 +21,8 @@ export function SiteHeader() {
     { to: "/bookings", label: "Bookings" },
     { to: "/safety", label: "Safety" },
     { to: "/about", label: "About" },
-  ] as const;
+    ...(isSuperadmin ? [{ to: "/admin", label: "Admin" }] : []),
+  ] as { to: string; label: string }[];
 
   return (
     <nav className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">

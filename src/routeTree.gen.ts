@@ -23,6 +23,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatBookingIdRouteImport } from './routes/chat.$bookingId'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -30,6 +31,7 @@ import { Route as ChatRequestRequestIdPeerIdRouteImport } from './routes/chat.re
 import { Route as ApiPublicHooksRequestUpdatedRouteImport } from './routes/api/public/hooks/request-updated'
 import { Route as ApiPublicHooksOfferCreatedRouteImport } from './routes/api/public/hooks/offer-created'
 import { Route as ApiPublicHooksNotifyRequestRouteImport } from './routes/api/public/hooks/notify-request'
+import { Route as ApiPublicHooksNotifyItemRouteImport } from './routes/api/public/hooks/notify-item'
 import { Route as ApiPublicHooksDailyDigestRouteImport } from './routes/api/public/hooks/daily-digest'
 import { Route as ApiPublicHooksBookingPickupRouteImport } from './routes/api/public/hooks/booking-pickup'
 
@@ -103,6 +105,11 @@ const ChatBookingIdRoute = ChatBookingIdRouteImport.update({
   path: '/chat/$bookingId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/_authenticated/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -143,6 +150,12 @@ const ApiPublicHooksNotifyRequestRoute =
     path: '/api/public/hooks/notify-request',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksNotifyItemRoute =
+  ApiPublicHooksNotifyItemRouteImport.update({
+    id: '/api/public/hooks/notify-item',
+    path: '/api/public/hooks/notify-item',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksDailyDigestRoute =
   ApiPublicHooksDailyDigestRouteImport.update({
     id: '/api/public/hooks/daily-digest',
@@ -170,9 +183,11 @@ export interface FileRoutesByFullPath {
   '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
   '/verification': typeof VerificationRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/chat/$bookingId': typeof ChatBookingIdRoute
   '/api/public/hooks/booking-pickup': typeof ApiPublicHooksBookingPickupRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
+  '/api/public/hooks/notify-item': typeof ApiPublicHooksNotifyItemRoute
   '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/api/public/hooks/offer-created': typeof ApiPublicHooksOfferCreatedRoute
   '/api/public/hooks/request-updated': typeof ApiPublicHooksRequestUpdatedRoute
@@ -195,9 +210,11 @@ export interface FileRoutesByTo {
   '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
   '/verification': typeof VerificationRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/chat/$bookingId': typeof ChatBookingIdRoute
   '/api/public/hooks/booking-pickup': typeof ApiPublicHooksBookingPickupRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
+  '/api/public/hooks/notify-item': typeof ApiPublicHooksNotifyItemRoute
   '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/api/public/hooks/offer-created': typeof ApiPublicHooksOfferCreatedRoute
   '/api/public/hooks/request-updated': typeof ApiPublicHooksRequestUpdatedRoute
@@ -221,9 +238,11 @@ export interface FileRoutesById {
   '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
   '/verification': typeof VerificationRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/chat/$bookingId': typeof ChatBookingIdRoute
   '/api/public/hooks/booking-pickup': typeof ApiPublicHooksBookingPickupRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
+  '/api/public/hooks/notify-item': typeof ApiPublicHooksNotifyItemRoute
   '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/api/public/hooks/offer-created': typeof ApiPublicHooksOfferCreatedRoute
   '/api/public/hooks/request-updated': typeof ApiPublicHooksRequestUpdatedRoute
@@ -248,9 +267,11 @@ export interface FileRouteTypes {
     | '/safety'
     | '/settings'
     | '/verification'
+    | '/admin'
     | '/chat/$bookingId'
     | '/api/public/hooks/booking-pickup'
     | '/api/public/hooks/daily-digest'
+    | '/api/public/hooks/notify-item'
     | '/api/public/hooks/notify-request'
     | '/api/public/hooks/offer-created'
     | '/api/public/hooks/request-updated'
@@ -273,9 +294,11 @@ export interface FileRouteTypes {
     | '/safety'
     | '/settings'
     | '/verification'
+    | '/admin'
     | '/chat/$bookingId'
     | '/api/public/hooks/booking-pickup'
     | '/api/public/hooks/daily-digest'
+    | '/api/public/hooks/notify-item'
     | '/api/public/hooks/notify-request'
     | '/api/public/hooks/offer-created'
     | '/api/public/hooks/request-updated'
@@ -298,9 +321,11 @@ export interface FileRouteTypes {
     | '/safety'
     | '/settings'
     | '/verification'
+    | '/_authenticated/admin'
     | '/chat/$bookingId'
     | '/api/public/hooks/booking-pickup'
     | '/api/public/hooks/daily-digest'
+    | '/api/public/hooks/notify-item'
     | '/api/public/hooks/notify-request'
     | '/api/public/hooks/offer-created'
     | '/api/public/hooks/request-updated'
@@ -324,9 +349,11 @@ export interface RootRouteChildren {
   SafetyRoute: typeof SafetyRoute
   SettingsRoute: typeof SettingsRoute
   VerificationRoute: typeof VerificationRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   ChatBookingIdRoute: typeof ChatBookingIdRoute
   ApiPublicHooksBookingPickupRoute: typeof ApiPublicHooksBookingPickupRoute
   ApiPublicHooksDailyDigestRoute: typeof ApiPublicHooksDailyDigestRoute
+  ApiPublicHooksNotifyItemRoute: typeof ApiPublicHooksNotifyItemRoute
   ApiPublicHooksNotifyRequestRoute: typeof ApiPublicHooksNotifyRequestRoute
   ApiPublicHooksOfferCreatedRoute: typeof ApiPublicHooksOfferCreatedRoute
   ApiPublicHooksRequestUpdatedRoute: typeof ApiPublicHooksRequestUpdatedRoute
@@ -436,6 +463,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatBookingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -485,6 +519,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksNotifyRequestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/notify-item': {
+      id: '/api/public/hooks/notify-item'
+      path: '/api/public/hooks/notify-item'
+      fullPath: '/api/public/hooks/notify-item'
+      preLoaderRoute: typeof ApiPublicHooksNotifyItemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/daily-digest': {
       id: '/api/public/hooks/daily-digest'
       path: '/api/public/hooks/daily-digest'
@@ -516,9 +557,11 @@ const rootRouteChildren: RootRouteChildren = {
   SafetyRoute: SafetyRoute,
   SettingsRoute: SettingsRoute,
   VerificationRoute: VerificationRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   ChatBookingIdRoute: ChatBookingIdRoute,
   ApiPublicHooksBookingPickupRoute: ApiPublicHooksBookingPickupRoute,
   ApiPublicHooksDailyDigestRoute: ApiPublicHooksDailyDigestRoute,
+  ApiPublicHooksNotifyItemRoute: ApiPublicHooksNotifyItemRoute,
   ApiPublicHooksNotifyRequestRoute: ApiPublicHooksNotifyRequestRoute,
   ApiPublicHooksOfferCreatedRoute: ApiPublicHooksOfferCreatedRoute,
   ApiPublicHooksRequestUpdatedRoute: ApiPublicHooksRequestUpdatedRoute,

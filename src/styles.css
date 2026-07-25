@@ -199,3 +199,13 @@
     transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
   }
 }
+
+/* Sonner toast overrides — ensure visibility above sticky header on mobile */
+[data-sonner-toaster] {
+  z-index: 2147483647 !important;
+  position: fixed !important;
+  top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+}
+[data-sonner-toaster] [data-sonner-toast] {
+  z-index: 2147483647 !important;
+}
