@@ -9,7 +9,7 @@ import { NotificationPermissionPrompt } from "@/components/NotificationPermissio
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
-import { MapView, type MapMarker } from "@/components/MapView";
+
 
 type Offer = { id: string; request_id: string; helper_id: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
 
@@ -55,7 +55,7 @@ function RequestsPage() {
   const [filterCat, setFilterCat] = useState<string>("All");
   const [filterUrg, setFilterUrg] = useState<"all" | "urgent" | "normal">("all");
   const [onlyMine, setOnlyMine] = useState(false);
-  const [view, setView] = useState<"list" | "map">("list");
+  
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -324,56 +324,8 @@ function RequestsPage() {
               Clear
             </button>
           )}
-          <div className="ml-auto flex shrink-0 overflow-hidden rounded-full border border-input text-sm">
-            <button
-              type="button"
-              onClick={() => setView("list")}
-              className={`px-3 py-2 ${view === "list" ? "bg-foreground text-background" : "bg-background hover:bg-muted"}`}
-            >
-              ☰ List
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("map")}
-              className={`px-3 py-2 ${view === "map" ? "bg-foreground text-background" : "bg-background hover:bg-muted"}`}
-            >
-              🗺 Map
-            </button>
-          </div>
         </div>
 
-        {view === "map" && !loading && (() => {
-          const q = query.trim().toLowerCase();
-          const filtered = rows.filter((r) => {
-            if (filterCat !== "All" && r.category !== filterCat) return false;
-            if (filterUrg !== "all" && r.urgency !== filterUrg) return false;
-            if (onlyMine && r.owner_id !== user?.id) return false;
-            if (q && !(r.title.toLowerCase().includes(q) || (r.description ?? "").toLowerCase().includes(q))) return false;
-            return true;
-          });
-          const withCoords = filtered.filter((r) => r.lat != null && r.lng != null);
-          return (
-            <div className="mb-6">
-              <MapView
-                markers={withCoords.map((r): MapMarker => ({
-                  id: r.id,
-                  lat: r.lat!,
-                  lng: r.lng!,
-                  title: r.title,
-                  subtitle: `${r.urgency === "urgent" ? "🚨 Urgent · " : ""}${r.category} · within ${r.radius_km}km`,
-                  accent: r.urgency === "urgent" ? "urgent" : "leaf",
-                }))}
-                height={500}
-                showKeyDebug
-              />
-              {withCoords.length === 0 && (
-                <p className="mt-3 text-center text-sm text-muted-foreground">
-                  No requests with a location to show on the map.
-                </p>
-              )}
-            </div>
-          );
-        })()}
 
         {(() => {
           const q = query.trim().toLowerCase();

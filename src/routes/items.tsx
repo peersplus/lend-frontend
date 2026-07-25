@@ -9,7 +9,7 @@ import { PhotoImg } from "@/components/PhotoImg";
 import { haversineKm, formatDistance } from "@/lib/geo";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "sonner";
-import { MapView, type MapMarker } from "@/components/MapView";
+
 
 type Item = {
   id: string;
@@ -65,7 +65,7 @@ function ItemsPage() {
   });
   const [saving, setSaving] = useState(false);
   const [filters, setFilters] = useState({ q: "", category: "", price: "all" as "all" | "free" | "rent", mine: false });
-  const [view, setView] = useState<"list" | "map">("list");
+  
 
   useEffect(() => {
     if (!user) return;
@@ -236,54 +236,12 @@ function ItemsPage() {
               Clear
             </button>
           )}
-          <div className="ml-auto flex shrink-0 items-center gap-2">
-            <div className="flex overflow-hidden rounded-full border border-input text-sm">
-              <button
-                type="button"
-                onClick={() => setView("list")}
-                className={`px-3 py-2 ${view === "list" ? "bg-foreground text-background" : "bg-background hover:bg-muted"}`}
-              >
-                ☰ List
-              </button>
-              <button
-                type="button"
-                onClick={() => setView("map")}
-                className={`px-3 py-2 ${view === "map" ? "bg-foreground text-background" : "bg-background hover:bg-muted"}`}
-              >
-                🗺 Map
-              </button>
-            </div>
-            <span className="whitespace-nowrap text-xs text-muted-foreground">
-              {loading ? "…" : `${listed.length} of ${items.length}`}
-            </span>
-          </div>
+          <span className="ml-auto whitespace-nowrap text-xs text-muted-foreground">
+            {loading ? "…" : `${listed.length} of ${items.length}`}
+          </span>
         </div>
 
 
-        {view === "map" && !loading && (
-          <div className="mb-6">
-            <MapView
-              me={me.lat != null && me.lng != null ? { lat: me.lat, lng: me.lng } : null}
-              markers={listed
-                .filter(({ i }) => i.lat != null && i.lng != null)
-                .map(({ i, km }): MapMarker => ({
-                  id: i.id,
-                  lat: i.lat!,
-                  lng: i.lng!,
-                  title: i.title,
-                  subtitle: `${i.price_mode === "free" ? "Free" : `$${i.price_amount}/day`}${km != null ? ` · ${formatDistance(km)}` : ""}${i.building_name ? ` · ${i.building_name}` : ""}`,
-                  accent: i.price_mode === "free" ? "leaf" : "muted",
-                }))}
-              height={500}
-              showKeyDebug
-            />
-            {listed.filter(({ i }) => i.lat != null && i.lng != null).length === 0 && (
-              <p className="mt-3 text-center text-sm text-muted-foreground">
-                No items with a location to show on the map.
-              </p>
-            )}
-          </div>
-        )}
 
         {loading ? (
           <p className="text-muted-foreground">Loading…</p>
