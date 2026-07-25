@@ -379,7 +379,7 @@ function Home() {
         {/* Trust band */}
         <section id="safety" className="bg-leaf px-6 py-16 text-leaf-foreground">
           <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-4">
-            <div className="md:col-span-1">
+            <div className="md:col-span-1" data-reveal="left">
               <h3 className="font-display text-3xl italic">Trust, verified.</h3>
               <p className="mt-3 text-sm text-leaf-foreground/70">
                 Four levels of verification keep the community safe.
@@ -390,8 +390,13 @@ function Home() {
               { t: "Address", d: "Mail-verified home address" },
               { t: "ID", d: "Government ID matched" },
               { t: "Trusted", d: "20+ positive exchanges" },
-            ].map((v) => (
-              <div key={v.t} className="border-l border-leaf-foreground/20 pl-4">
+            ].map((v, i) => (
+              <div
+                key={v.t}
+                className="border-l border-leaf-foreground/20 pl-4"
+                data-reveal
+                data-reveal-delay={String(120 + i * 100)}
+              >
                 <div className="mb-2 grid size-9 place-items-center rounded-full border border-leaf-foreground/30 text-sm">
                   ✓
                 </div>
