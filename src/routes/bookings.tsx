@@ -284,12 +284,6 @@ function BookingRow({
           </div>
         </div>
       )}
-        {role === "borrowed" && (b.status === "requested" || b.status === "approved") && (
-          <button onClick={onCancel} className="rounded-full border border-border px-4 py-2 text-sm">
-            Cancel
-          </button>
-        )}
-      </div>
 
       {showReturn && (
         <div className="mt-4 rounded-xl border border-border bg-background p-4">
