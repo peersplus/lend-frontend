@@ -55,6 +55,7 @@ function RequestsPage() {
   const [filterCat, setFilterCat] = useState<string>("All");
   const [filterUrg, setFilterUrg] = useState<"all" | "urgent" | "normal">("all");
   const [onlyMine, setOnlyMine] = useState(false);
+  const [view, setView] = useState<"list" | "map">("list");
   const [form, setForm] = useState({
     title: "",
     description: "",
