@@ -94,7 +94,8 @@ function SettingsPage() {
 
     setSaving(false);
     if (error) toast.error(error.message);
-    else toast.success("Saved.");
+    else toast.success("✅ Settings saved", { description: "Your neighborhood & alert preferences are updated." });
+
   };
 
   if (loading || !ready) return <div className="p-8">Loading…</div>;
