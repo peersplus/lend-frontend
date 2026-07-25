@@ -246,19 +246,19 @@ function Home() {
               <div className="absolute -bottom-6 -left-6 max-w-[260px] rounded-2xl border border-border bg-card p-4 shadow-xl">
                 <div className="mb-3 flex items-center gap-3">
                   <div className="grid size-10 place-items-center rounded-full bg-leaf/15 font-display italic text-leaf">
-                    M
+                    P
                   </div>
                   <div>
-                    <p className="text-sm font-semibold">Marcus K.</p>
-                    <p className="text-[11px] text-muted-foreground">Trusted Member · 4.9 ★</p>
+                    <p className="text-sm font-semibold">Peers+Help</p>
+                    <p className="text-[11px] text-muted-foreground">New on your block</p>
                   </div>
                 </div>
                 <p className="text-xs leading-relaxed italic text-muted-foreground">
-                  "Borrowed a pressure washer for $5. Saved $200 and made a new friend."
+                  "Start a sharing circle on your street. List one item and invite a neighbor."
                 </p>
               </div>
               <div className="absolute -top-4 right-4 rounded-full bg-accent px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent-foreground shadow-lg">
-                🚨 2 urgent requests nearby
+                🚨 Post the first urgent request
               </div>
             </div>
           </div>
