@@ -317,7 +317,7 @@ function Home() {
         {/* Emergency band */}
         <section className="bg-cream px-6 pb-24">
           <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-3">
-            <div className="rounded-3xl border border-accent/20 bg-accent/5 p-8 lg:col-span-1">
+            <div className="rounded-3xl border border-accent/20 bg-accent/5 p-8 lg:col-span-1" data-reveal="left">
               <div className="mb-4 flex items-center gap-2">
                 <span className="size-2 animate-pulse rounded-full bg-accent" />
                 <span className="text-xs font-bold uppercase tracking-widest text-accent">
@@ -347,7 +347,7 @@ function Home() {
               </Link>
             </div>
 
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2" data-reveal="right" data-reveal-delay="120">
               <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 (03) Why neighbors choose us
               </p>
@@ -357,8 +357,13 @@ function Home() {
                   { n: "🤝", t: "Real people", d: "Every neighbor is address-verified. No anonymous accounts, no strangers." },
                   { n: "📸", t: "Photo protection", d: "Both sides snap a photo at pickup and return — no arguments later." },
                   { n: "💚", t: "Free or fair", d: "Most items are free. Rentals are capped, and 100% goes to the lender." },
-                ].map((s) => (
-                  <div key={s.t} className="rounded-2xl border border-border bg-card p-6">
+                ].map((s, i) => (
+                  <div
+                    key={s.t}
+                    className="rounded-2xl border border-border bg-card p-6"
+                    data-reveal="scale"
+                    data-reveal-delay={String(200 + i * 120)}
+                  >
                     <div className="mb-4 grid size-12 place-items-center rounded-full bg-leaf/10 text-2xl">
                       {s.n}
                     </div>
