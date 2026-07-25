@@ -311,7 +311,7 @@ function RequestsPage() {
             ))}
           </div>
           {user && (
-            <label className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <label className="flex shrink-0 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm">
               <input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
               Only mine
             </label>
@@ -319,12 +319,12 @@ function RequestsPage() {
           {(query || filterCat !== "All" || filterUrg !== "all" || onlyMine) && (
             <button
               onClick={() => { setQuery(""); setFilterCat("All"); setFilterUrg("all"); setOnlyMine(false); }}
-              className="rounded-md border border-input px-3 py-2 text-sm hover:bg-muted"
+              className="shrink-0 rounded-md border border-input px-3 py-2 text-sm hover:bg-muted"
             >
               Clear
             </button>
           )}
-          <div className="ml-auto flex overflow-hidden rounded-full border border-input text-sm">
+          <div className="ml-auto flex shrink-0 overflow-hidden rounded-full border border-input text-sm">
             <button
               type="button"
               onClick={() => setView("list")}
