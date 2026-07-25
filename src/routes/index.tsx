@@ -233,10 +233,12 @@ function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              {categories.map((c) => (
+              {categories.map((c, i) => (
                 <Link
                   key={c.label}
                   to="/items"
+                  data-reveal="scale"
+                  data-reveal-delay={String((i % 6) * 60)}
                   className="group flex aspect-square flex-col justify-between rounded-2xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-1 hover:shadow-md"
                 >
                   <div className={`grid size-11 place-items-center rounded-xl text-xl ${c.tone}`}>
