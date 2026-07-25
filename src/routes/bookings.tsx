@@ -305,9 +305,13 @@ function BookingRow({
               </p>
             </>
           )}
+          <div className="mt-3">
+            <p className="mb-2 text-sm font-medium">Capture a return photo</p>
+            <PhotoUpload value={returnPhoto} onChange={setReturnPhoto} folder="bookings" label="Snap return photo" />
+          </div>
           <div className="mt-3 flex gap-2">
             <button
-              onClick={() => { onReturn(defect, notes); setShowReturn(false); }}
+              onClick={() => { onReturn(defect, notes, returnPhoto); setShowReturn(false); }}
               className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
             >
               Confirm return
