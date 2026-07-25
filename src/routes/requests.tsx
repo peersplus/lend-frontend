@@ -86,7 +86,7 @@ function RequestsPage() {
 
   async function offerHelp(r: Request) {
     if (!user) return navigate({ to: "/auth" });
-    const { error } = await supabase
+    const { data: inserted, error } = await supabase
       .from("request_offers")
       .insert({ request_id: r.id, helper_id: user.id })
       .select("id")
@@ -95,9 +95,34 @@ function RequestsPage() {
       toast.error(error.message);
       return;
     }
-    toast.success("You offered to help. Opening chat…");
+    if (inserted?.id) {
+      // Fire-and-forget: email the requester that someone stepped up.
+      const anon = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? "";
+      fetch("/api/public/hooks/offer-created", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: anon },
+        body: JSON.stringify({ offer_id: inserted.id }),
+      }).catch(() => {});
+    }
+    toast.success("✅ You offered to help — the requester was notified by email. Opening chat…");
     navigate({ to: "/chat/request/$requestId/$peerId", params: { requestId: r.id, peerId: r.owner_id } });
   }
+
+  async function closeRequest(r: Request, status: "closed" | "open") {
+    const { error } = await supabase.from("requests").update({ status }).eq("id", r.id);
+    if (error) return toast.error(error.message);
+    setRows((prev) => prev.filter((x) => x.id !== r.id || status === "open"));
+    toast.success(status === "closed" ? "Request marked inactive." : "Request reopened.");
+  }
+
+  async function deleteRequest(r: Request) {
+    if (!confirm("Delete this request? This cannot be undone.")) return;
+    const { error } = await supabase.from("requests").delete().eq("id", r.id);
+    if (error) return toast.error(error.message);
+    setRows((prev) => prev.filter((x) => x.id !== r.id));
+    toast.success("Request deleted.");
+  }
+
 
 
   const submit = async (e: React.FormEvent) => {
