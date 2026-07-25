@@ -182,12 +182,15 @@ function BookingsPage() {
                 key={b.id}
                 b={b}
                 role={tab}
-                onDispatch={(photo) => dispatchNow(b, photo)}
-                onReturn={(defect, notes, photo) => markReturned(b, defect, notes, photo)}
+                askHandoff={askHandoff}
+                onDispatch={(photo, name, personPhoto) => dispatchNow(b, photo, name, personPhoto)}
+                onReturn={(defect, notes, photo, name, personPhoto) => markReturned(b, defect, notes, photo, name, personPhoto)}
                 onCancel={() => update(b.id, { status: "cancelled" })}
                 onApprove={() => update(b.id, { status: "approved" })}
                 onDecline={() => update(b.id, { status: "declined" })}
+                onSaveSchedule={(pickup, ret) => saveSchedule(b.id, pickup, ret)}
               />
+
             ))}
           </ul>
         )}
