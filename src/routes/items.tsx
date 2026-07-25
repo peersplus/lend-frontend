@@ -39,7 +39,7 @@ export const Route = createFileRoute("/items")({
   component: ItemsPage,
 });
 
-const categories = ["Tools","Garden","Medical","Party","Baby","Kitchen","Camping","Cleaning","Sports","Pets","Furniture","Emergency"];
+const categories = ["Tools","Electronics","Garden","Medical","Party","Baby","Kitchen","Camping","Cleaning","Sports","Pets","Furniture","Emergency"];
 
 function ItemsPage() {
   const { user } = useAuth();
