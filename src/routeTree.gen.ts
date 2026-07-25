@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerificationRouteImport } from './routes/verification'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ItemsRouteImport } from './routes/items'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatBookingIdRouteImport } from './routes/chat.$bookingId'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -27,9 +33,19 @@ import { Route as ApiPublicHooksNotifyRequestRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksDailyDigestRouteImport } from './routes/api/public/hooks/daily-digest'
 import { Route as ApiPublicHooksBookingPickupRouteImport } from './routes/api/public/hooks/booking-pickup'
 
+const VerificationRoute = VerificationRouteImport.update({
+  id: '/verification',
+  path: '/verification',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SafetyRoute = SafetyRouteImport.update({
+  id: '/safety',
+  path: '/safety',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RequestsRoute = RequestsRouteImport.update({
@@ -42,9 +58,24 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ItemsRoute = ItemsRouteImport.update({
   id: '/items',
   path: '/items',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookingsRoute = BookingsRouteImport.update({
@@ -55,6 +86,11 @@ const BookingsRoute = BookingsRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -122,12 +158,18 @@ const ApiPublicHooksBookingPickupRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/bookings': typeof BookingsRoute
+  '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/items': typeof ItemsRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/requests': typeof RequestsRoute
+  '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
+  '/verification': typeof VerificationRoute
   '/chat/$bookingId': typeof ChatBookingIdRoute
   '/api/public/hooks/booking-pickup': typeof ApiPublicHooksBookingPickupRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
@@ -141,12 +183,18 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/bookings': typeof BookingsRoute
+  '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/items': typeof ItemsRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/requests': typeof RequestsRoute
+  '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
+  '/verification': typeof VerificationRoute
   '/chat/$bookingId': typeof ChatBookingIdRoute
   '/api/public/hooks/booking-pickup': typeof ApiPublicHooksBookingPickupRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
@@ -161,12 +209,18 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/bookings': typeof BookingsRoute
+  '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/items': typeof ItemsRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/requests': typeof RequestsRoute
+  '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
+  '/verification': typeof VerificationRoute
   '/chat/$bookingId': typeof ChatBookingIdRoute
   '/api/public/hooks/booking-pickup': typeof ApiPublicHooksBookingPickupRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
@@ -182,12 +236,18 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/auth'
     | '/bookings'
+    | '/community'
+    | '/contact'
     | '/items'
+    | '/privacy'
     | '/profile'
     | '/requests'
+    | '/safety'
     | '/settings'
+    | '/verification'
     | '/chat/$bookingId'
     | '/api/public/hooks/booking-pickup'
     | '/api/public/hooks/daily-digest'
@@ -201,12 +261,18 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/auth'
     | '/bookings'
+    | '/community'
+    | '/contact'
     | '/items'
+    | '/privacy'
     | '/profile'
     | '/requests'
+    | '/safety'
     | '/settings'
+    | '/verification'
     | '/chat/$bookingId'
     | '/api/public/hooks/booking-pickup'
     | '/api/public/hooks/daily-digest'
@@ -220,12 +286,18 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/auth'
     | '/bookings'
+    | '/community'
+    | '/contact'
     | '/items'
+    | '/privacy'
     | '/profile'
     | '/requests'
+    | '/safety'
     | '/settings'
+    | '/verification'
     | '/chat/$bookingId'
     | '/api/public/hooks/booking-pickup'
     | '/api/public/hooks/daily-digest'
@@ -240,12 +312,18 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   BookingsRoute: typeof BookingsRoute
+  CommunityRoute: typeof CommunityRoute
+  ContactRoute: typeof ContactRoute
   ItemsRoute: typeof ItemsRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   RequestsRoute: typeof RequestsRoute
+  SafetyRoute: typeof SafetyRoute
   SettingsRoute: typeof SettingsRoute
+  VerificationRoute: typeof VerificationRoute
   ChatBookingIdRoute: typeof ChatBookingIdRoute
   ApiPublicHooksBookingPickupRoute: typeof ApiPublicHooksBookingPickupRoute
   ApiPublicHooksDailyDigestRoute: typeof ApiPublicHooksDailyDigestRoute
@@ -260,11 +338,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verification': {
+      id: '/verification'
+      path: '/verification'
+      fullPath: '/verification'
+      preLoaderRoute: typeof VerificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/safety': {
+      id: '/safety'
+      path: '/safety'
+      fullPath: '/safety'
+      preLoaderRoute: typeof SafetyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/requests': {
@@ -281,11 +373,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/items': {
       id: '/items'
       path: '/items'
       fullPath: '/items'
       preLoaderRoute: typeof ItemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bookings': {
@@ -300,6 +413,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -384,12 +504,18 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   BookingsRoute: BookingsRoute,
+  CommunityRoute: CommunityRoute,
+  ContactRoute: ContactRoute,
   ItemsRoute: ItemsRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   RequestsRoute: RequestsRoute,
+  SafetyRoute: SafetyRoute,
   SettingsRoute: SettingsRoute,
+  VerificationRoute: VerificationRoute,
   ChatBookingIdRoute: ChatBookingIdRoute,
   ApiPublicHooksBookingPickupRoute: ApiPublicHooksBookingPickupRoute,
   ApiPublicHooksDailyDigestRoute: ApiPublicHooksDailyDigestRoute,

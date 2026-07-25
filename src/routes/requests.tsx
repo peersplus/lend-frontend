@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { NotificationBell } from "@/components/NotificationBell";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
@@ -176,28 +178,8 @@ function RequestsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link to="/" className="text-lg font-serif italic">Peers+Help</Link>
-          <div className="flex items-center gap-3">
-            <Link to="/items" className="text-sm hover:text-primary">Items</Link>
-            <Link to="/settings" className="text-sm hover:text-primary">Settings</Link>
-            {user && <NotificationBell />}
-            {user ? (
-              <button
-                onClick={() => supabase.auth.signOut()}
-                className="rounded-md border border-input px-3 py-1.5 text-sm hover:bg-accent"
-              >
-                Sign out
-              </button>
-            ) : (
-              <Link to="/auth" className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground">
-                Sign in
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
+
 
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-6">
@@ -457,6 +439,7 @@ function RequestsPage() {
           </p>
         </footer>
       </main>
+      <SiteFooter />
     </div>
   );
 }

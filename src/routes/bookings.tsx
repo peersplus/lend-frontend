@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserMenu } from "@/components/UserMenu";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
@@ -139,19 +140,8 @@ function BookingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">P</span>
-            <span className="font-display text-2xl text-leaf">Peers+Help</span>
-          </Link>
-          <div className="flex items-center gap-2 text-sm">
-            <Link to="/items" className="hidden sm:inline rounded-full border border-border px-4 py-2 hover:bg-muted">Browse</Link>
-            <Link to="/requests" className="hidden sm:inline rounded-full border border-border px-4 py-2 hover:bg-muted">Requests</Link>
-            <UserMenu />
-          </div>
-        </div>
-      </nav>
+      <SiteHeader />
+
 
       <main className="mx-auto max-w-4xl px-6 py-10">
         <h1 className="mb-2 font-display text-4xl">Your bookings</h1>
@@ -195,6 +185,7 @@ function BookingsPage() {
           </ul>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

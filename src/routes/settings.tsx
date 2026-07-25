@@ -1,9 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebPush } from "@/hooks/useWebPush";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "sonner";
 
@@ -102,15 +104,7 @@ function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-          <Link to="/" className="font-serif text-lg italic">Peers+Help</Link>
-          <div className="flex gap-3 text-sm">
-            <Link to="/requests" className="hover:text-primary">Requests</Link>
-            <Link to="/items" className="hover:text-primary">Items</Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="mx-auto max-w-3xl px-4 py-8">
         <h1 className="font-serif text-4xl italic">Your neighborhood & alerts</h1>
@@ -283,6 +277,7 @@ function SettingsPage() {
           </button>
         </form>
       </main>
+      <SiteFooter />
     </div>
   );
 }
