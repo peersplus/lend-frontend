@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,9 @@ import { NotificationPermissionPrompt } from "@/components/NotificationPermissio
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
+
+type Offer = { id: string; request_id: string; helper_id: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
+
 
 type Request = {
   id: string;
