@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { NotificationBell } from "@/components/NotificationBell";
 import { UserMenu } from "@/components/UserMenu";
+import { LOGO_URL } from "@/lib/brand";
 
 /**
  * Shared top navigation used across every page.
@@ -23,11 +24,12 @@ export function SiteHeader() {
   return (
     <nav className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">
-            P
-          </span>
-          <span className="font-display text-xl italic text-leaf sm:text-2xl">Peers+Help</span>
+        <Link to="/" className="flex items-center gap-2" aria-label="Peers+Help home">
+          <img
+            src={LOGO_URL}
+            alt="Peers+Help"
+            className="h-9 w-auto sm:h-10"
+          />
         </Link>
 
         <div className="hidden items-center gap-5 md:flex">
