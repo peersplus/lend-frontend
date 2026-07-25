@@ -31,7 +31,9 @@ export type Database = {
           owner_id: string
           owner_notes: string | null
           pickup_at: string | null
+          pickup_photo_url: string | null
           return_due: string | null
+          return_photo_url: string | null
           returned_at: string | null
           status: string
           updated_at: string
@@ -52,7 +54,9 @@ export type Database = {
           owner_id: string
           owner_notes?: string | null
           pickup_at?: string | null
+          pickup_photo_url?: string | null
           return_due?: string | null
+          return_photo_url?: string | null
           returned_at?: string | null
           status?: string
           updated_at?: string
@@ -73,7 +77,9 @@ export type Database = {
           owner_id?: string
           owner_notes?: string | null
           pickup_at?: string | null
+          pickup_photo_url?: string | null
           return_due?: string | null
+          return_photo_url?: string | null
           returned_at?: string | null
           status?: string
           updated_at?: string
@@ -308,6 +314,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          image_url: string | null
           lat: number | null
           lng: number | null
           needed_by: string | null
@@ -323,6 +330,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          image_url?: string | null
           lat?: number | null
           lng?: number | null
           needed_by?: string | null
@@ -338,6 +346,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          image_url?: string | null
           lat?: number | null
           lng?: number | null
           needed_by?: string | null
