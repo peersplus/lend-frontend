@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import heroHandoff from "@/assets/hero-handoff.jpg";
 import { useAuth } from "@/hooks/useAuth";
-import { NotificationBell } from "@/components/NotificationBell";
-import { UserMenu } from "@/components/UserMenu";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 
 export const Route = createFileRoute("/")({
@@ -129,56 +129,7 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
-              <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">
-                P
-              </span>
-              <span className="font-display text-2xl italic text-leaf">Peers+Help</span>
-            </Link>
-            <div className="hidden items-center gap-2 rounded-full bg-muted px-3 py-1.5 ring-1 ring-border md:flex">
-              <span className="size-2 animate-pulse rounded-full bg-leaf" />
-              <span className="text-xs font-medium text-muted-foreground">Set your neighborhood</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-6">
-            <Link to="/items" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
-              Browse
-            </Link>
-            <Link to="/requests" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
-              Requests
-            </Link>
-            <a href="#how" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
-              How it works
-            </a>
-            <a href="#safety" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
-              Trust & safety
-            </a>
-            {user ? (
-              <div className="flex items-center gap-2">
-                <NotificationBell />
-                <Link
-                  to="/requests"
-                  className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
-                >
-                  Post request
-                </Link>
-                <UserMenu />
-              </div>
-            ) : (
-              <Link
-                to="/auth"
-                className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
-              >
-                Sign in
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+      <SiteHeader />
 
       <main>
         {/* Hero */}
