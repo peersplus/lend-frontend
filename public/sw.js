@@ -1,0 +1,38 @@
+// Peers+Help push service worker
+self.addEventListener("install", (e) => self.skipWaiting());
+self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
+
+self.addEventListener("push", (event) => {
+  let data = { title: "Peers+Help", body: "New nearby activity", url: "/requests" };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch (_) {
+    if (event.data) data.body = event.data.text();
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/favicon.ico",
+      badge: "/favicon.ico",
+      data: { url: data.url || "/requests" },
+      tag: data.tag || "peershelp",
+      renotify: true,
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/requests";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const c of list) {
+        if ("focus" in c) {
+          c.navigate(url);
+          return c.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    }),
+  );
+});

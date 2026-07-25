@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import heroHandoff from "@/assets/hero-handoff.jpg";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationBell } from "@/components/NotificationBell";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -146,6 +148,9 @@ function Home() {
             <Link to="/items" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
               Browse
             </Link>
+            <Link to="/requests" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
+              Requests
+            </Link>
             <a href="#how" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
               How it works
             </a>
@@ -154,11 +159,18 @@ function Home() {
             </a>
             {user ? (
               <div className="flex items-center gap-2">
+                <NotificationBell />
                 <Link
-                  to="/items"
+                  to="/requests"
                   className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
                 >
-                  My feed
+                  Post request
+                </Link>
+                <Link
+                  to="/settings"
+                  className="rounded-full border border-border bg-card px-3 py-2 text-xs font-medium hover:bg-muted"
+                >
+                  Settings
                 </Link>
                 <button
                   onClick={() => supabase.auth.signOut()}
@@ -168,6 +180,7 @@ function Home() {
                 </button>
               </div>
             ) : (
+
               <Link
                 to="/auth"
                 className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
