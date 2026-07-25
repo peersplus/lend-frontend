@@ -6,6 +6,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { haversineKm, formatDistance } from "@/lib/geo";
+import { requestLocation } from "@/lib/geolocate";
 import { toast } from "sonner";
 
 type Item = {
