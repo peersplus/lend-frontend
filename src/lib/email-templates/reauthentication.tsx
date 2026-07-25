@@ -1,7 +1,6 @@
 import * as React from 'react'
 
 import {
-import { BrandHeader } from './BrandHeader'
   Body,
   Container,
   Head,
@@ -10,6 +9,7 @@ import { BrandHeader } from './BrandHeader'
   Preview,
   Text,
 } from '@react-email/components'
+import { BrandHeader } from './BrandHeader'
 
 interface ReauthenticationEmailProps {
   token: string

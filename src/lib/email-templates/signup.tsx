@@ -1,7 +1,6 @@
 import * as React from 'react'
 
 import {
-import { BrandHeader } from './BrandHeader'
   Body,
   Button,
   Container,
@@ -12,6 +11,7 @@ import { BrandHeader } from './BrandHeader'
   Preview,
   Text,
 } from '@react-email/components'
+import { BrandHeader } from './BrandHeader'
 
 interface SignupEmailProps {
   siteName: string

@@ -11,8 +11,8 @@ import {
   Section,
   Text,
 } from '@react-email/components'
-import type { TemplateEntry } from './registry'
 import { BrandHeader } from './BrandHeader'
+import type { TemplateEntry } from './registry'
 
 interface Item {
   title: string

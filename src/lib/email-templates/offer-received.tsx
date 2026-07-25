@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Body, Container, Head, Heading, Html, Preview, Section, Text } from '@react-email/components'
-import type { TemplateEntry } from './registry'
 import { BrandHeader } from './BrandHeader'
+import type { TemplateEntry } from './registry'
 
 interface Props {
   requestTitle?: string
