@@ -31,9 +31,15 @@ export type Database = {
           owner_id: string
           owner_notes: string | null
           pickup_at: string | null
+          pickup_person_name: string | null
+          pickup_person_photo: string | null
           pickup_photo_url: string | null
+          pickup_scheduled_at: string | null
           return_due: string | null
+          return_person_name: string | null
+          return_person_photo: string | null
           return_photo_url: string | null
+          return_scheduled_at: string | null
           returned_at: string | null
           status: string
           updated_at: string
@@ -54,9 +60,15 @@ export type Database = {
           owner_id: string
           owner_notes?: string | null
           pickup_at?: string | null
+          pickup_person_name?: string | null
+          pickup_person_photo?: string | null
           pickup_photo_url?: string | null
+          pickup_scheduled_at?: string | null
           return_due?: string | null
+          return_person_name?: string | null
+          return_person_photo?: string | null
           return_photo_url?: string | null
+          return_scheduled_at?: string | null
           returned_at?: string | null
           status?: string
           updated_at?: string
@@ -77,9 +89,15 @@ export type Database = {
           owner_id?: string
           owner_notes?: string | null
           pickup_at?: string | null
+          pickup_person_name?: string | null
+          pickup_person_photo?: string | null
           pickup_photo_url?: string | null
+          pickup_scheduled_at?: string | null
           return_due?: string | null
+          return_person_name?: string | null
+          return_person_photo?: string | null
           return_photo_url?: string | null
+          return_scheduled_at?: string | null
           returned_at?: string | null
           status?: string
           updated_at?: string
@@ -157,23 +175,29 @@ export type Database = {
       messages: {
         Row: {
           body: string
-          booking_id: string
+          booking_id: string | null
           created_at: string
           id: string
+          peer_id: string | null
+          request_id: string | null
           sender_id: string
         }
         Insert: {
           body: string
-          booking_id: string
+          booking_id?: string | null
           created_at?: string
           id?: string
+          peer_id?: string | null
+          request_id?: string | null
           sender_id: string
         }
         Update: {
           body?: string
-          booking_id?: string
+          booking_id?: string | null
           created_at?: string
           id?: string
+          peer_id?: string | null
+          request_id?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -182,6 +206,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
             referencedColumns: ["id"]
           },
         ]
@@ -242,6 +273,7 @@ export type Database = {
           phone: string | null
           push_enabled: boolean
           radius_km: number
+          require_handoff_person: boolean
           updated_at: string
           verification: string
         }
@@ -259,6 +291,7 @@ export type Database = {
           phone?: string | null
           push_enabled?: boolean
           radius_km?: number
+          require_handoff_person?: boolean
           updated_at?: string
           verification?: string
         }
@@ -276,6 +309,7 @@ export type Database = {
           phone?: string | null
           push_enabled?: boolean
           radius_km?: number
+          require_handoff_person?: boolean
           updated_at?: string
           verification?: string
         }
@@ -307,6 +341,38 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      request_offers: {
+        Row: {
+          created_at: string
+          helper_id: string
+          id: string
+          note: string | null
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          helper_id: string
+          id?: string
+          note?: string | null
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          helper_id?: string
+          id?: string
+          note?: string | null
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_offers_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       requests: {
         Row: {
@@ -366,6 +432,10 @@ export type Database = {
     Functions: {
       can_chat_on_booking: {
         Args: { _booking_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_chat_on_request: {
+        Args: { _peer_id: string; _request_id: string; _user_id: string }
         Returns: boolean
       }
       get_booking_contact: {
