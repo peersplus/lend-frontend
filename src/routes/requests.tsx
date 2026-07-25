@@ -46,6 +46,10 @@ function RequestsPage() {
   const [offersByReq, setOffersByReq] = useState<Record<string, Offer[]>>({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [query, setQuery] = useState("");
+  const [filterCat, setFilterCat] = useState<string>("All");
+  const [filterUrg, setFilterUrg] = useState<"all" | "urgent" | "normal">("all");
+  const [onlyMine, setOnlyMine] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -54,6 +58,15 @@ function RequestsPage() {
     radius_km: 5,
     image_url: "" as string,
   });
+
+  function notifyUpdate(r: Request, status: "closed" | "open" | "deleted") {
+    const anon = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? "";
+    fetch("/api/public/hooks/request-updated", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: anon },
+      body: JSON.stringify({ request_id: r.id, status, title: r.title, owner_id: r.owner_id }),
+    }).catch(() => {});
+  }
 
   async function loadOffers(requestIds: string[]) {
     if (requestIds.length === 0) return;
@@ -111,16 +124,18 @@ function RequestsPage() {
   async function closeRequest(r: Request, status: "closed" | "open") {
     const { error } = await supabase.from("requests").update({ status }).eq("id", r.id);
     if (error) return toast.error(error.message);
-    setRows((prev) => prev.filter((x) => x.id !== r.id || status === "open"));
-    toast.success(status === "closed" ? "Request marked inactive." : "Request reopened.");
+    setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, status } : x)));
+    notifyUpdate(r, status);
+    toast.success(status === "closed" ? "Request marked inactive — helpers notified." : "Request reopened — helpers notified.");
   }
 
   async function deleteRequest(r: Request) {
     if (!confirm("Delete this request? This cannot be undone.")) return;
+    notifyUpdate(r, "deleted");
     const { error } = await supabase.from("requests").delete().eq("id", r.id);
     if (error) return toast.error(error.message);
     setRows((prev) => prev.filter((x) => x.id !== r.id));
-    toast.success("Request deleted.");
+    toast.success("Request deleted — helpers notified.");
   }
 
 
