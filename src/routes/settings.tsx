@@ -252,6 +252,28 @@ function SettingsPage() {
             </div>
           </section>
 
+          <section className="rounded-lg border border-border bg-card p-6">
+            <h2 className="font-semibold">Handoff safety</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              For extra peace of mind when lending, ask for the name and a quick photo of the person who actually picks up or returns your item.
+            </p>
+            <label className="mt-4 flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={form.require_handoff_person}
+                onChange={(e) => setForm({ ...form, require_handoff_person: e.target.checked })}
+                className="mt-1"
+              />
+              <div>
+                <p className="text-sm font-medium">Ask for handoff person details</p>
+                <p className="text-xs text-muted-foreground">
+                  On pickup and return, capture their name (optional) and a photo (optional). Stays on the booking record.
+                </p>
+              </div>
+            </label>
+          </section>
+
+
           <button
             disabled={saving}
             className="rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
