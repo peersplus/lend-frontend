@@ -36,7 +36,7 @@ const Email = ({
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>{count} nearby request{count === 1 ? '' : 's'} from your neighbors</Preview>
+    <Preview>{`${count} nearby request${count === 1 ? '' : 's'} from your neighbors`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Your neighborhood, today</Heading>
