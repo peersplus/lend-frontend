@@ -82,6 +82,7 @@ function RequestsPage() {
         category: form.category,
         urgency: form.urgency,
         radius_km: form.radius_km,
+        image_url: form.image_url || null,
         lat: prof?.lat ?? null,
         lng: prof?.lng ?? null,
       })
@@ -93,7 +94,7 @@ function RequestsPage() {
     }
     setRows((prev) => [data as Request, ...prev]);
     setShowForm(false);
-    setForm({ title: "", description: "", category: "Tools", urgency: "normal", radius_km: 5 });
+    setForm({ title: "", description: "", category: "Tools", urgency: "normal", radius_km: 5, image_url: "" });
     toast.success("Request posted — your neighborhood has been notified.");
   };
 
