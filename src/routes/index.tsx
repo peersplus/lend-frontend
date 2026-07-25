@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import heroHandoff from "@/assets/hero-handoff.jpg";
 import { useAuth } from "@/hooks/useAuth";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { HeroCarousel } from "@/components/HeroCarousel";
 import { useReveal } from "@/hooks/useReveal";
 
 
@@ -188,32 +188,7 @@ function Home() {
             </div>
 
             <div className="relative lg:col-span-5" data-reveal="right" data-reveal-delay="120" data-scrub="parallax-slow">
-              <div className="overflow-hidden rounded-[2rem] ring-1 ring-black/5 shadow-2xl shadow-bark/10">
-                <img
-                  src={heroHandoff}
-                  alt="A smiling neighbor handing a wooden toolbox with a drill and hammer to another neighbor on a warm front porch"
-                  width={1200}
-                  height={1408}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-6 -left-6 max-w-[260px] rounded-2xl border border-border bg-card p-4 shadow-xl">
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="grid size-10 place-items-center rounded-full bg-leaf/15 font-display italic text-leaf">
-                    P
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">Peers Plus</p>
-                    <p className="text-[11px] text-muted-foreground">New on your block</p>
-                  </div>
-                </div>
-                <p className="text-xs leading-relaxed italic text-muted-foreground">
-                  "Start a sharing circle on your street. List one item and invite a neighbor."
-                </p>
-              </div>
-              <div className="absolute -top-4 right-4 rounded-full bg-accent px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent-foreground shadow-lg">
-                🚨 Post the first urgent request
-              </div>
+              <HeroCarousel />
             </div>
           </div>
         </section>
