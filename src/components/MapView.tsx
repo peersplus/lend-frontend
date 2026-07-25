@@ -1,6 +1,6 @@
 /// <reference types="google.maps" />
-import { useEffect, useRef } from "react";
-import { getMapsBrowserKey, getMapsChannel, detectMapsEnv } from "@/lib/maps-key";
+import { useEffect, useRef, useState } from "react";
+import { getMapsBrowserKeyWithSource, getMapsChannel, type MapsKeySource } from "@/lib/maps-key";
 
 export type MapMarker = {
   id: string;
@@ -16,23 +16,36 @@ type Props = {
   me?: { lat: number; lng: number } | null;
   height?: number;
   onMarkerClick?: (id: string) => void;
+  showKeyDebug?: boolean;
 };
 
 // Global loader — shared across all MapView instances.
 let mapsLoader: Promise<typeof google.maps> | null = null;
+
+function sourceLabel(source: MapsKeySource): string {
+  switch (source.type) {
+    case "host":
+      return `host override: ${source.var}`;
+    case "bucket":
+      return `env bucket: ${source.var}`;
+    case "managed":
+      return `managed fallback: ${source.var}`;
+    case "missing":
+      return "no key configured";
+  }
+}
 
 function loadGoogleMaps(): Promise<typeof google.maps> {
   if (typeof window === "undefined") return Promise.reject(new Error("No window"));
   if ((window as any).google?.maps) return Promise.resolve((window as any).google.maps);
   if (mapsLoader) return mapsLoader;
 
-  const key = getMapsBrowserKey();
+  const { key, source, hostname } = getMapsBrowserKeyWithSource();
   const channel = getMapsChannel();
   if (!key) {
-    const env = detectMapsEnv();
     return Promise.reject(
       new Error(
-        `Google Maps browser key missing for "${env}" environment (${window.location.hostname}). Set VITE_MAPS_KEY_${env.toUpperCase()} in build settings.`,
+        `Google Maps browser key missing on ${hostname}. Checked ${sourceLabel(source)}. Set a matching VITE_MAPS_KEY_* env var in build settings.`,
       ),
     );
   }
