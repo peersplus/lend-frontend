@@ -10,6 +10,7 @@ import { PhotoImg } from "@/components/PhotoImg";
 import { haversineKm, formatDistance } from "@/lib/geo";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "sonner";
+import { sendTemplateEmail } from '@/lib/email-templates/send-email'
 
 
 
@@ -122,11 +123,10 @@ function ItemsPage() {
     if (search.lend || search.cat) {
       setForm((f) => ({
         ...f,
-        title: search.lend ?? f.title,
-        category: search.cat ?? f.category,
+        title: f.title,
+        category: search.lend ?? f.category,
       }));
-      setShowForm(true);
-      toast.info("A neighbor requested this — list it to lend.");
+      
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, search.lend, search.cat]);

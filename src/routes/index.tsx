@@ -153,6 +153,7 @@ function Home() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
+               
                   to="/items"
                   className="inline-flex items-center gap-2 rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20 transition-transform hover:-translate-y-0.5"
                 >

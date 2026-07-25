@@ -121,7 +121,7 @@ export function HeroCarousel() {
           />
 
           {/* Bottom gradient + caption */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-bark/85 via-bark/40 to-transparent p-6 pt-24 text-cream">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] bg-gradient-to-t from-bark/85 via-bark/40 to-transparent p-12 pt-24 text-cream">
             <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-cream/80">
               <span aria-hidden className="text-base">
                 {SLIDES[i].emoji}
@@ -173,7 +173,7 @@ export function HeroCarousel() {
       </div>
 
       {/* Floating card */}
-      <div className="absolute -bottom-6 -left-6 hidden max-w-[260px] rounded-2xl border border-border bg-card p-4 shadow-xl md:block">
+      <div className="absolute -bottom-6 -left-6 hidden max-w-[260px] z-10 rounded-2xl border border-border bg-card p-4 shadow-xl md:block">
         <div className="mb-3 flex items-center gap-3">
           <div className="grid size-10 place-items-center rounded-full bg-leaf/15 font-display italic text-leaf">
             P
@@ -183,7 +183,7 @@ export function HeroCarousel() {
             <p className="text-[11px] text-muted-foreground">New on your block</p>
           </div>
         </div>
-        <p className="text-xs leading-relaxed italic text-muted-foreground">
+        <p className="text-xs leading-relaxed italic text-muted-foreground ">
           "Start a sharing circle on your street. List one item — or offer to walk a neighbor to a checkup."
         </p>
       </div>
