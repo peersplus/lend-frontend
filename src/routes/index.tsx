@@ -1,5 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import heroNeighbors from "@/assets/hero-neighbors.jpg";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import heroHandoff from "@/assets/hero-handoff.jpg";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,85 +43,138 @@ const categories = [
   { label: "Emergency", tone: "bg-red-500/10 text-red-600", emoji: "🚨" },
 ];
 
-const listings = [
-  {
-    title: "Extension Ladder",
-    owner: "Sarah M.",
-    distance: "0.4 mi",
-    price: "Free",
-    priceKind: "free" as const,
-    badge: "Trusted Member",
-    rating: 4.9,
-    category: "Tools",
-  },
-  {
-    title: "Cordless Power Drill",
-    owner: "Marcus L.",
-    distance: "0.8 mi",
-    price: "$8 / day",
-    priceKind: "rent" as const,
-    badge: "ID Verified",
-    rating: 5.0,
-    category: "Tools",
-  },
-  {
-    title: "Folding Wheelchair",
-    owner: "Maple St. Assoc.",
-    distance: "1.1 mi",
-    price: "Free",
-    priceKind: "free" as const,
-    badge: "Address Verified",
-    rating: 4.8,
-    category: "Medical",
-  },
-  {
-    title: "10×20 Party Tent",
-    owner: "Elena R.",
-    distance: "1.6 mi",
-    price: "$45 / day",
-    priceKind: "rent" as const,
-    badge: "Trusted Member",
-    rating: 4.9,
-    category: "Party",
-  },
-];
-
 const emergencies = [
   { need: "Wheelchair for visiting grandparent", who: "David K.", when: "10 min ago" },
   { need: "Portable generator — power out on 5th Ave", who: "Priya S.", when: "35 min ago" },
 ];
 
+const flowSteps = [
+  {
+    n: "01",
+    title: "Register & verify",
+    body: "Sign up with email or Google, add your neighborhood, and verify your address. You choose what neighbors see.",
+    screen: (
+      <div className="space-y-2.5">
+        <div className="h-2 w-16 rounded-full bg-leaf/40" />
+        <p className="font-display text-lg leading-tight">Welcome, neighbor 👋</p>
+        <div className="space-y-2 pt-1">
+          <div className="rounded-lg border border-border bg-background px-3 py-2 text-[11px]">sarah@maple.st</div>
+          <div className="rounded-lg border border-border bg-background px-3 py-2 text-[11px]">•••••••••</div>
+          <div className="rounded-lg border border-border bg-background px-3 py-2 text-[11px]">Maplewood Village</div>
+          <div className="rounded-lg bg-leaf py-2 text-center text-[11px] font-semibold text-leaf-foreground">
+            Create account
+          </div>
+          <div className="flex items-center gap-2 pt-1 text-[10px] text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-leaf" /> Address verified · ID pending
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    n: "02",
+    title: "Take the item",
+    body: "Find what you need, message the lender, then scan the QR at pickup. A photo on both sides keeps it fair.",
+    screen: (
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+          <span>Pickup · Sat 2:15pm</span>
+          <span className="rounded-full bg-leaf/15 px-2 py-0.5 font-semibold text-leaf">On the way</span>
+        </div>
+        <div className="aspect-[4/3] rounded-lg bg-gradient-to-br from-clay/30 to-leaf/20" />
+        <p className="text-[11px] font-semibold">Extension Ladder · Sarah M.</p>
+        <div className="grid place-items-center rounded-lg border-2 border-dashed border-leaf/50 bg-leaf/5 py-4">
+          <div className="mb-1 grid size-14 place-items-center rounded bg-foreground text-[8px] font-mono text-background">
+            ▪ ■ ▪<br />■ ▪ ■<br />▪ ■ ▪
+          </div>
+          <p className="text-[10px] font-semibold text-leaf">Scan to confirm handoff</p>
+        </div>
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          <span>📸</span> Photo captured
+        </div>
+      </div>
+    ),
+  },
+  {
+    n: "03",
+    title: "Return with a smile",
+    body: "Bring it back before the due date, scan the return QR, snap a photo, and rate your neighbor. Trust +1.",
+    screen: (
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+          <span>Return · Due Sun 6pm</span>
+          <span className="rounded-full bg-clay/15 px-2 py-0.5 font-semibold text-clay">Ready</span>
+        </div>
+        <div className="rounded-lg border border-leaf/30 bg-leaf/5 p-3">
+          <p className="mb-1 text-[11px] font-semibold text-leaf">✓ Returned in great shape</p>
+          <p className="text-[10px] text-muted-foreground">Sarah reviewed the photo and confirmed.</p>
+        </div>
+        <p className="text-[11px] font-semibold">Rate this exchange</p>
+        <div className="flex gap-1 text-lg">
+          <span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span>
+        </div>
+        <div className="rounded-lg bg-leaf py-2 text-center text-[11px] font-semibold text-leaf-foreground">
+          Say thanks & finish
+        </div>
+        <p className="text-[10px] text-muted-foreground">+1 trusted exchange · 21 total</p>
+      </div>
+    ),
+  },
+];
+
 function Home() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-3">
-            <a href="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2">
               <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">
                 P
               </span>
               <span className="font-display text-2xl italic text-leaf">Peers+Help</span>
-            </a>
+            </Link>
             <div className="hidden items-center gap-2 rounded-full bg-muted px-3 py-1.5 ring-1 ring-border md:flex">
               <span className="size-2 animate-pulse rounded-full bg-leaf" />
               <span className="text-xs font-medium text-muted-foreground">Maplewood Village</span>
             </div>
           </div>
           <div className="flex items-center gap-6">
-            <a href="#browse" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
+            <Link to="/items" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
               Browse
-            </a>
+            </Link>
             <a href="#how" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
               How it works
             </a>
             <a href="#safety" className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:inline">
               Trust & safety
             </a>
-            <button className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-foreground/90">
-              Sign in
-            </button>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/items"
+                  className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
+                >
+                  My feed
+                </Link>
+                <button
+                  onClick={() => supabase.auth.signOut()}
+                  className="rounded-full border border-border bg-card px-3 py-2 text-xs font-medium hover:bg-muted"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/auth"
+                className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
+              >
+                Sign in
+              </Link>
+            )}
           </div>
         </div>
       </nav>
@@ -142,13 +197,19 @@ function Home() {
                 transactions.
               </p>
               <div className="flex flex-wrap gap-3">
-                <button className="inline-flex items-center gap-2 rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20 transition-transform hover:-translate-y-0.5">
-                  Request an item
+                <Link
+                  to="/items"
+                  className="inline-flex items-center gap-2 rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20 transition-transform hover:-translate-y-0.5"
+                >
+                  Browse nearby
                   <span aria-hidden>→</span>
-                </button>
-                <button className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
-                  Lend something
-                </button>
+                </Link>
+                <Link
+                  to={user ? "/items" : "/auth"}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+                >
+                  {user ? "Lend something" : "Join your block"}
+                </Link>
               </div>
               <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
@@ -174,10 +235,10 @@ function Home() {
             <div className="relative lg:col-span-5">
               <div className="overflow-hidden rounded-[2rem] ring-1 ring-black/5 shadow-2xl shadow-bark/10">
                 <img
-                  src={heroNeighbors}
-                  alt="Two neighbors sharing a garden tool over a wooden fence in warm afternoon light"
+                  src={heroHandoff}
+                  alt="A smiling neighbor handing a wooden toolbox with a drill and hammer to another neighbor on a warm front porch"
                   width={1200}
-                  height={1400}
+                  height={1408}
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -212,14 +273,15 @@ function Home() {
                 </p>
                 <h2 className="text-3xl md:text-4xl">Everything, right around the corner</h2>
               </div>
-              <a href="#" className="hidden text-sm font-medium text-leaf underline decoration-leaf/30 underline-offset-4 md:inline">
-                All 14 categories →
-              </a>
+              <Link to="/items" className="hidden text-sm font-medium text-leaf underline decoration-leaf/30 underline-offset-4 md:inline">
+                Browse all listings →
+              </Link>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {categories.map((c) => (
-                <button
+                <Link
                   key={c.label}
+                  to="/items"
                   className="group flex aspect-square flex-col justify-between rounded-2xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-1 hover:shadow-md"
                 >
                   <div className={`grid size-11 place-items-center rounded-xl text-xl ${c.tone}`}>
@@ -229,76 +291,68 @@ function Home() {
                     <p className="text-sm font-semibold">{c.label}</p>
                     <p className="text-[11px] text-muted-foreground">Browse →</p>
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Nearby feed */}
-        <section className="px-6 py-24">
+        {/* Mobile flow: register → take → return */}
+        <section id="how" className="px-6 py-24">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-              <div>
-                <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  (02) Available near you
-                </p>
-                <h2 className="text-3xl md:text-4xl">On your block this week</h2>
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm">
-                <span className="text-muted-foreground">Radius:</span>
-                <span className="font-semibold">2.5 miles</span>
-                <span className="text-muted-foreground">·</span>
-                <span className="font-medium text-leaf">Change</span>
-              </div>
+            <div className="mb-14 max-w-2xl">
+              <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                (02) The neighborhood handshake
+              </p>
+              <h2 className="mb-4 text-3xl md:text-4xl">
+                Register, take, return — <span className="italic text-leaf">right from your phone.</span>
+              </h2>
+              <p className="text-muted-foreground">
+                Three quick screens keep every exchange safe: verify your address, scan a QR at pickup,
+                and snap a return photo. No cash, no awkwardness — just neighbors keeping their word.
+              </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {listings.map((item) => (
-                <article
-                  key={item.title}
-                  className="group flex cursor-pointer flex-col gap-4"
-                >
-                  <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-black/5">
-                    <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-muted to-cream">
-                      <span className="font-display text-3xl italic text-muted-foreground/60">
-                        {item.category}
-                      </span>
-                    </div>
-                    <div className="absolute left-3 top-3 flex gap-2">
-                      <span
-                        className={`rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-tight backdrop-blur ${
-                          item.priceKind === "free"
-                            ? "bg-leaf/90 text-leaf-foreground"
-                            : "bg-foreground/85 text-background"
-                        }`}
-                      >
-                        {item.price}
-                      </span>
-                    </div>
-                    <div className="absolute right-3 top-3 rounded-md bg-background/85 px-2 py-1 text-[10px] font-semibold text-foreground backdrop-blur">
-                      {item.distance}
-                    </div>
+            <div className="grid gap-10 lg:grid-cols-3">
+              {flowSteps.map((step) => (
+                <div key={step.n} className="flex flex-col items-center text-center">
+                  <div className="mb-6 font-mono text-xs font-bold uppercase tracking-[0.3em] text-clay">
+                    Step {step.n}
                   </div>
-                  <div>
-                    <div className="mb-1 flex items-start justify-between gap-2">
-                      <h3 className="text-lg font-semibold">{item.title}</h3>
-                      <span className="mt-1 shrink-0 text-xs font-semibold text-foreground">
-                        {item.rating} ★
-                      </span>
+                  {/* Phone frame */}
+                  <div className="relative mb-6">
+                    <div className="rounded-[2.4rem] border-[10px] border-bark bg-bark p-1 shadow-2xl shadow-bark/25">
+                      <div className="relative w-[220px] overflow-hidden rounded-[1.75rem] bg-cream">
+                        <div className="flex items-center justify-between px-5 pt-2 text-[9px] font-semibold text-bark/70">
+                          <span>9:41</span>
+                          <span>••• ▮▮▮</span>
+                        </div>
+                        <div className="h-[380px] p-4">{step.screen}</div>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">Shared by {item.owner}</p>
-                    <span className="mt-3 inline-block rounded bg-leaf/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-leaf">
-                      {item.badge}
-                    </span>
+                    <div className="absolute left-1/2 top-0 h-1.5 w-16 -translate-x-1/2 rounded-b-lg bg-bark" />
                   </div>
-                </article>
+                  <h3 className="mb-2 font-display text-2xl">{step.title}</h3>
+                  <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">{step.body}</p>
+                </div>
               ))}
+            </div>
+
+            <div className="mt-14 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                to={user ? "/items" : "/auth"}
+                className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20"
+              >
+                {user ? "Open my feed" : "Register in 30 seconds"}
+              </Link>
+              <Link to="/items" className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold">
+                See what's nearby
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* Emergency + how it works */}
+        {/* Emergency band */}
         <section className="bg-cream px-6 pb-24">
           <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-3">
             <div className="rounded-3xl border border-accent/20 bg-accent/5 p-8 lg:col-span-1">
@@ -323,46 +377,34 @@ function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="mt-6 w-full rounded-xl bg-accent py-3 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90">
+              <Link
+                to={user ? "/items" : "/auth"}
+                className="mt-6 block w-full rounded-xl bg-accent py-3 text-center text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
+              >
                 Post emergency request
-              </button>
+              </Link>
             </div>
 
-            <div id="how" className="lg:col-span-2">
+            <div className="lg:col-span-2">
               <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                (03) How it works
+                (03) Why neighbors choose us
               </p>
-              <h2 className="mb-10 text-3xl md:text-4xl">The neighborhood handshake</h2>
-              <ol className="grid gap-6 sm:grid-cols-3">
+              <h2 className="mb-10 text-3xl md:text-4xl">Small favors, big community</h2>
+              <div className="grid gap-6 sm:grid-cols-3">
                 {[
-                  {
-                    n: "1",
-                    t: "Join the circle",
-                    d: "Verify your address and phone. We keep it neighbors-only, so everyone knows everyone.",
-                  },
-                  {
-                    n: "2",
-                    t: "Ask or offer",
-                    d: "Post what you need or list what you own. Neighbors in your radius are gently notified.",
-                  },
-                  {
-                    n: "3",
-                    t: "Meet & scan",
-                    d: "Scan a QR at pickup and return — photos on both ends keep it fair for everyone.",
-                  },
+                  { n: "🤝", t: "Real people", d: "Every neighbor is address-verified. No anonymous accounts, no strangers." },
+                  { n: "📸", t: "Photo protection", d: "Both sides snap a photo at pickup and return — no arguments later." },
+                  { n: "💚", t: "Free or fair", d: "Most items are free. Rentals are capped, and 100% goes to the lender." },
                 ].map((s) => (
-                  <li
-                    key={s.n}
-                    className="rounded-2xl border border-border bg-card p-6"
-                  >
-                    <div className="mb-4 grid size-12 place-items-center rounded-full bg-leaf/10 font-display text-2xl italic text-leaf">
+                  <div key={s.t} className="rounded-2xl border border-border bg-card p-6">
+                    <div className="mb-4 grid size-12 place-items-center rounded-full bg-leaf/10 text-2xl">
                       {s.n}
                     </div>
                     <h4 className="mb-2 text-lg font-semibold">{s.t}</h4>
                     <p className="text-sm leading-relaxed text-muted-foreground">{s.d}</p>
-                  </li>
+                  </div>
                 ))}
-              </ol>
+              </div>
             </div>
           </div>
         </section>
@@ -404,12 +446,15 @@ function Home() {
               today.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <button className="rounded-full bg-leaf px-8 py-3.5 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20">
-                Get started — it's free
-              </button>
-              <button className="rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold">
+              <Link
+                to={user ? "/items" : "/auth"}
+                className="rounded-full bg-leaf px-8 py-3.5 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20"
+              >
+                {user ? "Open the app" : "Get started — it's free"}
+              </Link>
+              <Link to="/items" className="rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold">
                 See what's nearby
-              </button>
+              </Link>
             </div>
           </div>
         </section>
