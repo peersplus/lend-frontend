@@ -4,7 +4,7 @@ import { LOGO_URL } from "@/lib/brand";
 /** Shared footer with links to trust pages and support contact. */
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t border-border/60 bg-card/60">
+    <footer className="mt-16 border-t border-leaf/20 bg-leaf/10">
       <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 text-sm md:grid-cols-4">
         <div>
           <img src={LOGO_URL} alt="Peers+Help" className="h-8 w-auto" />
