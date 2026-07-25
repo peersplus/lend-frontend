@@ -46,8 +46,8 @@ const categories = [
 ];
 
 const emergencies = [
-  { need: "Wheelchair for visiting grandparent", who: "David K.", when: "10 min ago" },
-  { need: "Portable generator — power out on 5th Ave", who: "Priya S.", when: "35 min ago" },
+  { need: "Wheelchair for visiting grandparent", who: "Example request", when: "Nearby" },
+  { need: "Portable generator — power out on 5th Ave", who: "Example request", when: "Nearby" },
 ];
 
 const flowSteps = [
@@ -118,7 +118,7 @@ const flowSteps = [
         <div className="rounded-lg bg-leaf py-2 text-center text-[11px] font-semibold text-leaf-foreground">
           Say thanks & finish
         </div>
-        <p className="text-[10px] text-muted-foreground">+1 trusted exchange · 21 total</p>
+        <p className="text-[10px] text-muted-foreground">Trust grows one exchange at a time</p>
       </div>
     ),
   },
@@ -141,7 +141,7 @@ function Home() {
             </Link>
             <div className="hidden items-center gap-2 rounded-full bg-muted px-3 py-1.5 ring-1 ring-border md:flex">
               <span className="size-2 animate-pulse rounded-full bg-leaf" />
-              <span className="text-xs font-medium text-muted-foreground">Maplewood Village</span>
+              <span className="text-xs font-medium text-muted-foreground">Set your neighborhood</span>
             </div>
           </div>
           <div className="flex items-center gap-6">
@@ -221,14 +221,14 @@ function Home() {
                     <span className="size-7 rounded-full border-2 border-background bg-sky-400/40" />
                   </span>
                   <span>
-                    <b className="text-foreground">2,400+</b> verified neighbors
+                    <b className="text-foreground">Be among the first</b> verified neighbors
                   </span>
                 </div>
                 <div>
-                  <b className="text-foreground">$180k+</b> saved this year
+                  <b className="text-foreground">Free</b> to join & lend
                 </div>
                 <div>
-                  <b className="text-foreground">450 tons</b> kept out of landfills
+                  <b className="text-foreground">Verified</b> people only
                 </div>
               </div>
             </div>
@@ -246,19 +246,19 @@ function Home() {
               <div className="absolute -bottom-6 -left-6 max-w-[260px] rounded-2xl border border-border bg-card p-4 shadow-xl">
                 <div className="mb-3 flex items-center gap-3">
                   <div className="grid size-10 place-items-center rounded-full bg-leaf/15 font-display italic text-leaf">
-                    M
+                    P
                   </div>
                   <div>
-                    <p className="text-sm font-semibold">Marcus K.</p>
-                    <p className="text-[11px] text-muted-foreground">Trusted Member · 4.9 ★</p>
+                    <p className="text-sm font-semibold">Peers+Help</p>
+                    <p className="text-[11px] text-muted-foreground">New on your block</p>
                   </div>
                 </div>
                 <p className="text-xs leading-relaxed italic text-muted-foreground">
-                  "Borrowed a pressure washer for $5. Saved $200 and made a new friend."
+                  "Start a sharing circle on your street. List one item and invite a neighbor."
                 </p>
               </div>
               <div className="absolute -top-4 right-4 rounded-full bg-accent px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent-foreground shadow-lg">
-                🚨 2 urgent requests nearby
+                🚨 Post the first urgent request
               </div>
             </div>
           </div>
