@@ -327,15 +327,23 @@ function ItemsPage() {
                   )}
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">{item.title}</h3>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="min-w-0 flex-1 text-lg font-semibold">{item.title}</h3>
+                    {(item.building_name || item.address) && (
+                      <button
+                        type="button"
+                        title={[item.building_name, item.address].filter(Boolean).join(" · ")}
+                        onMouseEnter={() => toast.info([item.building_name, item.address].filter(Boolean).join(" · "), { id: `loc-${item.id}` })}
+                        onClick={() => toast.info([item.building_name, item.address].filter(Boolean).join(" · "), { id: `loc-${item.id}` })}
+                        className="shrink-0 rounded-full border border-input bg-background p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        aria-label="Show location"
+                      >
+                        📍
+                      </button>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground line-clamp-2">{item.description ?? item.category}</p>
-                  {(item.building_name || item.address) && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {item.building_name && <span className="font-medium text-foreground">🏢 {item.building_name}</span>}
-                      {item.building_name && item.address ? " · " : ""}
-                      {item.address && <span className="line-clamp-1">{item.address}</span>}
-                    </p>
-                  )}
+
                   {item.deposit_amount != null && (
                     <p className="mt-1 text-xs text-muted-foreground">
                       Replacement value if damaged: <strong>${item.deposit_amount}</strong>
