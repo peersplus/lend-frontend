@@ -474,6 +474,17 @@ function RequestsPage() {
         </footer>
       </main>
       <SiteFooter />
+      {editing && (
+        <EditRequestModal
+          request={editing}
+          onClose={() => setEditing(null)}
+          onSaved={(updated) => {
+            setRows((prev) => prev.map((x) => (x.id === updated.id ? { ...x, ...updated } : x)));
+            setEditing(null);
+          }}
+        />
+      )}
+
     </div>
   );
 }
