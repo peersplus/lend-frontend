@@ -95,20 +95,18 @@ function RequestsPage() {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      // Load open requests, plus every request the current user owns (any status) so they can reopen.
-      const filter = user?.id ? `status.eq.open,owner_id.eq.${user.id}` : "status.eq.open";
-      const { data } = await supabase
-        .from("requests")
-        .select("*")
-        .or(filter)
-        .order("created_at", { ascending: false })
-        .limit(80);
+      // Superadmin sees all. Owners see their own regardless of status. Everyone else sees open.
+      const query = supabase.from("requests").select("*").order("created_at", { ascending: false }).limit(120);
+      const { data } = isSuperadmin
+        ? await query
+        : await query.or(user?.id ? `status.eq.open,owner_id.eq.${user.id}` : "status.eq.open");
       const list = (data as Request[]) ?? [];
       setRows(list);
       setLoading(false);
       await loadOffers(list.map((r) => r.id));
     })();
-  }, [user?.id]);
+  }, [user?.id, isSuperadmin]);
+
 
 
   async function offerHelp(r: Request) {
