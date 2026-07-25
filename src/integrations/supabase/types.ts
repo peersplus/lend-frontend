@@ -59,13 +59,59 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          read_at: string | null
+          recipient_id: string
+          request_id: string | null
+          title: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          recipient_id: string
+          request_id?: string | null
+          title: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          recipient_id?: string
+          request_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email_enabled: boolean
           id: string
+          lat: number | null
+          lng: number | null
           neighborhood: string | null
+          push_enabled: boolean
+          radius_km: number
           updated_at: string
           verification: string
         }
@@ -73,8 +119,13 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email_enabled?: boolean
           id: string
+          lat?: number | null
+          lng?: number | null
           neighborhood?: string | null
+          push_enabled?: boolean
+          radius_km?: number
           updated_at?: string
           verification?: string
         }
@@ -82,10 +133,90 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email_enabled?: boolean
           id?: string
+          lat?: number | null
+          lng?: number | null
           neighborhood?: string | null
+          push_enabled?: boolean
+          radius_km?: number
           updated_at?: string
           verification?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      requests: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          needed_by: string | null
+          owner_id: string
+          radius_km: number
+          status: string
+          title: string
+          updated_at: string
+          urgency: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          needed_by?: string | null
+          owner_id: string
+          radius_km?: number
+          status?: string
+          title: string
+          updated_at?: string
+          urgency?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          needed_by?: string | null
+          owner_id?: string
+          radius_km?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          urgency?: string
         }
         Relationships: []
       }
