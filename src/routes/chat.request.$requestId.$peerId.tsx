@@ -36,13 +36,14 @@ function RequestChatPage() {
     if (!user) { navigate({ to: "/auth" }); return; }
 
     (async () => {
-      const [{ data: r, error: rErr }, { data: p }] = await Promise.all([
+      const [{ data: r, error: rErr }, { data: pRows }] = await Promise.all([
         supabase.from("requests").select("id,owner_id,title,description,urgency,category").eq("id", requestId).maybeSingle(),
-        supabase.from("profiles").select("id,display_name,avatar_url,phone,building_name,address").eq("id", peerId).maybeSingle(),
+        supabase.rpc("get_request_contact", { _request_id: requestId, _peer_id: peerId }),
       ]);
       if (rErr || !r) { toast.error("Request not found"); navigate({ to: "/requests" }); return; }
       setReq(r as Req);
-      setPeer((p as PeerProfile) ?? null);
+      const p = Array.isArray(pRows) ? pRows[0] : null;
+      setPeer(p ? { id: (p as any).user_id, display_name: (p as any).display_name, avatar_url: (p as any).avatar_url, phone: (p as any).phone, building_name: (p as any).building_name, address: (p as any).address } as PeerProfile : null);
 
       const { data: msgs } = await supabase
         .from("messages")

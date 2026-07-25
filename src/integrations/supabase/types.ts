@@ -450,6 +450,25 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_public_profile: {
+        Args: { _user_id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+        }[]
+      }
+      get_request_contact: {
+        Args: { _peer_id: string; _request_id: string }
+        Returns: {
+          address: string
+          avatar_url: string
+          building_name: string
+          display_name: string
+          phone: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
