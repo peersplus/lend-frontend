@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import { NotificationBell } from "@/components/NotificationBell";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -9,6 +10,7 @@ import { NotificationPermissionPrompt } from "@/components/NotificationPermissio
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
+
 
 
 type Offer = { id: string; request_id: string; helper_id: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
@@ -46,15 +48,18 @@ const categories = ["Tools", "Electronics", "Medical", "Companionship", "Party",
 
 function RequestsPage() {
   const { user } = useAuth();
+  const { isSuperadmin } = useRole();
   const navigate = useNavigate();
   const [rows, setRows] = useState<Request[]>([]);
   const [offersByReq, setOffersByReq] = useState<Record<string, Offer[]>>({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Request | null>(null);
   const [query, setQuery] = useState("");
   const [filterCat, setFilterCat] = useState<string>("All");
   const [filterUrg, setFilterUrg] = useState<"all" | "urgent" | "normal">("all");
   const [onlyMine, setOnlyMine] = useState(false);
+
   
   const [form, setForm] = useState({
     title: "",
@@ -90,20 +95,18 @@ function RequestsPage() {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      // Load open requests, plus every request the current user owns (any status) so they can reopen.
-      const filter = user?.id ? `status.eq.open,owner_id.eq.${user.id}` : "status.eq.open";
-      const { data } = await supabase
-        .from("requests")
-        .select("*")
-        .or(filter)
-        .order("created_at", { ascending: false })
-        .limit(80);
+      // Superadmin sees all. Owners see their own regardless of status. Everyone else sees open.
+      const query = supabase.from("requests").select("*").order("created_at", { ascending: false }).limit(120);
+      const { data } = isSuperadmin
+        ? await query
+        : await query.or(user?.id ? `status.eq.open,owner_id.eq.${user.id}` : "status.eq.open");
       const list = (data as Request[]) ?? [];
       setRows(list);
       setLoading(false);
       await loadOffers(list.map((r) => r.id));
     })();
-  }, [user?.id]);
+  }, [user?.id, isSuperadmin]);
+
 
 
   async function offerHelp(r: Request) {
@@ -420,8 +423,14 @@ function RequestsPage() {
                     </div>
                   )}
 
-                  {user && user.id === r.owner_id && (
-                    <div className="mt-3 flex gap-2">
+                  {user && (user.id === r.owner_id || isSuperadmin) && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setEditing(r)}
+                        className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                      >
+                        ✏️ Edit
+                      </button>
                       {r.status === "open" ? (
                         <button
                           onClick={() => closeRequest(r, "closed")}
@@ -446,6 +455,7 @@ function RequestsPage() {
                     </div>
                   )}
 
+
                 </div>
               </article>
             ))}
@@ -464,6 +474,17 @@ function RequestsPage() {
         </footer>
       </main>
       <SiteFooter />
+      {editing && (
+        <EditRequestModal
+          request={editing}
+          onClose={() => setEditing(null)}
+          onSaved={(updated) => {
+            setRows((prev) => prev.map((x) => (x.id === updated.id ? { ...x, ...updated } : x)));
+            setEditing(null);
+          }}
+        />
+      )}
+
     </div>
   );
 }

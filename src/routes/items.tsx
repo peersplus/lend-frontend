@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
@@ -9,6 +10,7 @@ import { PhotoImg } from "@/components/PhotoImg";
 import { haversineKm, formatDistance } from "@/lib/geo";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "sonner";
+
 
 
 type Item = {
@@ -49,12 +51,15 @@ const categories = ["Tools","Electronics","Garden","Medical","Party","Baby","Kit
 
 function ItemsPage() {
   const { user } = useAuth();
+  const { isSuperadmin } = useRole();
   const navigate = useNavigate();
   const search = Route.useSearch();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [requesting, setRequesting] = useState<Item | null>(null);
+  const [editing, setEditing] = useState<Item | null>(null);
+
   const [me, setMe] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null });
   const [form, setForm] = useState({
     title: "", description: "", category: "Tools",
@@ -319,6 +324,29 @@ function ItemsPage() {
                       Request this item
                     </button>
                   )}
+                  {user && (user.id === item.owner_id || isSuperadmin) && (
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() => setEditing(item)}
+                        className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm("Delete this listing?")) return;
+                          const { error } = await supabase.from("items").delete().eq("id", item.id);
+                          if (error) return toast.error(error.message);
+                          setItems((prev) => prev.filter((x) => x.id !== item.id));
+                          toast.success("Item deleted.");
+                        }}
+                        className="flex-1 rounded-full border border-destructive/50 bg-background px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+
                 </div>
               </article>
             ))}
@@ -334,6 +362,18 @@ function ItemsPage() {
           onClose={() => setRequesting(null)}
         />
       )}
+
+      {editing && (
+        <EditItemModal
+          item={editing}
+          onClose={() => setEditing(null)}
+          onSaved={(updated) => {
+            setItems((prev) => prev.map((x) => (x.id === updated.id ? { ...x, ...updated } : x)));
+            setEditing(null);
+          }}
+        />
+      )}
+
 
       {showForm && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setShowForm(false)}>
@@ -490,6 +530,93 @@ function RequestConsentModal({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function EditItemModal({
+  item,
+  onClose,
+  onSaved,
+}: {
+  item: Item;
+  onClose: () => void;
+  onSaved: (updated: Item) => void;
+}) {
+  const [form, setForm] = useState({
+    title: item.title,
+    description: item.description ?? "",
+    category: item.category,
+    price_mode: item.price_mode,
+    price_amount: item.price_amount != null ? String(item.price_amount) : "",
+    deposit_amount: item.deposit_amount != null ? String(item.deposit_amount) : "",
+    building_name: item.building_name ?? "",
+    address: item.address ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    const patch = {
+      title: form.title,
+      description: form.description || null,
+      category: form.category,
+      price_mode: form.price_mode,
+      price_amount: form.price_mode === "rent" && form.price_amount ? Number(form.price_amount) : null,
+      deposit_amount: form.deposit_amount ? Number(form.deposit_amount) : null,
+      building_name: form.building_name || null,
+      address: form.address || null,
+    };
+    const { data, error } = await supabase.from("items").update(patch).eq("id", item.id).select("*").maybeSingle();
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Item updated.");
+    onSaved((data as Item) ?? ({ ...item, ...patch } as Item));
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
+      <form onClick={(e) => e.stopPropagation()} onSubmit={submit} className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-8 shadow-2xl">
+        <h2 className="font-display text-2xl">Edit listing</h2>
+        <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+          className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+        <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+          className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+        <div className="grid grid-cols-2 gap-3">
+          <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+            className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
+            {["Tools","Electronics","Garden","Medical","Party","Baby","Kitchen","Camping","Cleaning","Sports","Pets","Furniture","Emergency"].map((c) => <option key={c}>{c}</option>)}
+          </select>
+          <select value={form.price_mode} onChange={(e) => setForm({ ...form, price_mode: e.target.value as "free" | "rent" })}
+            className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
+            <option value="free">Free to borrow</option>
+            <option value="rent">Rent per day</option>
+          </select>
+        </div>
+        {form.price_mode === "rent" && (
+          <input type="number" min="1" placeholder="Price per day (USD)"
+            value={form.price_amount} onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
+            className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+        )}
+        <input type="number" min="0" placeholder="Replacement value if damaged (USD)"
+          value={form.deposit_amount} onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })}
+          className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+        <div className="grid grid-cols-2 gap-3">
+          <input placeholder="Building / society" value={form.building_name}
+            onChange={(e) => setForm({ ...form, building_name: e.target.value })}
+            className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+          <input placeholder="Address" value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
+            className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+        </div>
+        <div className="flex gap-2 pt-2">
+          <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-border bg-background py-2.5 text-sm font-semibold">Cancel</button>
+          <button disabled={saving} className="flex-1 rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground">
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
