@@ -191,6 +191,54 @@ function ItemsPage() {
           </p>
         </div>
 
+        <div className="mb-6 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3">
+          <input
+            type="search"
+            value={filters.q}
+            onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
+            placeholder="Search title, description, building…"
+            className="min-w-[220px] flex-1 rounded-full border border-input bg-background px-4 py-2 text-sm outline-none focus:border-leaf"
+          />
+          <select
+            value={filters.category}
+            onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
+            className="rounded-full border border-input bg-background px-3 py-2 text-sm"
+          >
+            <option value="">All categories</option>
+            {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <div className="flex overflow-hidden rounded-full border border-input text-sm">
+            {(["all","free","rent"] as const).map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setFilters((f) => ({ ...f, price: p }))}
+                className={`px-3 py-2 ${filters.price === p ? "bg-leaf text-leaf-foreground" : "bg-background hover:bg-muted"}`}
+              >
+                {p === "all" ? "All" : p === "free" ? "Free" : "For rent"}
+              </button>
+            ))}
+          </div>
+          {user && (
+            <label className="flex items-center gap-2 rounded-full border border-input bg-background px-3 py-2 text-sm">
+              <input type="checkbox" checked={filters.mine} onChange={(e) => setFilters((f) => ({ ...f, mine: e.target.checked }))} />
+              Only mine
+            </label>
+          )}
+          {(filters.q || filters.category || filters.price !== "all" || filters.mine) && (
+            <button
+              type="button"
+              onClick={() => setFilters({ q: "", category: "", price: "all", mine: false })}
+              className="rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-muted"
+            >
+              Clear
+            </button>
+          )}
+          <span className="ml-auto text-xs text-muted-foreground">
+            {loading ? "…" : `${listed.length} of ${items.length}`}
+          </span>
+        </div>
+
         {loading ? (
           <p className="text-muted-foreground">Loading…</p>
         ) : items.length === 0 ? (
@@ -205,6 +253,10 @@ function ItemsPage() {
                 Sign in to list
               </Link>
             )}
+          </div>
+        ) : listed.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-border bg-card p-12 text-center text-muted-foreground">
+            No items match your filters. Try clearing them.
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
