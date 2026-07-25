@@ -28,6 +28,10 @@ type Item = {
 };
 
 export const Route = createFileRoute("/items")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    lend: typeof s.lend === "string" ? s.lend : undefined,
+    cat: typeof s.cat === "string" ? s.cat : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Browse nearby items — Peers+Help" },
@@ -44,6 +48,7 @@ const categories = ["Tools","Electronics","Garden","Medical","Party","Baby","Kit
 function ItemsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -92,6 +97,21 @@ function ItemsPage() {
   }, [items, me]);
 
   useEffect(() => { load(); }, []);
+
+  // Prefill "Lend something" form when arriving from a request card.
+  useEffect(() => {
+    if (!user) return;
+    if (search.lend || search.cat) {
+      setForm((f) => ({
+        ...f,
+        title: search.lend ?? f.title,
+        category: search.cat ?? f.category,
+      }));
+      setShowForm(true);
+      toast.info("A neighbor requested this — list it to lend.");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, search.lend, search.cat]);
 
 
 

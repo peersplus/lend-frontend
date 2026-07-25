@@ -479,6 +479,14 @@ function Home() {
             © 2026 Peers Plus and Help · Built for the block
           </p>
         </div>
+        <div className="mx-auto mt-8 max-w-7xl border-t border-border pt-6 text-xs leading-relaxed text-muted-foreground">
+          <p>
+            <strong className="text-foreground">Peers+Help is a free community platform.</strong> We help neighbors post, connect
+            and communicate at no cost. All conversations, exchanges, payments and pickups happen directly between users —
+            Peers+Help is <strong>not responsible</strong> for any communication, agreement, damage, or loss between neighbors.
+            We provide the platform and support you when things go wrong.
+          </p>
+        </div>
       </footer>
     </div>
   );

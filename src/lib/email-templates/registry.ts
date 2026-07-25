@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import { template as nearbyUrgent } from './nearby-urgent'
 import { template as nearbyDigest } from './nearby-digest'
 import { template as bookingPickup } from './booking-pickup'
+import { template as offerReceived } from './offer-received'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -17,4 +18,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'nearby-urgent': nearbyUrgent,
   'nearby-digest': nearbyDigest,
   'booking-pickup': bookingPickup,
+  'offer-received': offerReceived,
 }
