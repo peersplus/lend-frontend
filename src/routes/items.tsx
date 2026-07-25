@@ -81,7 +81,14 @@ function ItemsPage() {
     setItems((data as Item[]) ?? []);
     setLoading(false);
   }
-  useEffect(() => { load(); }, []);
+  const listed = useMemo(() => {
+    if (me.lat == null || me.lng == null) return items.map((i) => ({ i, km: null as number | null }));
+    return items
+      .map((i) => ({ i, km: i.lat != null && i.lng != null ? haversineKm({ lat: me.lat!, lng: me.lng! }, { lat: i.lat!, lng: i.lng! }) : null }))
+      .sort((a, b) => (a.km ?? 1e9) - (b.km ?? 1e9));
+  }, [items, me]);
+
+
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
