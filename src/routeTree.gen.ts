@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as ItemsRouteImport } from './routes/items'
+import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -19,6 +20,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicHooksNotifyRequestRouteImport } from './routes/api/public/hooks/notify-request'
 import { Route as ApiPublicHooksDailyDigestRouteImport } from './routes/api/public/hooks/daily-digest'
+import { Route as ApiPublicHooksBookingPickupRouteImport } from './routes/api/public/hooks/booking-pickup'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -33,6 +35,11 @@ const RequestsRoute = RequestsRouteImport.update({
 const ItemsRoute = ItemsRouteImport.update({
   id: '/items',
   path: '/items',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingsRoute = BookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -73,13 +80,21 @@ const ApiPublicHooksDailyDigestRoute =
     path: '/api/public/hooks/daily-digest',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksBookingPickupRoute =
+  ApiPublicHooksBookingPickupRouteImport.update({
+    id: '/api/public/hooks/booking-pickup',
+    path: '/api/public/hooks/booking-pickup',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/bookings': typeof BookingsRoute
   '/items': typeof ItemsRoute
   '/requests': typeof RequestsRoute
   '/settings': typeof SettingsRoute
+  '/api/public/hooks/booking-pickup': typeof ApiPublicHooksBookingPickupRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -89,9 +104,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/bookings': typeof BookingsRoute
   '/items': typeof ItemsRoute
   '/requests': typeof RequestsRoute
   '/settings': typeof SettingsRoute
+  '/api/public/hooks/booking-pickup': typeof ApiPublicHooksBookingPickupRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -102,9 +119,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/bookings': typeof BookingsRoute
   '/items': typeof ItemsRoute
   '/requests': typeof RequestsRoute
   '/settings': typeof SettingsRoute
+  '/api/public/hooks/booking-pickup': typeof ApiPublicHooksBookingPickupRoute
   '/api/public/hooks/daily-digest': typeof ApiPublicHooksDailyDigestRoute
   '/api/public/hooks/notify-request': typeof ApiPublicHooksNotifyRequestRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -116,9 +135,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/bookings'
     | '/items'
     | '/requests'
     | '/settings'
+    | '/api/public/hooks/booking-pickup'
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/notify-request'
     | '/lovable/email/auth/preview'
@@ -128,9 +149,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/bookings'
     | '/items'
     | '/requests'
     | '/settings'
+    | '/api/public/hooks/booking-pickup'
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/notify-request'
     | '/lovable/email/auth/preview'
@@ -140,9 +163,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/bookings'
     | '/items'
     | '/requests'
     | '/settings'
+    | '/api/public/hooks/booking-pickup'
     | '/api/public/hooks/daily-digest'
     | '/api/public/hooks/notify-request'
     | '/lovable/email/auth/preview'
@@ -153,9 +178,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  BookingsRoute: typeof BookingsRoute
   ItemsRoute: typeof ItemsRoute
   RequestsRoute: typeof RequestsRoute
   SettingsRoute: typeof SettingsRoute
+  ApiPublicHooksBookingPickupRoute: typeof ApiPublicHooksBookingPickupRoute
   ApiPublicHooksDailyDigestRoute: typeof ApiPublicHooksDailyDigestRoute
   ApiPublicHooksNotifyRequestRoute: typeof ApiPublicHooksNotifyRequestRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -184,6 +211,13 @@ declare module '@tanstack/react-router' {
       path: '/items'
       fullPath: '/items'
       preLoaderRoute: typeof ItemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookings': {
+      id: '/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof BookingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -235,15 +269,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksDailyDigestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/booking-pickup': {
+      id: '/api/public/hooks/booking-pickup'
+      path: '/api/public/hooks/booking-pickup'
+      fullPath: '/api/public/hooks/booking-pickup'
+      preLoaderRoute: typeof ApiPublicHooksBookingPickupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  BookingsRoute: BookingsRoute,
   ItemsRoute: ItemsRoute,
   RequestsRoute: RequestsRoute,
   SettingsRoute: SettingsRoute,
+  ApiPublicHooksBookingPickupRoute: ApiPublicHooksBookingPickupRoute,
   ApiPublicHooksDailyDigestRoute: ApiPublicHooksDailyDigestRoute,
   ApiPublicHooksNotifyRequestRoute: ApiPublicHooksNotifyRequestRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
