@@ -49,7 +49,7 @@ const Email = ({
           <Text style={muted}>No new requests in your radius today. 🌿</Text>
         ) : (
           items.map((it, i) => (
-            <Section key={i} style={card}>
+            <Section key={String(i)} style={card}>
               <Text style={cardTag}>
                 {it.urgency === 'urgent' ? '🚨 Urgent' : '•'} {it.category ?? 'Request'}
                 {it.neighborhood ? ` — ${it.neighborhood}` : ''}
