@@ -43,7 +43,7 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -52,7 +52,19 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Welcome to the block! Check your email to confirm.");
+        if (data.session) {
+          toast.success(`Welcome to the block, ${displayName || "neighbor"}!`);
+          navigate({ to: "/items" });
+        } else {
+          toast.success(
+            `Almost there! We sent a verification link to ${email}. Open it and you're in.`,
+            { duration: 9000 },
+          );
+          toast.info("Tip: check your spam folder if it doesn't arrive in a minute.", {
+            duration: 7000,
+          });
+          setMode("signin");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -99,6 +111,7 @@ function AuthPage() {
           </p>
 
           <button
+            type="button"
             onClick={handleGoogle}
             className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background py-2.5 text-sm font-semibold hover:bg-muted"
           >
@@ -149,6 +162,7 @@ function AuthPage() {
               className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-leaf/40"
             />
             <button
+              type="submit"
               disabled={busy}
               className="w-full rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20 disabled:opacity-60"
             >
@@ -159,6 +173,7 @@ function AuthPage() {
           <p className="mt-6 text-center text-xs text-muted-foreground">
             {mode === "signin" ? "New neighbor? " : "Already a member? "}
             <button
+              type="button"
               onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
               className="font-semibold text-leaf underline underline-offset-4"
             >
