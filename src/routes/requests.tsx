@@ -90,18 +90,21 @@ function RequestsPage() {
   useEffect(() => {
     (async () => {
       setLoading(true);
+      // Load open requests, plus every request the current user owns (any status) so they can reopen.
+      const filter = user?.id ? `status.eq.open,owner_id.eq.${user.id}` : "status.eq.open";
       const { data } = await supabase
         .from("requests")
         .select("*")
-        .eq("status", "open")
+        .or(filter)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(80);
       const list = (data as Request[]) ?? [];
       setRows(list);
       setLoading(false);
       await loadOffers(list.map((r) => r.id));
     })();
   }, [user?.id]);
+
 
   async function offerHelp(r: Request) {
     if (!user) return navigate({ to: "/auth" });
