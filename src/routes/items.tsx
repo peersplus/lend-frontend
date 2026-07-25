@@ -128,15 +128,12 @@ function ItemsPage() {
   }
 
   function useMyLocation() {
-    if (!("geolocation" in navigator)) return toast.error("Geolocation not supported.");
-    navigator.geolocation.getCurrentPosition(
-      (p) => {
-        setForm((f) => ({ ...f, lat: p.coords.latitude.toFixed(6), lng: p.coords.longitude.toFixed(6) }));
-        toast.success("Location captured for this listing.");
-      },
-      (err) => toast.error(err.message),
-    );
+    requestLocation(({ lat, lng }) => {
+      setForm((f) => ({ ...f, lat: lat.toFixed(6), lng: lng.toFixed(6) }));
+      toast.success("Location captured for this listing.");
+    });
   }
+
 
 
   return (
