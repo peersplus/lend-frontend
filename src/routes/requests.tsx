@@ -284,7 +284,7 @@ function RequestsPage() {
           </div>
         )}
 
-        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3">
+        <div className="mb-4 flex items-center gap-2 overflow-x-auto rounded-xl border border-border bg-card p-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -294,12 +294,12 @@ function RequestsPage() {
           <select
             value={filterCat}
             onChange={(e) => setFilterCat(e.target.value)}
-            className="rounded-md border border-input bg-background px-2 py-2 text-sm"
+            className="shrink-0 rounded-md border border-input bg-background px-2 py-2 text-sm"
           >
             <option>All</option>
             {categories.map((c) => <option key={c}>{c}</option>)}
           </select>
-          <div className="flex overflow-hidden rounded-md border border-input text-sm">
+          <div className="flex shrink-0 overflow-hidden rounded-md border border-input text-sm">
             {(["all", "urgent", "normal"] as const).map((u) => (
               <button
                 key={u}
@@ -311,7 +311,7 @@ function RequestsPage() {
             ))}
           </div>
           {user && (
-            <label className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <label className="flex shrink-0 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm">
               <input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
               Only mine
             </label>
@@ -319,12 +319,12 @@ function RequestsPage() {
           {(query || filterCat !== "All" || filterUrg !== "all" || onlyMine) && (
             <button
               onClick={() => { setQuery(""); setFilterCat("All"); setFilterUrg("all"); setOnlyMine(false); }}
-              className="rounded-md border border-input px-3 py-2 text-sm hover:bg-muted"
+              className="shrink-0 rounded-md border border-input px-3 py-2 text-sm hover:bg-muted"
             >
               Clear
             </button>
           )}
-          <div className="ml-auto flex overflow-hidden rounded-full border border-input text-sm">
+          <div className="ml-auto flex shrink-0 overflow-hidden rounded-full border border-input text-sm">
             <button
               type="button"
               onClick={() => setView("list")}
