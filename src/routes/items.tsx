@@ -11,6 +11,7 @@ type Item = {
   category: string;
   price_mode: "free" | "rent";
   price_amount: number | null;
+  deposit_amount: number | null;
   distance_hint: string | null;
   image_url: string | null;
   owner_id: string;
@@ -21,35 +22,15 @@ export const Route = createFileRoute("/items")({
   head: () => ({
     meta: [
       { title: "Browse nearby items — Peers+Help" },
-      {
-        name: "description",
-        content:
-          "Discover tools, medical gear, party supplies and more available to borrow or rent from verified neighbors.",
-      },
+      { name: "description", content: "Discover tools, medical gear, party supplies and more available to borrow or rent from verified neighbors." },
       { property: "og:title", content: "Browse nearby items — Peers+Help" },
-      {
-        property: "og:description",
-        content: "Borrow or rent household items from verified neighbors near you.",
-      },
+      { property: "og:description", content: "Borrow or rent household items from verified neighbors near you." },
     ],
   }),
   component: ItemsPage,
 });
 
-const categories = [
-  "Tools",
-  "Garden",
-  "Medical",
-  "Party",
-  "Baby",
-  "Kitchen",
-  "Camping",
-  "Cleaning",
-  "Sports",
-  "Pets",
-  "Furniture",
-  "Emergency",
-];
+const categories = ["Tools","Garden","Medical","Party","Baby","Kitchen","Camping","Cleaning","Sports","Pets","Furniture","Emergency"];
 
 function ItemsPage() {
   const { user } = useAuth();
@@ -57,39 +38,28 @@ function ItemsPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [requesting, setRequesting] = useState<Item | null>(null);
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    category: "Tools",
+    title: "", description: "", category: "Tools",
     price_mode: "free" as "free" | "rent",
-    price_amount: "",
-    image_url: "",
+    price_amount: "", deposit_amount: "", image_url: "",
   });
   const [saving, setSaving] = useState(false);
 
   async function load() {
     setLoading(true);
     const { data, error } = await supabase
-      .from("items")
-      .select("*")
-      .eq("status", "available")
-      .order("created_at", { ascending: false })
-      .limit(60);
+      .from("items").select("*").eq("status", "available")
+      .order("created_at", { ascending: false }).limit(60);
     if (error) toast.error(error.message);
     setItems((data as Item[]) ?? []);
     setLoading(false);
   }
-
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!user) {
-      navigate({ to: "/auth" });
-      return;
-    }
+    if (!user) { navigate({ to: "/auth" }); return; }
     setSaving(true);
     const { error } = await supabase.from("items").insert({
       owner_id: user.id,
@@ -98,16 +68,14 @@ function ItemsPage() {
       category: form.category,
       price_mode: form.price_mode,
       price_amount: form.price_mode === "rent" && form.price_amount ? Number(form.price_amount) : null,
+      deposit_amount: form.deposit_amount ? Number(form.deposit_amount) : null,
       image_url: form.image_url || null,
     });
     setSaving(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    if (error) { toast.error(error.message); return; }
     toast.success("Listed! Your neighbors can see it now.");
     setShowForm(false);
-    setForm({ title: "", description: "", category: "Tools", price_mode: "free", price_amount: "", image_url: "" });
+    setForm({ title: "", description: "", category: "Tools", price_mode: "free", price_amount: "", deposit_amount: "", image_url: "" });
     load();
   }
 
@@ -121,32 +89,24 @@ function ItemsPage() {
       <nav className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">
-              P
-            </span>
-            <span className="font-display text-2xl italic text-leaf">Peers+Help</span>
+            <span className="grid size-8 place-items-center rounded-full bg-leaf text-leaf-foreground font-display text-lg">P</span>
+            <span className="font-display text-2xl text-leaf">Peers+Help</span>
           </Link>
           <div className="flex items-center gap-3">
+            <Link to="/bookings" className="hidden sm:inline rounded-full border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted">
+              My bookings
+            </Link>
             {user ? (
               <>
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
-                >
+                <button onClick={() => setShowForm(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
                   + Lend something
                 </button>
-                <button
-                  onClick={handleSignOut}
-                  className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted"
-                >
+                <button onClick={handleSignOut} className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted">
                   Sign out
                 </button>
               </>
             ) : (
-              <Link
-                to="/auth"
-                className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background"
-              >
+              <Link to="/auth" className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background">
                 Sign in
               </Link>
             )}
@@ -156,10 +116,11 @@ function ItemsPage() {
 
       <main className="mx-auto max-w-7xl px-6 py-12">
         <div className="mb-8">
-          <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            Available near you
-          </p>
+          <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Available near you</p>
           <h1 className="font-display text-4xl">On your block right now</h1>
+          <p className="mt-2 max-w-2xl text-muted-foreground">
+            Borrow or rent from neighbors. Save money, cut waste — one shared item at a time.
+          </p>
         </div>
 
         {loading ? (
@@ -168,10 +129,7 @@ function ItemsPage() {
           <div className="rounded-3xl border border-dashed border-border bg-card p-12 text-center">
             <p className="mb-4 text-muted-foreground">Nothing listed yet — be the first neighbor to share.</p>
             {user ? (
-              <button
-                onClick={() => setShowForm(true)}
-                className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground"
-              >
+              <button onClick={() => setShowForm(true)} className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground">
                 List your first item
               </button>
             ) : (
@@ -189,26 +147,34 @@ function ItemsPage() {
                     <img src={item.image_url} alt={item.title} className="h-full w-full object-cover" />
                   ) : (
                     <div className="grid h-full w-full place-items-center bg-gradient-to-br from-muted to-cream">
-                      <span className="font-display text-3xl italic text-muted-foreground/60">
-                        {item.category}
-                      </span>
+                      <span className="font-display text-3xl text-muted-foreground/60">{item.category}</span>
                     </div>
                   )}
-                  <span
-                    className={`absolute left-3 top-3 rounded-md px-2 py-1 text-[10px] font-bold uppercase backdrop-blur ${
-                      item.price_mode === "free"
-                        ? "bg-leaf/90 text-leaf-foreground"
-                        : "bg-foreground/85 text-background"
-                    }`}
-                  >
+                  <span className={`absolute left-3 top-3 rounded-md px-2 py-1 text-[10px] font-bold uppercase backdrop-blur ${
+                    item.price_mode === "free" ? "bg-leaf/90 text-leaf-foreground" : "bg-foreground/85 text-background"
+                  }`}>
                     {item.price_mode === "free" ? "Free" : `$${item.price_amount}/day`}
                   </span>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {item.description ?? item.category}
-                  </p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{item.description ?? item.category}</p>
+                  {item.deposit_amount != null && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Replacement value if damaged: <strong>${item.deposit_amount}</strong>
+                    </p>
+                  )}
+                  {user?.id !== item.owner_id && (
+                    <button
+                      onClick={() => {
+                        if (!user) { navigate({ to: "/auth" }); return; }
+                        setRequesting(item);
+                      }}
+                      className="mt-3 w-full rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
+                    >
+                      Request this item
+                    </button>
+                  )}
                 </div>
               </article>
             ))}
@@ -216,83 +182,145 @@ function ItemsPage() {
         )}
       </main>
 
+      {requesting && user && (
+        <RequestConsentModal
+          item={requesting}
+          user={user}
+          onClose={() => setRequesting(null)}
+        />
+      )}
+
       {showForm && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setShowForm(false)}>
-          <form
-            onClick={(e) => e.stopPropagation()}
-            onSubmit={handleCreate}
-            className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-8 shadow-2xl"
-          >
+          <form onClick={(e) => e.stopPropagation()} onSubmit={handleCreate} className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-8 shadow-2xl">
             <h2 className="font-display text-2xl">Lend something</h2>
-            <input
-              required
-              placeholder="What are you sharing? (e.g. Extension ladder)"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm"
-            />
-            <textarea
-              placeholder="Anything neighbors should know? Condition, pickup notes…"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              rows={3}
-              className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm"
-            />
+            <input required placeholder="What are you sharing? (e.g. Extension ladder)"
+              value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+              className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+            <textarea placeholder="Anything neighbors should know? Condition, pickup notes…"
+              value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+              rows={3} className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
             <div className="grid grid-cols-2 gap-3">
-              <select
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm"
-              >
-                {categories.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
+              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
+                {categories.map((c) => (<option key={c}>{c}</option>))}
               </select>
-              <select
-                value={form.price_mode}
+              <select value={form.price_mode}
                 onChange={(e) => setForm({ ...form, price_mode: e.target.value as "free" | "rent" })}
-                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm"
-              >
+                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
                 <option value="free">Free to borrow</option>
                 <option value="rent">Rent per day</option>
               </select>
             </div>
             {form.price_mode === "rent" && (
-              <input
-                type="number"
-                min="1"
-                step="1"
-                required
-                placeholder="Price per day (USD)"
-                value={form.price_amount}
-                onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
-                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm"
-              />
+              <input type="number" min="1" step="1" required placeholder="Price per day (USD)"
+                value={form.price_amount} onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
+                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
             )}
-            <input
-              placeholder="Image URL (optional)"
-              value={form.image_url}
-              onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-              className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm"
-            />
+            <div>
+              <input type="number" min="0" step="1" required
+                placeholder="Replacement value if damaged (USD)"
+                value={form.deposit_amount}
+                onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })}
+                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+              <p className="mt-1 px-1 text-xs text-muted-foreground">
+                Borrower will be shown this amount up-front and asked to consent. If the item comes back damaged, they pay this full amount in cash at return.
+              </p>
+            </div>
+            <input placeholder="Image URL (optional)"
+              value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+              className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
             <div className="flex gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="flex-1 rounded-xl border border-border bg-background py-2.5 text-sm font-semibold"
-              >
+              <button type="button" onClick={() => setShowForm(false)}
+                className="flex-1 rounded-xl border border-border bg-background py-2.5 text-sm font-semibold">
                 Cancel
               </button>
-              <button
-                disabled={saving}
-                className="flex-1 rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground"
-              >
+              <button disabled={saving}
+                className="flex-1 rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground">
                 {saving ? "Sharing…" : "Share with neighbors"}
               </button>
             </div>
           </form>
         </div>
       )}
+    </div>
+  );
+}
+
+function RequestConsentModal({
+  item, user, onClose,
+}: {
+  item: Item;
+  user: { id: string };
+  onClose: () => void;
+}) {
+  const [days, setDays] = useState(1);
+  const [consent, setConsent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const deposit = Number(item.deposit_amount ?? 0);
+  const rent = item.price_mode === "rent" ? Number(item.price_amount ?? 0) : 0;
+  const rentTotal = rent * days;
+
+  async function submit() {
+    if (!consent) return toast.error("Please accept the terms first.");
+    setSubmitting(true);
+    const { error } = await supabase.from("bookings").insert({
+      item_id: item.id,
+      owner_id: item.owner_id,
+      borrower_id: user.id,
+      status: "requested",
+      agreed_rent_per_day: rent || null,
+      agreed_days: days,
+      agreed_deposit: deposit,
+      consent_accepted_at: new Date().toISOString(),
+    });
+    setSubmitting(false);
+    if (error) return toast.error(error.message);
+    toast.success("Request sent! The owner will approve and hand it over.");
+    onClose();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-3xl bg-card p-8 shadow-2xl">
+        <h2 className="font-display text-2xl">Request "{item.title}"</h2>
+
+        {item.price_mode === "rent" && (
+          <label className="block text-sm">
+            How many days?
+            <input type="number" min={1} value={days} onChange={(e) => setDays(Math.max(1, Number(e.target.value)))}
+              className="mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+          </label>
+        )}
+
+        <div className="rounded-xl bg-muted p-4 text-sm space-y-1">
+          {rent > 0 && <p><strong>Rent:</strong> ${rent}/day × {days} = <strong>${rentTotal}</strong> — paid in cash at return</p>}
+          <p><strong>Replacement value:</strong> ${deposit}</p>
+        </div>
+
+        <div className="rounded-xl border-2 border-clay/40 bg-clay/5 p-4 text-sm">
+          <p className="font-semibold text-clay">Please read carefully</p>
+          <p className="mt-1 text-foreground">
+            If the item comes back with any defect, damage or missing parts, you agree to pay the
+            <strong> full replacement value of ${deposit}</strong> to the owner in cash at return
+            {rent > 0 ? ` (in addition to the $${rentTotal} rent).` : "."}
+          </p>
+          <label className="mt-3 flex items-start gap-2 cursor-pointer">
+            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1" />
+            <span>I understand and accept these terms. A confirmation will be emailed to me at pickup.</span>
+          </label>
+        </div>
+
+        <div className="flex gap-2">
+          <button onClick={onClose} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-semibold">
+            Cancel
+          </button>
+          <button onClick={submit} disabled={!consent || submitting}
+            className="flex-1 rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground disabled:opacity-50">
+            {submitting ? "Sending…" : "Send request"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
