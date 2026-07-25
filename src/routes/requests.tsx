@@ -26,6 +26,8 @@ type Request = {
   image_url: string | null;
   status: string;
   created_at: string;
+  lat: number | null;
+  lng: number | null;
 };
 
 export const Route = createFileRoute("/requests")({
