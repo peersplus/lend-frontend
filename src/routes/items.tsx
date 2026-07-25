@@ -96,19 +96,35 @@ function ItemsPage() {
       price_amount: form.price_mode === "rent" && form.price_amount ? Number(form.price_amount) : null,
       deposit_amount: form.deposit_amount ? Number(form.deposit_amount) : null,
       image_url: form.image_url || null,
-    });
+      building_name: form.building_name || null,
+      address: form.address || null,
+      lat: form.lat ? Number(form.lat) : null,
+      lng: form.lng ? Number(form.lng) : null,
+    } as never);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Listed! Your neighbors can see it now.");
     setShowForm(false);
-    setForm({ title: "", description: "", category: "Tools", price_mode: "free", price_amount: "", deposit_amount: "", image_url: "" });
+    setForm({
+      title: "", description: "", category: "Tools", price_mode: "free",
+      price_amount: "", deposit_amount: "", image_url: "",
+      building_name: form.building_name, address: form.address,
+      lat: form.lat, lng: form.lng,
+    });
     load();
   }
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    toast.success("Signed out");
+  function useMyLocation() {
+    if (!("geolocation" in navigator)) return toast.error("Geolocation not supported.");
+    navigator.geolocation.getCurrentPosition(
+      (p) => {
+        setForm((f) => ({ ...f, lat: p.coords.latitude.toFixed(6), lng: p.coords.longitude.toFixed(6) }));
+        toast.success("Location captured for this listing.");
+      },
+      (err) => toast.error(err.message),
+    );
   }
+
 
   return (
     <div className="min-h-screen bg-background">
