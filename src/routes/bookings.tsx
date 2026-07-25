@@ -86,10 +86,15 @@ function BookingsPage() {
     load();
   }
 
-  async function dispatchNow(b: Booking, photo: string | null) {
+  async function dispatchNow(b: Booking, photo: string | null, personName: string, personPhoto: string | null) {
     if (!photo) return toast.error("Capture a pickup photo first — this protects both of you.");
-    await update(b.id, { status: "picked_up", pickup_at: new Date().toISOString(), pickup_photo_url: photo });
-    // fire confirmation email to borrower
+    await update(b.id, {
+      status: "picked_up",
+      pickup_at: new Date().toISOString(),
+      pickup_photo_url: photo,
+      pickup_person_name: personName || null,
+      pickup_person_photo: personPhoto || null,
+    });
     fetch("/api/public/hooks/booking-pickup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -98,7 +103,7 @@ function BookingsPage() {
     toast.success("Dispatched. Confirmation emailed to borrower.");
   }
 
-  async function markReturned(b: Booking, defect: boolean, notes: string, photo: string | null) {
+  async function markReturned(b: Booking, defect: boolean, notes: string, photo: string | null, personName: string, personPhoto: string | null) {
     if (!photo) return toast.error("Capture a return photo first.");
     const rentTotal = Number(b.agreed_rent_per_day ?? 0) * Number(b.agreed_days ?? 1);
     const amount = defect ? Number(b.agreed_deposit) + rentTotal : rentTotal;
@@ -109,10 +114,17 @@ function BookingsPage() {
       defect_notes: defect ? notes : null,
       amount_paid: amount,
       return_photo_url: photo,
+      return_person_name: personName || null,
+      return_person_photo: personPhoto || null,
     });
     toast.success(defect
       ? `Return logged. Borrower owes $${amount} in cash (rent + full replacement).`
       : `Return logged. Borrower owes $${amount} in cash.`);
+  }
+
+  async function saveSchedule(id: string, pickupISO: string | null, returnISO: string | null) {
+    await update(id, { pickup_scheduled_at: pickupISO, return_scheduled_at: returnISO });
+    toast.success("Schedule updated.");
   }
 
   if (!user) {
