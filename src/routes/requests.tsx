@@ -284,7 +284,7 @@ function RequestsPage() {
           </div>
         )}
 
-        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3">
+        <div className="mb-4 flex items-center gap-2 overflow-x-auto rounded-xl border border-border bg-card p-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
