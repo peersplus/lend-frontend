@@ -257,7 +257,7 @@ function Home() {
         {/* Mobile flow: register → take → return */}
         <section id="how" className="px-6 py-24">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-14 max-w-2xl">
+            <div className="mb-14 max-w-2xl" data-reveal>
               <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 (02) The neighborhood handshake
               </p>
@@ -271,8 +271,13 @@ function Home() {
             </div>
 
             <div className="grid gap-10 lg:grid-cols-3">
-              {flowSteps.map((step) => (
-                <div key={step.n} className="flex flex-col items-center text-center">
+              {flowSteps.map((step, i) => (
+                <div
+                  key={step.n}
+                  className="flex flex-col items-center text-center"
+                  data-reveal="scale"
+                  data-reveal-delay={String(i * 140)}
+                >
                   <div className="mb-6 font-mono text-xs font-bold uppercase tracking-[0.3em] text-clay">
                     Step {step.n}
                   </div>
