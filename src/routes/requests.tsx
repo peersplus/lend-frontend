@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import { NotificationBell } from "@/components/NotificationBell";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -9,6 +10,7 @@ import { NotificationPermissionPrompt } from "@/components/NotificationPermissio
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
+
 
 
 type Offer = { id: string; request_id: string; helper_id: string; created_at: string; profiles?: { display_name: string | null; avatar_url: string | null } | null };
@@ -46,15 +48,18 @@ const categories = ["Tools", "Electronics", "Medical", "Companionship", "Party",
 
 function RequestsPage() {
   const { user } = useAuth();
+  const { isSuperadmin } = useRole();
   const navigate = useNavigate();
   const [rows, setRows] = useState<Request[]>([]);
   const [offersByReq, setOffersByReq] = useState<Record<string, Offer[]>>({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Request | null>(null);
   const [query, setQuery] = useState("");
   const [filterCat, setFilterCat] = useState<string>("All");
   const [filterUrg, setFilterUrg] = useState<"all" | "urgent" | "normal">("all");
   const [onlyMine, setOnlyMine] = useState(false);
+
   
   const [form, setForm] = useState({
     title: "",
