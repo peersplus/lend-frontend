@@ -445,7 +445,8 @@ function RequestsPage() {
             ))}
 
           </div>
-        )}
+          );
+        })()}
 
         <footer className="mt-16 rounded-2xl border border-dashed border-border bg-muted/40 p-6 text-xs leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">Peers+Help is a free community platform.</p>
