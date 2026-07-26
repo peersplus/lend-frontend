@@ -9,90 +9,36 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as BookingsRouteImport } from './routes/bookings'
-import { Route as CommunityRouteImport } from './routes/community'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as ItemsRouteImport } from './routes/items'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as RequestsRouteImport } from './routes/requests'
-import { Route as SafetyRouteImport } from './routes/safety'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as VerificationRouteImport } from './routes/verification'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SafetyRouteImport } from './routes/safety'
+import { Route as RequestsRouteImport } from './routes/requests'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ItemsRouteImport } from './routes/items'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CommunityRouteImport } from './routes/community'
+import { Route as BookingsRouteImport } from './routes/bookings'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatBookingIdRouteImport } from './routes/chat.$bookingId'
-import { Route as ApiPublicHooksBookingPickupRouteImport } from './routes/api/public/hooks/booking-pickup'
-import { Route as ApiPublicHooksDailyDigestRouteImport } from './routes/api/public/hooks/daily-digest'
-import { Route as ApiPublicHooksNotifyItemRouteImport } from './routes/api/public/hooks/notify-item'
-import { Route as ApiPublicHooksNotifyRequestRouteImport } from './routes/api/public/hooks/notify-request'
-import { Route as ApiPublicHooksOfferCreatedRouteImport } from './routes/api/public/hooks/offer-created'
-import { Route as ApiPublicHooksRequestUpdatedRouteImport } from './routes/api/public/hooks/request-updated'
-import { Route as ChatRequestRequestIdPeerIdRouteImport } from './routes/chat.request.$requestId.$peerId'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ChatRequestRequestIdPeerIdRouteImport } from './routes/chat.request.$requestId.$peerId'
+import { Route as ApiPublicHooksRequestUpdatedRouteImport } from './routes/api/public/hooks/request-updated'
+import { Route as ApiPublicHooksOfferCreatedRouteImport } from './routes/api/public/hooks/offer-created'
+import { Route as ApiPublicHooksNotifyRequestRouteImport } from './routes/api/public/hooks/notify-request'
+import { Route as ApiPublicHooksNotifyItemRouteImport } from './routes/api/public/hooks/notify-item'
+import { Route as ApiPublicHooksDailyDigestRouteImport } from './routes/api/public/hooks/daily-digest'
+import { Route as ApiPublicHooksBookingPickupRouteImport } from './routes/api/public/hooks/booking-pickup'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookingsRoute = BookingsRouteImport.update({
-  id: '/bookings',
-  path: '/bookings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ItemsRoute = ItemsRouteImport.update({
-  id: '/items',
-  path: '/items',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RequestsRoute = RequestsRouteImport.update({
-  id: '/requests',
-  path: '/requests',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SafetyRoute = SafetyRouteImport.update({
-  id: '/safety',
-  path: '/safety',
+const VerificationRoute = VerificationRouteImport.update({
+  id: '/verification',
+  path: '/verification',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -100,9 +46,68 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VerificationRoute = VerificationRouteImport.update({
-  id: '/verification',
-  path: '/verification',
+const SafetyRoute = SafetyRouteImport.update({
+  id: '/safety',
+  path: '/safety',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RequestsRoute = RequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItemsRoute = ItemsRouteImport.update({
+  id: '/items',
+  path: '/items',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingsRoute = BookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatBookingIdRoute = ChatBookingIdRouteImport.update({
+  id: '/chat/$bookingId',
+  path: '/chat/$bookingId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -110,39 +115,26 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const ChatBookingIdRoute = ChatBookingIdRouteImport.update({
-  id: '/chat/$bookingId',
-  path: '/chat/$bookingId',
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicHooksBookingPickupRoute =
-  ApiPublicHooksBookingPickupRouteImport.update({
-    id: '/api/public/hooks/booking-pickup',
-    path: '/api/public/hooks/booking-pickup',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksDailyDigestRoute =
-  ApiPublicHooksDailyDigestRouteImport.update({
-    id: '/api/public/hooks/daily-digest',
-    path: '/api/public/hooks/daily-digest',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksNotifyItemRoute =
-  ApiPublicHooksNotifyItemRouteImport.update({
-    id: '/api/public/hooks/notify-item',
-    path: '/api/public/hooks/notify-item',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksNotifyRequestRoute =
-  ApiPublicHooksNotifyRequestRouteImport.update({
-    id: '/api/public/hooks/notify-request',
-    path: '/api/public/hooks/notify-request',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksOfferCreatedRoute =
-  ApiPublicHooksOfferCreatedRouteImport.update({
-    id: '/api/public/hooks/offer-created',
-    path: '/api/public/hooks/offer-created',
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRequestRequestIdPeerIdRoute =
+  ChatRequestRequestIdPeerIdRouteImport.update({
+    id: '/chat/request/$requestId/$peerId',
+    path: '/chat/request/$requestId/$peerId',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksRequestUpdatedRoute =
@@ -151,26 +143,34 @@ const ApiPublicHooksRequestUpdatedRoute =
     path: '/api/public/hooks/request-updated',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ChatRequestRequestIdPeerIdRoute =
-  ChatRequestRequestIdPeerIdRouteImport.update({
-    id: '/chat/request/$requestId/$peerId',
-    path: '/chat/request/$requestId/$peerId',
+const ApiPublicHooksOfferCreatedRoute =
+  ApiPublicHooksOfferCreatedRouteImport.update({
+    id: '/api/public/hooks/offer-created',
+    path: '/api/public/hooks/offer-created',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailTransactionalPreviewRoute =
-  LovableEmailTransactionalPreviewRouteImport.update({
-    id: '/lovable/email/transactional/preview',
-    path: '/lovable/email/transactional/preview',
+const ApiPublicHooksNotifyRequestRoute =
+  ApiPublicHooksNotifyRequestRouteImport.update({
+    id: '/api/public/hooks/notify-request',
+    path: '/api/public/hooks/notify-request',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksNotifyItemRoute =
+  ApiPublicHooksNotifyItemRouteImport.update({
+    id: '/api/public/hooks/notify-item',
+    path: '/api/public/hooks/notify-item',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksDailyDigestRoute =
+  ApiPublicHooksDailyDigestRouteImport.update({
+    id: '/api/public/hooks/daily-digest',
+    path: '/api/public/hooks/daily-digest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksBookingPickupRoute =
+  ApiPublicHooksBookingPickupRouteImport.update({
+    id: '/api/public/hooks/booking-pickup',
+    path: '/api/public/hooks/booking-pickup',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -372,88 +372,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bookings': {
-      id: '/bookings'
-      path: '/bookings'
-      fullPath: '/bookings'
-      preLoaderRoute: typeof BookingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/items': {
-      id: '/items'
-      path: '/items'
-      fullPath: '/items'
-      preLoaderRoute: typeof ItemsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/requests': {
-      id: '/requests'
-      path: '/requests'
-      fullPath: '/requests'
-      preLoaderRoute: typeof RequestsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/safety': {
-      id: '/safety'
-      path: '/safety'
-      fullPath: '/safety'
-      preLoaderRoute: typeof SafetyRouteImport
+    '/verification': {
+      id: '/verification'
+      path: '/verification'
+      fullPath: '/verification'
+      preLoaderRoute: typeof VerificationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -463,11 +386,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/verification': {
-      id: '/verification'
-      path: '/verification'
-      fullPath: '/verification'
-      preLoaderRoute: typeof VerificationRouteImport
+    '/safety': {
+      id: '/safety'
+      path: '/safety'
+      fullPath: '/safety'
+      preLoaderRoute: typeof SafetyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/requests': {
+      id: '/requests'
+      path: '/requests'
+      fullPath: '/requests'
+      preLoaderRoute: typeof RequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/items': {
+      id: '/items'
+      path: '/items'
+      fullPath: '/items'
+      preLoaderRoute: typeof ItemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookings': {
+      id: '/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof BookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat/$bookingId': {
+      id: '/chat/$bookingId'
+      path: '/chat/$bookingId'
+      fullPath: '/chat/$bookingId'
+      preLoaderRoute: typeof ChatBookingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -477,67 +484,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/chat/$bookingId': {
-      id: '/chat/$bookingId'
-      path: '/chat/$bookingId'
-      fullPath: '/chat/$bookingId'
-      preLoaderRoute: typeof ChatBookingIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/booking-pickup': {
-      id: '/api/public/hooks/booking-pickup'
-      path: '/api/public/hooks/booking-pickup'
-      fullPath: '/api/public/hooks/booking-pickup'
-      preLoaderRoute: typeof ApiPublicHooksBookingPickupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/daily-digest': {
-      id: '/api/public/hooks/daily-digest'
-      path: '/api/public/hooks/daily-digest'
-      fullPath: '/api/public/hooks/daily-digest'
-      preLoaderRoute: typeof ApiPublicHooksDailyDigestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/notify-item': {
-      id: '/api/public/hooks/notify-item'
-      path: '/api/public/hooks/notify-item'
-      fullPath: '/api/public/hooks/notify-item'
-      preLoaderRoute: typeof ApiPublicHooksNotifyItemRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/notify-request': {
-      id: '/api/public/hooks/notify-request'
-      path: '/api/public/hooks/notify-request'
-      fullPath: '/api/public/hooks/notify-request'
-      preLoaderRoute: typeof ApiPublicHooksNotifyRequestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/offer-created': {
-      id: '/api/public/hooks/offer-created'
-      path: '/api/public/hooks/offer-created'
-      fullPath: '/api/public/hooks/offer-created'
-      preLoaderRoute: typeof ApiPublicHooksOfferCreatedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/request-updated': {
-      id: '/api/public/hooks/request-updated'
-      path: '/api/public/hooks/request-updated'
-      fullPath: '/api/public/hooks/request-updated'
-      preLoaderRoute: typeof ApiPublicHooksRequestUpdatedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat/request/$requestId/$peerId': {
-      id: '/chat/request/$requestId/$peerId'
-      path: '/chat/request/$requestId/$peerId'
-      fullPath: '/chat/request/$requestId/$peerId'
-      preLoaderRoute: typeof ChatRequestRequestIdPeerIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/auth/webhook': {
@@ -547,11 +498,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat/request/$requestId/$peerId': {
+      id: '/chat/request/$requestId/$peerId'
+      path: '/chat/request/$requestId/$peerId'
+      fullPath: '/chat/request/$requestId/$peerId'
+      preLoaderRoute: typeof ChatRequestRequestIdPeerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/request-updated': {
+      id: '/api/public/hooks/request-updated'
+      path: '/api/public/hooks/request-updated'
+      fullPath: '/api/public/hooks/request-updated'
+      preLoaderRoute: typeof ApiPublicHooksRequestUpdatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/offer-created': {
+      id: '/api/public/hooks/offer-created'
+      path: '/api/public/hooks/offer-created'
+      fullPath: '/api/public/hooks/offer-created'
+      preLoaderRoute: typeof ApiPublicHooksOfferCreatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/notify-request': {
+      id: '/api/public/hooks/notify-request'
+      path: '/api/public/hooks/notify-request'
+      fullPath: '/api/public/hooks/notify-request'
+      preLoaderRoute: typeof ApiPublicHooksNotifyRequestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/notify-item': {
+      id: '/api/public/hooks/notify-item'
+      path: '/api/public/hooks/notify-item'
+      fullPath: '/api/public/hooks/notify-item'
+      preLoaderRoute: typeof ApiPublicHooksNotifyItemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/daily-digest': {
+      id: '/api/public/hooks/daily-digest'
+      path: '/api/public/hooks/daily-digest'
+      fullPath: '/api/public/hooks/daily-digest'
+      preLoaderRoute: typeof ApiPublicHooksDailyDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/booking-pickup': {
+      id: '/api/public/hooks/booking-pickup'
+      path: '/api/public/hooks/booking-pickup'
+      fullPath: '/api/public/hooks/booking-pickup'
+      preLoaderRoute: typeof ApiPublicHooksBookingPickupRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
