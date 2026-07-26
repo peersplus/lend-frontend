@@ -15,6 +15,7 @@ import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as LandingRouteImport } from './routes/landing'
 import { Route as ItemsRouteImport } from './routes/items'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CommunityRouteImport } from './routes/community'
@@ -64,6 +65,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItemsRoute = ItemsRouteImport.update({
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/items': typeof ItemsRoute
+  '/landing': typeof LandingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/requests': typeof RequestsRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/items': typeof ItemsRoute
+  '/landing': typeof LandingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/requests': typeof RequestsRoute
@@ -238,6 +246,7 @@ export interface FileRoutesById {
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
   '/items': typeof ItemsRoute
+  '/landing': typeof LandingRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/requests': typeof RequestsRoute
@@ -267,6 +276,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/contact'
     | '/items'
+    | '/landing'
     | '/privacy'
     | '/profile'
     | '/requests'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/contact'
     | '/items'
+    | '/landing'
     | '/privacy'
     | '/profile'
     | '/requests'
@@ -322,6 +333,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/contact'
     | '/items'
+    | '/landing'
     | '/privacy'
     | '/profile'
     | '/requests'
@@ -351,6 +363,7 @@ export interface RootRouteChildren {
   CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
   ItemsRoute: typeof ItemsRoute
+  LandingRoute: typeof LandingRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   RequestsRoute: typeof RequestsRoute
@@ -412,6 +425,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/items': {
@@ -577,6 +597,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
   ItemsRoute: ItemsRoute,
+  LandingRoute: LandingRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   RequestsRoute: RequestsRoute,
@@ -598,13 +619,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
