@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { getFirebaseIdToken } from "@/lib/firebase";
 
 export type Notification = {
   id: string;
@@ -24,36 +24,22 @@ export function useNotifications() {
       return;
     }
     setLoading(true);
-    const { data } = await supabase
-      .from("notifications")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(50);
-    setItems((data as Notification[]) ?? []);
+    try {
+      const token = await getFirebaseIdToken();
+      const response = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/notifications`, {
+        headers: { Authorization: token ? `Bearer ${token}` : "" },
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(body?.error?.message || "Unable to load notifications");
+      setItems((body?.data as Notification[]) ?? []);
+    } catch {
+      setItems([]);
+    }
     setLoading(false);
   }, [user]);
 
   useEffect(() => {
     load();
-    if (!user) return;
-    const channel = supabase
-      .channel(`notifications:${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: `recipient_id=eq.${user.id}`,
-        },
-        (payload) => {
-          setItems((prev) => [payload.new as Notification, ...prev]);
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [user, load]);
 
   const unreadCount = items.filter((n) => !n.read_at).length;
@@ -62,10 +48,11 @@ export function useNotifications() {
     if (!user) return;
     const unread = items.filter((n) => !n.read_at).map((n) => n.id);
     if (!unread.length) return;
-    await supabase
-      .from("notifications")
-      .update({ read_at: new Date().toISOString() })
-      .in("id", unread);
+    const token = await getFirebaseIdToken();
+    await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/notifications/mark-all-read`, {
+      method: "POST",
+      headers: { Authorization: token ? `Bearer ${token}` : "" },
+    });
     setItems((prev) =>
       prev.map((n) => (n.read_at ? n : { ...n, read_at: new Date().toISOString() })),
     );

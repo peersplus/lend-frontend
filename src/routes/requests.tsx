@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { createRequestApi, createRequestOfferApi, deleteRequestApi, listRequestOffersApi, listRequestsApi, updateRequestApi } from "@/lib/api-peers";
 import { useRole } from "@/hooks/useRole";
 import { NotificationBell } from "@/components/NotificationBell";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -81,61 +81,61 @@ function RequestsPage() {
 
   async function loadOffers(requestIds: string[]) {
     if (requestIds.length === 0) return;
-    const { data } = await supabase
-      .from("request_offers")
-      .select("id, request_id, helper_id, created_at, profiles:helper_id(display_name, avatar_url)")
-      .in("request_id", requestIds);
-    const grouped: Record<string, Offer[]> = {};
-    (data as unknown as Offer[] | null)?.forEach((o) => {
-      (grouped[o.request_id] ||= []).push(o);
-    });
-    setOffersByReq(grouped);
+    try {
+      const data = await listRequestOffersApi(requestIds);
+      const grouped: Record<string, Offer[]> = {};
+      (data as unknown as Offer[] | null)?.forEach((o) => {
+        (grouped[o.request_id] ||= []).push(o);
+      });
+      setOffersByReq(grouped);
+    } catch {
+      setOffersByReq({});
+    }
   }
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      // Superadmin sees all. Owners see their own regardless of status. Everyone else sees open.
-      const query = supabase.from("requests").select("*").order("created_at", { ascending: false }).limit(120);
-      const { data } = isSuperadmin
-        ? await query
-        : await query.or(user?.id ? `status.eq.open,owner_id.eq.${user.id}` : "status.eq.open");
-      const list = (data as Request[]) ?? [];
-      setRows(list);
+      try {
+        const list = (await listRequestsApi()) as Request[];
+        setRows(list);
+        await loadOffers(list.map((r) => r.id));
+      } catch (error: any) {
+        toast.error(error.message || 'Unable to load requests');
+        setRows([]);
+      }
       setLoading(false);
-      await loadOffers(list.map((r) => r.id));
     })();
-  }, [user?.id, isSuperadmin]);
+  }, [user?.uid, isSuperadmin]);
 
 
 
   async function offerHelp(r: Request) {
     if (!user) return navigate({ to: "/auth" });
-    const { data: inserted, error } = await supabase
-      .from("request_offers")
-      .insert({ request_id: r.id, helper_id: user.id })
-      .select("id")
-      .maybeSingle();
-    if (error && !error.message.toLowerCase().includes("duplicate")) {
-      toast.error(error.message);
+    try {
+      const inserted = await createRequestOfferApi({ request_id: r.id, helper_id: user.uid });
+      if (inserted?.id) {
+        const anon = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? "";
+        fetch("/api/public/hooks/offer-created", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: anon },
+          body: JSON.stringify({ offer_id: inserted.id }),
+        }).catch(() => {});
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Unable to offer help');
       return;
-    }
-    if (inserted?.id) {
-      // Fire-and-forget: email the requester that someone stepped up.
-      const anon = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? "";
-      fetch("/api/public/hooks/offer-created", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", apikey: anon },
-        body: JSON.stringify({ offer_id: inserted.id }),
-      }).catch(() => {});
     }
     toast.success("✅ You offered to help — the requester was notified by email. Opening chat…");
     navigate({ to: "/chat/request/$requestId/$peerId", params: { requestId: r.id, peerId: r.owner_id } });
   }
 
   async function closeRequest(r: Request, status: "closed" | "open") {
-    const { error } = await supabase.from("requests").update({ status }).eq("id", r.id);
-    if (error) return toast.error(error.message);
+    try {
+      await updateRequestApi(r.id, { status });
+    } catch (error: any) {
+      return toast.error(error.message || 'Unable to update request');
+    }
     setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, status } : x)));
     notifyUpdate(r, status);
     toast.success(status === "closed" ? "Request marked inactive — helpers notified." : "Request reopened — helpers notified.");
@@ -144,8 +144,11 @@ function RequestsPage() {
   async function deleteRequest(r: Request) {
     if (!confirm("Delete this request? This cannot be undone.")) return;
     notifyUpdate(r, "deleted");
-    const { error } = await supabase.from("requests").delete().eq("id", r.id);
-    if (error) return toast.error(error.message);
+    try {
+      await deleteRequestApi(r.id);
+    } catch (error: any) {
+      return toast.error(error.message || 'Unable to delete request');
+    }
     setRows((prev) => prev.filter((x) => x.id !== r.id));
     toast.success("Request deleted — helpers notified.");
   }
@@ -155,32 +158,23 @@ function RequestsPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    // pull user's stored coords for radius fan-out
-    const { data: prof } = await supabase
-      .from("profiles")
-      .select("lat,lng,radius_km")
-      .eq("id", user.id)
-      .maybeSingle();
-    const { data, error } = await supabase
-      .from("requests")
-      .insert({
-        owner_id: user.id,
+    try {
+      const profile = await import('@/lib/api-peers').then((m) => m.getMyPeerProfileApi());
+      const data = await createRequestApi({
         title: form.title,
         description: form.description || null,
         category: form.category,
         urgency: form.urgency,
         radius_km: form.radius_km,
         image_url: form.image_url || null,
-        lat: prof?.lat ?? null,
-        lng: prof?.lng ?? null,
-      })
-      .select("*")
-      .single();
-    if (error) {
-      toast.error(error.message);
+        lat: profile?.lat ?? null,
+        lng: profile?.lng ?? null,
+      });
+      setRows((prev) => [data as Request, ...prev]);
+    } catch (error: any) {
+      toast.error(error.message || 'Unable to post request');
       return;
     }
-    setRows((prev) => [data as Request, ...prev]);
     setShowForm(false);
     setForm({ title: "", description: "", category: "Tools", urgency: "normal", radius_km: 5, image_url: "" });
     toast.success("Request posted — your neighborhood has been notified.");
@@ -338,7 +332,7 @@ function RequestsPage() {
           const filtered = rows.filter((r) => {
             if (filterCat !== "All" && r.category !== filterCat) return false;
             if (filterUrg !== "all" && r.urgency !== filterUrg) return false;
-            if (onlyMine && r.owner_id !== user?.id) return false;
+            if (onlyMine && r.owner_id !== user?.uid) return false;
             if (q && !(r.title.toLowerCase().includes(q) || (r.description ?? "").toLowerCase().includes(q))) return false;
             return true;
           });
@@ -380,7 +374,7 @@ function RequestsPage() {
                   </div>
 
 
-                  {user && user.id !== r.owner_id && r.status === "open" && (
+                  {user && user.uid !== r.owner_id && r.status === "open" && (
                     <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <button
                         onClick={() => offerHelp(r)}
@@ -408,7 +402,7 @@ function RequestsPage() {
                         {offersByReq[r.id]!.map((o) => (
                           <li key={o.id} className="flex items-center justify-between gap-2 text-sm">
                             <span className="truncate">{o.profiles?.display_name ?? "Neighbor"}</span>
-                            {user && user.id === r.owner_id && (
+                            {user && user.uid === r.owner_id && (
                               <Link
                                 to="/chat/request/$requestId/$peerId"
                                 params={{ requestId: r.id, peerId: o.helper_id }}
@@ -423,7 +417,7 @@ function RequestsPage() {
                     </div>
                   )}
 
-                  {user && (user.id === r.owner_id || isSuperadmin) && (
+                  {user && (user.uid === r.owner_id || isSuperadmin) && (
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button
                         onClick={() => setEditing(r)}

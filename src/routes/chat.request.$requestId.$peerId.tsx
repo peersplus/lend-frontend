@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { createMessageApi, listMessagesApi } from "@/lib/api-peers";
 import { UserMenu } from "@/components/UserMenu";
 import { toast } from "sonner";
 
@@ -36,39 +36,33 @@ function RequestChatPage() {
     if (!user) { navigate({ to: "/auth" }); return; }
 
     (async () => {
-      const [{ data: r, error: rErr }, { data: pRows }] = await Promise.all([
-        supabase.from("requests").select("id,owner_id,title,description,urgency,category").eq("id", requestId).maybeSingle(),
-        supabase.rpc("get_request_contact", { _request_id: requestId, _peer_id: peerId }),
-      ]);
-      if (rErr || !r) { toast.error("Request not found"); navigate({ to: "/requests" }); return; }
-      setReq(r as Req);
-      const p = Array.isArray(pRows) ? pRows[0] : null;
-      setPeer(p ? { id: (p as any).user_id, display_name: (p as any).display_name, avatar_url: (p as any).avatar_url, phone: (p as any).phone, building_name: (p as any).building_name, address: (p as any).address } as PeerProfile : null);
-
-      const { data: msgs } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("request_id", requestId)
-        .or(`and(sender_id.eq.${user.id},peer_id.eq.${peerId}),and(sender_id.eq.${peerId},peer_id.eq.${user.id})`)
-        .order("created_at", { ascending: true });
-      setMessages((msgs as Message[]) ?? []);
-      setReady(true);
+      try {
+        const requests = await import('@/lib/api-peers').then((m) => m.listRequestsApi());
+        const r = (requests as Req[]).find((x) => x.id === requestId) || null;
+        if (!r) { toast.error("Request not found"); navigate({ to: "/requests" }); return; }
+        setReq(r as Req);
+        const msgs = await listMessagesApi({ request_id: requestId });
+        setMessages((msgs as Message[]) ?? []);
+        setReady(true);
+      } catch (error: any) {
+        toast.error(error.message || 'Unable to load request chat');
+        navigate({ to: "/requests" });
+      }
     })();
   }, [user, loading, requestId, peerId, navigate]);
 
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
-      .channel(`req-chat:${requestId}:${peerId}`)
-      .on("postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `request_id=eq.${requestId}` },
-        (payload) => {
-          const m = payload.new as Message;
-          const pair = (m.sender_id === user.id && m.peer_id === peerId) || (m.sender_id === peerId && m.peer_id === user.id);
-          if (pair) setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
-        })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    let active = true;
+    const interval = window.setInterval(async () => {
+      try {
+        const msgs = await listMessagesApi({ request_id: requestId });
+        if (active) setMessages((msgs as Message[]) ?? []);
+      } catch {
+        // ignore refresh errors
+      }
+    }, 3000);
+    return () => { active = false; window.clearInterval(interval); };
   }, [user, requestId, peerId]);
 
   useEffect(() => { bottom.current?.scrollIntoView({ behavior: "smooth" }); }, [messages.length]);
@@ -78,15 +72,19 @@ function RequestChatPage() {
     const body = text.trim();
     if (!body || !user) return;
     setSending(true);
-    const { error } = await supabase.from("messages").insert({
-      request_id: requestId,
-      peer_id: peerId,
-      sender_id: user.id,
-      body,
-    });
-    setSending(false);
-    if (error) return toast.error(error.message);
-    setText("");
+    try {
+      await createMessageApi({
+        request_id: requestId,
+        peer_id: peerId,
+        sender_id: user.uid,
+        body,
+      });
+      setSending(false);
+      setText("");
+    } catch (error: any) {
+      setSending(false);
+      toast.error(error.message || 'Unable to send message');
+    }
   }
 
   if (loading || !ready) return <div className="p-8 text-muted-foreground">Loading…</div>;

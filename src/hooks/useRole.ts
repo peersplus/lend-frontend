@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
 export function useRole() {
@@ -14,16 +13,31 @@ export function useRole() {
       setReady(true);
       return;
     }
+
     let cancelled = false;
-    supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .then(({ data }) => {
-        if (cancelled) return;
-        setRoles((data ?? []).map((r: { role: string }) => r.role));
-        setReady(true);
-      });
+
+    (async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/user-roles/${user.uid}`, {
+          headers: {
+            Authorization: `Bearer ${await (await import("@/lib/firebase")).getFirebaseIdToken()}`,
+          },
+        });
+        const body = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(body?.error?.message || "Unable to load roles");
+        const role = body?.data?.role || body?.role || "user";
+        if (!cancelled) {
+          setRoles(role ? [role] : []);
+          setReady(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setRoles([]);
+          setReady(true);
+        }
+      }
+    })();
+
     return () => {
       cancelled = true;
     };
@@ -32,6 +46,6 @@ export function useRole() {
   return {
     roles,
     ready,
-    isSuperadmin: roles.includes("superadmin"),
+    isSuperadmin: roles.some((role) => role === "superadmin" || role === "super_admin"),
   };
 }

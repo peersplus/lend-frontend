@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { getMyPeerProfileApi, updateMyPeerProfileApi } from "@/lib/api-peers";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
@@ -33,37 +33,43 @@ function ProfilePage() {
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate({ to: "/auth" }); return; }
-    supabase.from("profiles")
-      .select("display_name,avatar_url,phone,neighborhood,building_name,address")
-      .eq("id", user.id).maybeSingle()
-      .then(({ data }) => {
+    (async () => {
+      try {
+        const data = await getMyPeerProfileApi();
         if (data) setForm({
-          display_name: data.display_name ?? "",
+          display_name: data.display_name ?? data.full_name ?? "",
           avatar_url: data.avatar_url ?? "",
-          phone: (data as any).phone ?? "",
+          phone: data.phone ?? "",
           neighborhood: data.neighborhood ?? "",
-          building_name: (data as any).building_name ?? "",
-          address: (data as any).address ?? "",
+          building_name: data.building_name ?? "",
+          address: data.address ?? "",
         });
-        setReady(true);
-      });
+      } catch {
+        // ignore missing profile
+      }
+      setReady(true);
+    })();
   }, [user, loading, navigate]);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("profiles").update({
-      display_name: form.display_name || null,
-      avatar_url: form.avatar_url || null,
-      phone: form.phone || null,
-      neighborhood: form.neighborhood || null,
-      building_name: form.building_name || null,
-      address: form.address || null,
-    } as never).eq("id", user.id);
-    setSaving(false);
-    if (error) toast.error(error.message);
-    else toast.success("✅ Profile saved", { description: "Your changes are live for neighbors to see." });
+    try {
+      await updateMyPeerProfileApi({
+        display_name: form.display_name || null,
+        avatar_url: form.avatar_url || null,
+        phone: form.phone || null,
+        neighborhood: form.neighborhood || null,
+        building_name: form.building_name || null,
+        address: form.address || null,
+      });
+      setSaving(false);
+      toast.success("✅ Profile saved", { description: "Your changes are live for neighbors to see." });
+    } catch (error: any) {
+      setSaving(false);
+      toast.error(error.message || 'Unable to save profile');
+    }
 
   }
 
@@ -82,22 +88,23 @@ function ProfilePage() {
         <p className="mt-2 text-muted-foreground">This is how neighbors see you. Contact details only unlock after a booking is approved.</p>
 
         <form onSubmit={save} className="mt-8 space-y-6">
-          <section className="flex items-center gap-4 rounded-2xl border border-border bg-card p-5">
-            {form.avatar_url ? (
-              <PhotoImg path={form.avatar_url} alt="" className="size-20 rounded-full object-cover ring-2 ring-border" />
-            ) : (
-              <div className="grid size-20 place-items-center rounded-full bg-leaf/15 text-2xl font-display text-leaf">
-                {initials || "🙂"}
+          <section className="rounded-[28px] border border-border bg-card p-5 shadow-sm">
+            <div className="flex flex-col gap-5 md:flex-row md:items-center">
+              <div className="flex-1">
+                <p className="text-sm font-semibold">Profile photo</p>
+                <p className="mt-1 text-sm text-muted-foreground">Use a clear, friendly headshot so neighbors recognize you quickly.</p>
               </div>
-            )}
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-2">Profile photo</label>
-              <PhotoUpload
-                value={form.avatar_url || null}
-                onChange={(p) => setForm({ ...form, avatar_url: p ?? "" })}
-                folder="avatars"
-                label="Upload profile photo"
-              />
+              <div className="md:min-w-[240px]">
+                <PhotoUpload
+                  value={form.avatar_url || null}
+                  onChange={(p) => setForm({ ...form, avatar_url: p ?? "" })}
+                  folder="avatars"
+                  label="Upload profile photo"
+                  crop
+                  cropTitle="Crop your profile photo"
+                  compact
+                />
+              </div>
             </div>
           </section>
 

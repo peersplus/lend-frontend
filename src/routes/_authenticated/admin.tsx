@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useRole } from "@/hooks/useRole";
+import { getFirebaseIdToken } from "@/lib/firebase";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { toast } from "sonner";
@@ -37,46 +37,41 @@ function AdminPage() {
   useEffect(() => {
     if (!isSuperadmin) return;
     setLoading(true);
-    const table = tab === "users" ? "profiles" : tab;
-    supabase
-      .from(table as any)
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(200)
-      .then(async ({ data, error }) => {
-        if (error) toast.error(error.message);
-        const list = (data as any[]) ?? [];
-        const ownerIds = Array.from(
-          new Set(
-            list
-              .map((r) => r.owner_id ?? r.borrower_id ?? (tab === "users" ? r.id : null))
-              .filter(Boolean),
-          ),
-        );
-        if (ownerIds.length) {
-          const { data: profs } = await supabase
-            .from("profiles")
-            .select("id, display_name")
-            .in("id", ownerIds as string[]);
-          const nameById = new Map((profs ?? []).map((p: any) => [p.id, p.display_name]));
-          list.forEach((r) => {
-            const oid = r.owner_id ?? r.borrower_id ?? (tab === "users" ? r.id : null);
-            r.__ownerName = (oid && nameById.get(oid)) || null;
-          });
-        }
+    (async () => {
+      try {
+        const token = await getFirebaseIdToken();
+        const response = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/${tab === "users" ? "profiles" : tab}`, {
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
+        });
+        const body = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(body?.error?.message || "Unable to load admin data");
+        const list = (body?.data as any[]) ?? [];
         setRows(list);
-        setLoading(false);
-      });
+      } catch (error: any) {
+        toast.error(error.message || "Unable to load admin data");
+        setRows([]);
+      }
+      setLoading(false);
+    })();
   }, [tab, isSuperadmin]);
 
 
   async function del(id: string) {
     if (!confirm("Delete this row?")) return;
-    const table = tab === "users" ? "profiles" : tab;
-    const { error } = await supabase.from(table as any).delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Deleted");
-    setRows((r) => r.filter((x) => x.id !== id));
+    try {
+      const token = await getFirebaseIdToken();
+      const table = tab === "users" ? "profiles" : tab;
+      const response = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/${table}/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: token ? `Bearer ${token}` : "" },
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(body?.error?.message || "Unable to delete row");
+      toast.success("Deleted");
+      setRows((r) => r.filter((x) => x.id !== id));
+    } catch (error: any) {
+      toast.error(error.message || "Unable to delete row");
+    }
   }
 
   if (!ready) return null;

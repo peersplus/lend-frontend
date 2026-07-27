@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { getFirebaseIdToken } from "@/lib/firebase";
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
 
@@ -52,15 +52,19 @@ export function useWebPush() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       });
       const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } };
-      await supabase.from("push_subscriptions").upsert(
-        {
-          user_id: user.id,
+      const token = await getFirebaseIdToken();
+      await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/profile/push-subscription`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({
           endpoint: json.endpoint,
           p256dh: json.keys.p256dh,
           auth: json.keys.auth,
-        },
-        { onConflict: "endpoint" },
-      );
+        }),
+      });
       setSubscribed(true);
     } finally {
       setBusy(false);
@@ -73,7 +77,15 @@ export function useWebPush() {
       const reg = await navigator.serviceWorker.getRegistration("/sw.js");
       const sub = await reg?.pushManager.getSubscription();
       if (sub) {
-        await supabase.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+        const token = await getFirebaseIdToken();
+        await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/profile/push-subscription`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+          body: JSON.stringify({ endpoint: sub.endpoint }),
+        });
         await sub.unsubscribe();
       }
       setSubscribed(false);

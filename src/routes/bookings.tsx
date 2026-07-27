@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { listBookingsApi, updateBookingApi, getMyPeerProfileApi } from "@/lib/api-peers";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
@@ -59,8 +59,12 @@ function BookingsPage() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("profiles").select("require_handoff_person").eq("id", user.id).maybeSingle();
-      setAskHandoff(!!data?.require_handoff_person);
+      try {
+        const profile = await getMyPeerProfileApi();
+        setAskHandoff(!!profile?.require_handoff_person);
+      } catch {
+        setAskHandoff(false);
+      }
     })();
   }, [user]);
 
@@ -68,23 +72,25 @@ function BookingsPage() {
   const load = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    const col = tab === "borrowed" ? "borrower_id" : "owner_id";
-    const { data, error } = await supabase
-      .from("bookings")
-      .select("*, items(title, image_url)")
-      .eq(col, user.id)
-      .order("created_at", { ascending: false });
-    if (error) toast.error(error.message);
-    setRows((data as any) ?? []);
+    try {
+      const data = await listBookingsApi(tab);
+      setRows((data as any) ?? []);
+    } catch (error: any) {
+      toast.error(error.message || 'Unable to load bookings');
+      setRows([]);
+    }
     setLoading(false);
   }, [user, tab]);
 
   useEffect(() => { load(); }, [load]);
 
   async function update(id: string, patch: Record<string, unknown>) {
-    const { error } = await supabase.from("bookings").update(patch as never).eq("id", id);
-    if (error) return toast.error(error.message);
-    load();
+    try {
+      await updateBookingApi(id, patch);
+      load();
+    } catch (error: any) {
+      toast.error(error.message || 'Unable to update booking');
+    }
   }
 
   async function dispatchNow(b: Booking, photo: string | null, personName: string, personPhoto: string | null) {

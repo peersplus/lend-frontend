@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
+import { signOutFirebase } from "@/lib/firebase";
 
 type Profile = {
   display_name: string | null;
@@ -20,10 +20,7 @@ export function UserMenu() {
 
   useEffect(() => {
     if (!user) { setProfile(null); return; }
-    supabase.from("profiles")
-      .select("display_name,avatar_url,neighborhood")
-      .eq("id", user.id).maybeSingle()
-      .then(({ data }) => setProfile(data as Profile | null));
+    setProfile(null);
   }, [user]);
 
   useEffect(() => {
@@ -48,7 +45,7 @@ export function UserMenu() {
   const initials = name.split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase()).join("");
 
   async function signOut() {
-    await supabase.auth.signOut();
+    await signOutFirebase();
     toast.success("Signed out");
     navigate({ to: "/" });
   }

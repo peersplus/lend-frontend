@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebPush } from "@/hooks/useWebPush";
-import { supabase } from "@/integrations/supabase/client";
+import { getFirebaseIdToken } from "@/lib/firebase";
 import { toast } from "sonner";
 
 const DISMISS_KEY = "peers-notif-prompt-dismissed";
@@ -29,12 +29,16 @@ export function NotificationPermissionPrompt({ compact = false }: { compact?: bo
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("email_enabled")
-        .eq("id", user.id)
-        .maybeSingle();
-      setEmailStatus(data?.email_enabled === false ? "off" : "on");
+      try {
+        const token = await getFirebaseIdToken();
+        const response = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/peer-profile/me`, {
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
+        });
+        const body = await response.json().catch(() => null);
+        setEmailStatus(body?.data?.email_enabled === false ? "off" : "on");
+      } catch {
+        setEmailStatus("on");
+      }
     })();
   }, [user]);
 

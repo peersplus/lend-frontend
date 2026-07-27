@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { getFirebaseIdToken } from "@/lib/firebase";
 import { useWebPush } from "@/hooks/useWebPush";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -45,21 +45,26 @@ function SettingsPage() {
       return;
     }
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("neighborhood,lat,lng,radius_km,push_enabled,email_enabled,require_handoff_person")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (data) {
-        setForm({
-          neighborhood: data.neighborhood ?? "",
-          lat: data.lat != null ? String(data.lat) : "",
-          lng: data.lng != null ? String(data.lng) : "",
-          radius_km: data.radius_km ?? 5,
-          push_enabled: data.push_enabled ?? true,
-          email_enabled: data.email_enabled ?? true,
-          require_handoff_person: data.require_handoff_person ?? false,
+      try {
+        const token = await getFirebaseIdToken();
+        const response = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/peer-profile/me`, {
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
         });
+        const body = await response.json().catch(() => null);
+        const data = body?.data;
+        if (data) {
+          setForm({
+            neighborhood: data.neighborhood ?? "",
+            lat: data.lat != null ? String(data.lat) : "",
+            lng: data.lng != null ? String(data.lng) : "",
+            radius_km: data.radius_km ?? 5,
+            push_enabled: data.push_enabled ?? true,
+            email_enabled: data.email_enabled ?? true,
+            require_handoff_person: data.require_handoff_person ?? false,
+          });
+        }
+      } catch {
+        // ignore load errors
       }
       setReady(true);
     })();
@@ -81,22 +86,32 @@ function SettingsPage() {
     e.preventDefault();
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        neighborhood: form.neighborhood || null,
-        lat: form.lat ? Number(form.lat) : null,
-        lng: form.lng ? Number(form.lng) : null,
-        radius_km: form.radius_km,
-        push_enabled: form.push_enabled,
-        email_enabled: form.email_enabled,
-        require_handoff_person: form.require_handoff_person,
-      })
-      .eq("id", user.id);
-
-    setSaving(false);
-    if (error) toast.error(error.message);
-    else toast.success("✅ Settings saved", { description: "Your neighborhood & alert preferences are updated." });
+    try {
+      const token = await getFirebaseIdToken();
+      const response = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/peer-profile/me`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({
+          neighborhood: form.neighborhood || null,
+          lat: form.lat ? Number(form.lat) : null,
+          lng: form.lng ? Number(form.lng) : null,
+          radius_km: form.radius_km,
+          push_enabled: form.push_enabled,
+          email_enabled: form.email_enabled,
+          require_handoff_person: form.require_handoff_person,
+        }),
+      });
+      const body = await response.json().catch(() => null);
+      setSaving(false);
+      if (!response.ok) throw new Error(body?.error?.message || "Unable to save settings");
+      toast.success("✅ Settings saved", { description: "Your neighborhood & alert preferences are updated." });
+    } catch (error: any) {
+      setSaving(false);
+      toast.error(error.message || "Unable to save settings");
+    }
 
   };
 

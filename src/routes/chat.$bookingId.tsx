@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { createMessageApi, getProfileApi, listBookingsApi, listMessagesApi } from "@/lib/api-peers";
 import { UserMenu } from "@/components/UserMenu";
+import { PhotoImg } from "@/components/PhotoImg";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/chat/$bookingId")({
@@ -19,11 +20,14 @@ type Message = { id: string; booking_id: string; sender_id: string; body: string
 type BookingLite = { id: string; status: string; owner_id: string; borrower_id: string; items: { title: string; image_url: string | null } | null };
 type Contact = { user_id: string; display_name: string | null; avatar_url: string | null; phone: string | null; building_name: string | null; address: string | null; role: string };
 
+type ViewerRole = "owner" | "borrower";
+
 function ChatPage() {
   const { bookingId } = Route.useParams();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [booking, setBooking] = useState<BookingLite | null>(null);
+  const [viewerRole, setViewerRole] = useState<ViewerRole | null>(null);
   const [contact, setContact] = useState<Contact | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
@@ -36,35 +40,68 @@ function ChatPage() {
     if (!user) { navigate({ to: "/auth" }); return; }
 
     (async () => {
-      const { data: b, error: bErr } = await supabase
-        .from("bookings")
-        .select("id,status,owner_id,borrower_id, items(title, image_url)")
-        .eq("id", bookingId).maybeSingle();
-      if (bErr || !b) { toast.error(bErr?.message ?? "Booking not found"); navigate({ to: "/bookings" }); return; }
-      setBooking(b as unknown as BookingLite);
-
-      const active = ["approved","picked_up","returned","defect_reported","completed"].includes((b as any).status);
-      if (active) {
-        const [{ data: msgs }, { data: ct }] = await Promise.all([
-          supabase.from("messages").select("*").eq("booking_id", bookingId).order("created_at", { ascending: true }),
-          supabase.rpc("get_booking_contact", { _booking_id: bookingId }),
+      try {
+        const [borrowedBookings, lentBookings] = await Promise.all([
+          listBookingsApi('borrowed'),
+          listBookingsApi('lent'),
         ]);
-        setMessages((msgs as Message[]) ?? []);
-        if (Array.isArray(ct) && ct.length > 0) setContact(ct[0] as Contact);
+
+        const b = ((borrowedBookings as any[]) ?? []).find((x) => x.id === bookingId)
+          || ((lentBookings as any[]) ?? []).find((x) => x.id === bookingId)
+          || null;
+
+        if (!b) {
+          toast.error("Booking not found");
+          navigate({ to: "/bookings" });
+          return;
+        }
+
+        const nextViewerRole: ViewerRole = user.uid === b.owner_id ? 'owner' : 'borrower';
+        setBooking(b as unknown as BookingLite);
+        setViewerRole(nextViewerRole);
+
+        const active = ["approved","picked_up","returned","defect_reported","completed"].includes((b as any).status);
+        if (active) {
+          const msgs = await listMessagesApi({ booking_id: bookingId });
+          setMessages((msgs as Message[]) ?? []);
+        }
+
+        const otherUserId = nextViewerRole === 'owner' ? b.borrower_id : b.owner_id;
+        if (otherUserId) {
+          const profile = await getProfileApi(otherUserId);
+          setContact({
+            user_id: otherUserId,
+            display_name: profile?.display_name ?? profile?.full_name ?? null,
+            avatar_url: profile?.avatar_url ?? null,
+            phone: profile?.phone ?? null,
+            building_name: profile?.building_name ?? null,
+            address: profile?.address ?? null,
+            role: nextViewerRole === 'owner' ? 'borrower' : 'owner',
+          });
+        } else {
+          setContact(null);
+        }
+
+        setReady(true);
+      } catch (error: any) {
+        toast.error(error.message || 'Unable to load chat');
+        navigate({ to: "/bookings" });
       }
-      setReady(true);
     })();
   }, [user, loading, bookingId, navigate]);
 
   useEffect(() => {
     if (!booking) return;
-    const channel = supabase
-      .channel(`messages:${bookingId}`)
-      .on("postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `booking_id=eq.${bookingId}` },
-        (payload) => setMessages((prev) => [...prev, payload.new as Message]))
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    let active = true;
+    const interval = window.setInterval(async () => {
+      try {
+        const msgs = await listMessagesApi({ booking_id: bookingId });
+        if (active) setMessages((msgs as Message[]) ?? []);
+      } catch {
+        // ignore refresh errors
+      }
+    }, 3000);
+    return () => { active = false; window.clearInterval(interval); };
   }, [booking, bookingId]);
 
   useEffect(() => { bottom.current?.scrollIntoView({ behavior: "smooth" }); }, [messages.length]);
@@ -74,10 +111,14 @@ function ChatPage() {
     const body = text.trim();
     if (!body || !user) return;
     setSending(true);
-    const { error } = await supabase.from("messages").insert({ booking_id: bookingId, sender_id: user.id, body });
-    setSending(false);
-    if (error) return toast.error(error.message);
-    setText("");
+    try {
+      await createMessageApi({ booking_id: bookingId, sender_id: user.uid, body });
+      setSending(false);
+      setText("");
+    } catch (error: any) {
+      setSending(false);
+      toast.error(error.message || 'Unable to send message');
+    }
   }
 
   if (loading || !ready) return <div className="p-8 text-muted-foreground">Loading…</div>;
@@ -107,6 +148,9 @@ function ChatPage() {
               <p className="text-xs text-muted-foreground">
                 Status: <span className="font-semibold">{booking.status.replace("_"," ")}</span>
               </p>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                {viewerRole === 'owner' ? 'You are the owner' : 'You are the borrower'}
+              </p>
             </div>
           </header>
 
@@ -126,7 +170,7 @@ function ChatPage() {
                   <p className="mt-6 text-center text-sm text-muted-foreground">Say hi 👋 — coordinate pickup, timing, and any details.</p>
                 )}
                 {messages.map((m) => {
-                  const mine = m.sender_id === user!.id;
+                  const mine = m.sender_id === user!.uid;
                   return (
                     <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${mine ? "bg-leaf text-leaf-foreground" : "bg-muted text-foreground"}`}>
@@ -164,7 +208,7 @@ function ChatPage() {
               <>
                 <div className="mt-2 flex items-center gap-3">
                   {contact.avatar_url ? (
-                    <img src={contact.avatar_url} alt="" className="size-12 rounded-full object-cover" />
+                    <PhotoImg path={contact.avatar_url} alt="" className="size-12 rounded-full object-cover" />
                   ) : (
                     <div className="grid size-12 place-items-center rounded-full bg-leaf/15 text-sm font-semibold text-leaf">
                       {(contact.display_name || "N").slice(0, 1).toUpperCase()}

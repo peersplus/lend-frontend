@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 const cache = new Map<string, { url: string; exp: number }>();
 
@@ -29,11 +28,24 @@ export function PhotoImg({
       return;
     }
     let cancelled = false;
-    supabase.storage.from("photos").createSignedUrl(path, 3600).then(({ data }) => {
-      if (cancelled || !data?.signedUrl) return;
-      cache.set(path, { url: data.signedUrl, exp: Date.now() + 55 * 60 * 1000 });
-      setUrl(data.signedUrl);
-    });
+    (async () => {
+      try {
+        const token = await (await import('@/lib/firebase')).getFirebaseIdToken();
+        const res = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}/api/storage/photos/public-url`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' },
+          body: JSON.stringify({ path }),
+        });
+        if (cancelled) return;
+        const body = await res.json().catch(() => null);
+        const url = body?.data?.publicUrl || body?.publicUrl;
+        if (!url) return;
+        cache.set(path, { url, exp: Date.now() + 55 * 60 * 1000 });
+        setUrl(url);
+      } catch {
+        // ignore image URL fetch failures
+      }
+    })();
     return () => { cancelled = true; };
   }, [path]);
 

@@ -1,9 +1,14 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { LOGO_URL } from "@/lib/brand";
+import {
+  getFirebaseAuthErrorMessage,
+  getFirebaseClient,
+  signInWithEmail,
+  signInWithGoogle,
+  signUpWithEmail,
+} from "@/lib/firebase";
 
 
 export const Route = createFileRoute("/auth")({
@@ -33,63 +38,64 @@ function AuthPage() {
   const [displayName, setDisplayName] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [busy, setBusy] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; title: string; description?: string } | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/items" });
-    });
+    const client = getFirebaseClient();
+    if (client?.auth.currentUser) {
+      navigate({ to: "/items", search: {} });
+    }
   }, [navigate]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+    setFeedback(null);
     try {
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/items`,
-            data: { display_name: displayName, neighborhood },
-          },
+        await signUpWithEmail({ email, password, displayName, neighborhood });
+        setMode("signin");
+        setPassword("");
+        setFeedback({
+          type: "success",
+          title: "Verification email sent",
+          description: "Please check your inbox, verify your account, and then sign in.",
         });
-        if (error) throw error;
-        if (data.session) {
-          toast.success(`Welcome to the block, ${displayName || "neighbor"}!`);
-          navigate({ to: "/items" });
-        } else {
-          toast.success(
-            `Almost there! We sent a verification link to ${email}. Open it and you're in.`,
-            { duration: 9000 },
-          );
-          toast.info("Tip: check your spam folder if it doesn't arrive in a minute.", {
-            duration: 7000,
-          });
-          setMode("signin");
-        }
+        toast.success("Verification email sent. Please verify your account.");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        await signInWithEmail({ email, password });
         toast.success("Welcome back!");
-        navigate({ to: "/items" });
+        navigate({ to: "/items", search: {} });
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      const errorMessage = getFirebaseAuthErrorMessage(err);
+      if (mode === "signup" && errorMessage.title.includes("already registered")) {
+        setMode("signin");
+      }
+      setFeedback({ type: "error", title: errorMessage.title, description: errorMessage.description });
+      toast.error(errorMessage.title, {
+        description: errorMessage.description,
+        duration: 6000,
+      });
     } finally {
       setBusy(false);
     }
   }
 
   async function handleGoogle() {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      toast.error(result.error.message ?? "Google sign-in failed");
-      return;
+    setFeedback(null);
+    try {
+      await signInWithGoogle();
+      toast.success("Signed in with Google");
+      navigate({ to: "/items", search: {} });
+    } catch (err) {
+      const errorMessage = getFirebaseAuthErrorMessage(err);
+      setFeedback({ type: "error", title: errorMessage.title, description: errorMessage.description });
+      toast.error(errorMessage.title, {
+        description: errorMessage.description,
+        duration: 6000,
+      });
     }
-    if (result.redirected) return;
-    navigate({ to: "/items" });
   }
 
   return (
@@ -109,6 +115,18 @@ function AuthPage() {
               ? "Sign in to borrow, lend, and message neighbors."
               : "Create a verified account. Your address stays private."}
           </p>
+
+          {feedback && (
+            <div
+              role="alert"
+              className={`mb-4 rounded-xl border px-3 py-2 text-sm ${feedback.type === "success"
+                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                : "border-red-300 bg-red-50 text-red-700"}`}
+            >
+              <p className="font-semibold">{feedback.title}</p>
+              {feedback.description && <p className="mt-1 text-xs">{feedback.description}</p>}
+            </div>
+          )}
 
           <button
             type="button"
@@ -174,7 +192,10 @@ function AuthPage() {
             {mode === "signin" ? "New neighbor? " : "Already a member? "}
             <button
               type="button"
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              onClick={() => {
+                setFeedback(null);
+                setMode(mode === "signin" ? "signup" : "signin");
+              }}
               className="font-semibold text-leaf underline underline-offset-4"
             >
               {mode === "signin" ? "Create an account" : "Sign in"}
