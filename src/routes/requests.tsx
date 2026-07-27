@@ -483,3 +483,93 @@ function RequestsPage() {
   );
 }
 
+
+function EditRequestModal({
+  request,
+  onClose,
+  onSaved,
+}: {
+  request: Request;
+  onClose: () => void;
+  onSaved: (updated: Request) => void;
+}) {
+  const [title, setTitle] = useState(request.title);
+  const [description, setDescription] = useState(request.description ?? "");
+  const [category, setCategory] = useState(request.category);
+  const [urgency, setUrgency] = useState<"normal" | "urgent">(request.urgency);
+  const [radiusKm, setRadiusKm] = useState<number>(request.radius_km ?? 5);
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    setSaving(true);
+    const patch = {
+      title: title.trim(),
+      description: description.trim() || null,
+      category,
+      urgency,
+      radius_km: radiusKm,
+    };
+    const { data, error } = await supabase
+      .from("requests")
+      .update(patch)
+      .eq("id", request.id)
+      .select("*")
+      .maybeSingle();
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Request updated");
+    onSaved({ ...request, ...(data as Request) });
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-lg rounded-2xl bg-background p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Edit request</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">✕</button>
+        </div>
+        <div className="space-y-3">
+          <label className="block text-sm">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Title</span>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Description</span>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block text-sm">
+              <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Category</span>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                {categories.map((c) => (<option key={c} value={c}>{c}</option>))}
+              </select>
+            </label>
+            <label className="block text-sm">
+              <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Urgency</span>
+              <select value={urgency} onChange={(e) => setUrgency(e.target.value as "normal" | "urgent")} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                <option value="normal">Normal</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </label>
+          </div>
+          <label className="block text-sm">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Radius (km)</span>
+            <input type="number" min={1} max={50} value={radiusKm} onChange={(e) => setRadiusKm(Number(e.target.value) || 5)} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          </label>
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button onClick={onClose} className="rounded-full border border-border px-4 py-2 text-sm">Cancel</button>
+          <button onClick={save} disabled={saving || !title.trim()} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground disabled:opacity-60">
+            {saving ? "Saving…" : "Save"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
