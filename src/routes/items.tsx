@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { createItemApi, createBookingApi, deleteItemApi, listItemsApi, listBookingsApi, updateItemApi, updateBookingApi } from "@/lib/api-peers";
@@ -10,7 +10,7 @@ import { PhotoImg } from "@/components/PhotoImg";
 import { haversineKm, formatDistance } from "@/lib/geo";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "sonner";
-import { ImagePlus, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImagePlus, LayoutGrid, List, MapPin } from "lucide-react";
 
 
 
@@ -68,14 +68,23 @@ function ItemsPage() {
   const { user } = useAuth();
   const { isSuperadmin } = useRole();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = Route.useSearch();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [lendStep, setLendStep] = useState<1 | 2 | 3>(1);
   const [requesting, setRequesting] = useState<Item | null>(null);
   const [editing, setEditing] = useState<Item | null>(null);
   const [myBookings, setMyBookings] = useState<BookingRequest[]>([]);
   const [busyBookingId, setBusyBookingId] = useState<string | null>(null);
+  const [cancelBooking, setCancelBooking] = useState<BookingRequest | null>(null);
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
+  const [cardUploadItemId, setCardUploadItemId] = useState<string | null>(null);
+  const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
+  const [activeImageByItemId, setActiveImageByItemId] = useState<Record<string, number>>({});
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const [me, setMe] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null });
   const [form, setForm] = useState({
@@ -155,6 +164,25 @@ function ItemsPage() {
     void loadMyBookings();
   }, [user]);
 
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("items-view-mode");
+      if (saved === "grid" || saved === "list") {
+        setViewMode(saved);
+      }
+    } catch {
+      // ignore localStorage access errors
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("items-view-mode", viewMode);
+    } catch {
+      // ignore localStorage access errors
+    }
+  }, [viewMode]);
+
   // Prefill "Lend something" form when arriving from a request card.
   useEffect(() => {
     if (!user) return;
@@ -200,6 +228,7 @@ function ItemsPage() {
     setSaving(false);
     toast.success("✅ Item listed", { description: "Neighbors nearby can now request to borrow it." });
     setShowForm(false);
+    setLendStep(1);
     setForm({
       title: "", description: "", category: "Tools", price_mode: "free",
       price_amount: "", deposit_amount: "", image_url: "", image_urls: [],
@@ -217,7 +246,6 @@ function ItemsPage() {
   }
 
   async function handleCancelRequest(bookingId: string) {
-    if (!confirm("Cancel this request?")) return;
     setBusyBookingId(bookingId);
     try {
       await updateBookingApi(bookingId, { status: 'cancelled' });
@@ -228,6 +256,15 @@ function ItemsPage() {
     } finally {
       setBusyBookingId(null);
     }
+  }
+
+  function cycleItemImage(itemId: string, imageCount: number, direction: 1 | -1) {
+    if (imageCount < 2) return;
+    setActiveImageByItemId((prev) => {
+      const current = prev[itemId] ?? 0;
+      const next = (current + direction + imageCount) % imageCount;
+      return { ...prev, [itemId]: next };
+    });
   }
 
   async function handleRemindRequest(booking: BookingRequest) {
@@ -244,13 +281,76 @@ function ItemsPage() {
     }
   }
 
+  function validateLendStep(step: 1 | 2 | 3) {
+    if (step === 1) {
+      if (!form.title.trim()) {
+        toast.error("Please add an item title.");
+        return false;
+      }
+      return true;
+    }
+
+    if (step === 2) {
+      if (!form.deposit_amount || Number(form.deposit_amount) < 0) {
+        toast.error("Please add replacement value.");
+        return false;
+      }
+      if (form.price_mode === "rent" && (!form.price_amount || Number(form.price_amount) <= 0)) {
+        toast.error("Please add a valid rent price.");
+        return false;
+      }
+      return true;
+    }
+
+    return true;
+  }
+
+  async function updateItemImages(itemId: string, imageUrls: string[]) {
+    setUpdatingItemId(itemId);
+    try {
+      await updateItemApi(itemId, {
+        image_url: imageUrls[0] || null,
+        image_urls: imageUrls,
+      });
+      setItems((prev) => prev.map((entry) => (
+        entry.id === itemId
+          ? { ...entry, image_url: imageUrls[0] || null, image_urls: imageUrls }
+          : entry
+      )));
+      setActiveImageByItemId((prev) => ({ ...prev, [itemId]: 0 }));
+      toast.success("Item images updated.");
+    } catch (error: any) {
+      toast.error(error.message || "Unable to update item images");
+    } finally {
+      setUpdatingItemId(null);
+    }
+  }
+
+  async function handleDeleteItem(itemId: string) {
+    setDeletingItemId(itemId);
+    try {
+      await deleteItemApi(itemId);
+      setItems((prev) => prev.filter((x) => x.id !== itemId));
+      toast.success("Item deleted.");
+    } catch (error: any) {
+      toast.error(error.message || "Unable to delete item");
+    } finally {
+      setDeletingItemId(null);
+    }
+  }
+
+  const isItemDetailPath = pathname.startsWith("/items/") && pathname !== "/items";
+  if (isItemDetailPath) {
+    return <Outlet />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
       {user && (
         <div className="border-b border-border/60 bg-card/40">
-          <div className="mx-auto flex max-w-7xl justify-end px-6 py-2">
-            <button onClick={() => setShowForm(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90">
+          <div className="mx-auto flex max-w-7xl px-4 py-3 sm:justify-end sm:px-6">
+            <button onClick={() => { setLendStep(1); setShowForm(true); }} className="w-full rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90 sm:w-auto">
               + Lend something
             </button>
           </div>
@@ -258,32 +358,33 @@ function ItemsPage() {
       )}
 
 
-      <main className="mx-auto max-w-7xl px-6 py-12">
-        <div className="mb-8">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
+        <div className="mb-6 sm:mb-8">
           <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Available near you</p>
-          <h1 className="font-display text-4xl">On your block right now</h1>
+          <h1 className="font-display text-3xl sm:text-4xl">On your block right now</h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
             Borrow or rent from neighbors. Save money, cut waste — one shared item at a time.
           </p>
         </div>
 
-        <div className="mb-6 flex items-center gap-2 overflow-x-auto rounded-2xl border border-border bg-card p-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mb-6 rounded-2xl border border-border bg-card p-3 sm:p-4">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_auto_auto_auto_auto] lg:items-center">
           <input
             type="search"
             value={filters.q}
             onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
             placeholder="Search title, description, building…"
-            className="min-w-[180px] flex-1 rounded-full border border-input bg-background px-4 py-2 text-sm outline-none focus:border-leaf"
+            className="w-full rounded-full border border-input bg-background px-4 py-2 text-sm outline-none focus:border-leaf lg:min-w-[220px]"
           />
           <select
             value={filters.category}
             onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
-            className="shrink-0 rounded-full border border-input bg-background px-3 py-2 text-sm"
+            className="w-full rounded-full border border-input bg-background px-3 py-2 text-sm sm:w-auto"
           >
             <option value="">All categories</option>
             {categories.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <div className="flex shrink-0 overflow-hidden rounded-full border border-input text-sm">
+          <div className="grid w-full grid-cols-3 overflow-hidden rounded-full border border-input text-sm sm:w-auto">
             {(["all","free","rent"] as const).map((p) => (
               <button
                 key={p}
@@ -296,7 +397,7 @@ function ItemsPage() {
             ))}
           </div>
           {user && (
-            <label className="flex shrink-0 items-center gap-2 rounded-full border border-input bg-background px-3 py-2 text-sm">
+            <label className="flex items-center gap-2 rounded-full border border-input bg-background px-3 py-2 text-sm sm:w-fit">
               <input type="checkbox" checked={filters.mine} onChange={(e) => setFilters((f) => ({ ...f, mine: e.target.checked }))} />
               Only mine
             </label>
@@ -305,14 +406,33 @@ function ItemsPage() {
             <button
               type="button"
               onClick={() => setFilters({ q: "", category: "", price: "all", mine: false })}
-              className="shrink-0 rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-muted"
+              className="rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-muted sm:w-fit"
             >
               Clear
             </button>
           )}
-          <span className="ml-auto whitespace-nowrap text-xs text-muted-foreground">
+          <div className="grid grid-cols-2 overflow-hidden rounded-full border border-input sm:w-fit">
+            <button
+              type="button"
+              onClick={() => setViewMode("grid")}
+              className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold ${viewMode === "grid" ? "bg-leaf text-leaf-foreground" : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+              aria-label="Grid view"
+            >
+              <LayoutGrid className="h-3.5 w-3.5" /> Cards
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("list")}
+              className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold ${viewMode === "list" ? "bg-leaf text-leaf-foreground" : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+              aria-label="List view"
+            >
+              <List className="h-3.5 w-3.5" /> List
+            </button>
+          </div>
+          <span className="whitespace-nowrap px-1 text-xs text-muted-foreground sm:col-span-2 lg:col-auto lg:justify-self-end">
             {loading ? "…" : `${listed.length} of ${items.length}`}
           </span>
+        </div>
         </div>
 
 
@@ -323,7 +443,7 @@ function ItemsPage() {
           <div className="rounded-3xl border border-dashed border-border bg-card p-12 text-center">
             <p className="mb-4 text-muted-foreground">Nothing listed yet — be the first neighbor to share.</p>
             {user ? (
-              <button onClick={() => setShowForm(true)} className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground">
+              <button onClick={() => { setLendStep(1); setShowForm(true); }} className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground">
                 List your first item
               </button>
             ) : (
@@ -337,17 +457,23 @@ function ItemsPage() {
             No items match your filters. Try clearing them.
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className={viewMode === "grid" ? "grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid gap-4"}>
             {listed.map(({ i: item, km }) => {
               const myBooking = myBookings.find((booking) => booking.item_id === item.id);
               const showRequestActions = user?.uid !== item.owner_id && myBooking && ['requested', 'approved'].includes(myBooking.status);
               const images = normalizeImageList(item);
+              const activeImageIndex = images.length ? ((activeImageByItemId[item.id] ?? 0) % images.length) : 0;
 
               return (
-              <article key={item.id} className="group flex flex-col gap-3">
-                <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-black/5">
-                  {images[0] ? (
-                    <PhotoImg path={images[0]} alt={item.title} className="h-full w-full object-cover" />
+              <article
+                key={item.id}
+                className={viewMode === "grid"
+                  ? "group flex h-full flex-col gap-3 rounded-2xl border border-border/60 bg-card/60 p-3 sm:p-3.5"
+                  : "group flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/60 p-3 sm:flex-row sm:items-stretch sm:gap-4 sm:p-4"}
+              >
+                <div className={viewMode === "grid" ? "relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-black/5" : "relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted ring-1 ring-black/5 sm:w-60 sm:shrink-0"}>
+                  {images[activeImageIndex] ? (
+                    <PhotoImg path={images[activeImageIndex]} alt={item.title} className="h-full w-full object-cover" />
                   ) : (
                     <div className="grid h-full w-full place-items-center bg-gradient-to-br from-muted to-cream">
                       <span className="font-display text-3xl text-muted-foreground/60">{item.category}</span>
@@ -365,11 +491,32 @@ function ItemsPage() {
                   )}
                   {images.length > 1 && (
                     <span className="absolute bottom-3 right-3 rounded-md bg-black/70 px-2 py-1 text-[10px] font-semibold text-white">
-                      +{images.length - 1} more
+                      {activeImageIndex + 1}/{images.length}
                     </span>
                   )}
+
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => cycleItemImage(item.id, images.length, -1)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/55 p-1.5 text-white hover:bg-black/75"
+                        aria-label="Previous item image"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => cycleItemImage(item.id, images.length, 1)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/55 p-1.5 text-white hover:bg-black/75"
+                        aria-label="Next item image"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
                 </div>
-                <div>
+                <div className="flex min-w-0 flex-1 flex-col">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="min-w-0 flex-1 text-lg font-semibold">{item.title}</h3>
                     {(item.building_name || item.address) && (
@@ -405,13 +552,24 @@ function ItemsPage() {
                       Replacement value if damaged: <strong>${item.deposit_amount}</strong>
                     </p>
                   )}
+
+                  <div className="mt-auto space-y-2 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => navigate({ to: "/items/$itemId", params: { itemId: item.id } })}
+                      className="inline-flex w-full items-center justify-center rounded-full border border-input bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"
+                    >
+                      View details
+                    </button>
+                  </div>
+
                   {user?.uid !== item.owner_id && !showRequestActions && (
                     <button
                       onClick={() => {
                         if (!user) { navigate({ to: "/auth" }); return; }
                         setRequesting(item);
                       }}
-                      className="mt-3 w-full rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
+                      className="mt-2 w-full rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
                     >
                       Request this item
                     </button>
@@ -430,7 +588,7 @@ function ItemsPage() {
                       <div className="mt-2 flex flex-wrap gap-2">
                         <button
                           type="button"
-                          onClick={() => handleCancelRequest(myBooking!.id)}
+                          onClick={() => setCancelBooking(myBooking!)}
                           disabled={busyBookingId === myBooking?.id}
                           className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
                         >
@@ -450,29 +608,77 @@ function ItemsPage() {
                     </div>
                   )}
                   {user && (user.uid === item.owner_id || isSuperadmin) && (
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        onClick={() => setEditing(item)}
-                        className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!confirm("Delete this listing?")) return;
-                          try {
-                            await deleteItemApi(item.id);
-                            setItems((prev) => prev.filter((x) => x.id !== item.id));
-                            toast.success("Item deleted.");
-                          } catch (error: any) {
-                            toast.error(error.message || 'Unable to delete item');
-                          }
-                        }}
-                        className="flex-1 rounded-full border border-destructive/50 bg-background px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <>
+                      {images.length === 0 && (
+                        <div className="mt-3 rounded-xl border border-dashed border-border bg-muted/30 p-2">
+                          <p className="mb-2 text-xs text-muted-foreground">No photos yet. Add from card using gallery or camera.</p>
+                          <PhotoUpload
+                            value={null}
+                            onChange={(path) => {
+                              if (!path) return;
+                              void updateItemImages(item.id, [path]);
+                            }}
+                            folder="items"
+                            label={updatingItemId === item.id ? "Saving image..." : "Add first image"}
+                          />
+                        </div>
+                      )}
+
+                      {images.length > 0 && cardUploadItemId === item.id && (
+                        <div className="mt-3 space-y-2 rounded-xl border border-border bg-background/70 p-2">
+                          <div className="grid grid-cols-4 gap-2">
+                            {images.map((img, imgIdx) => (
+                              <div key={`${img}-${imgIdx}`} className="relative overflow-hidden rounded border border-border">
+                                <PhotoImg path={img} alt={`${item.title} image`} className="h-12 w-full object-cover" />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const next = images.filter((_, idx) => idx !== imgIdx);
+                                    void updateItemImages(item.id, next);
+                                  }}
+                                  className="absolute right-0.5 top-0.5 rounded-full bg-black/70 px-1 text-[10px] text-white"
+                                >
+                                  x
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          {images.length < 5 && (
+                            <PhotoUpload
+                              value={null}
+                              onChange={(path) => {
+                                if (!path) return;
+                                void updateItemImages(item.id, [...images, path]);
+                              }}
+                              folder="items"
+                              label="Add image"
+                            />
+                          )}
+                        </div>
+                      )}
+
+                      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <button
+                          onClick={() => setEditing(item)}
+                          className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCardUploadItemId((prev) => (prev === item.id ? null : item.id))}
+                          className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                        >
+                          {cardUploadItemId === item.id ? "Hide images" : "Manage images"}
+                        </button>
+                        <button
+                          onClick={() => setDeleteItemId(item.id)}
+                          className="rounded-full border border-destructive/50 bg-background px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 sm:col-span-2"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
                   )}
 
                 </div>
@@ -506,131 +712,248 @@ function ItemsPage() {
         />
       )}
 
+      {cancelBooking && (
+        <ConfirmActionModal
+          title="Cancel request"
+          description="Are you sure you want to cancel this request?"
+          confirmLabel={busyBookingId === cancelBooking.id ? "Cancelling..." : "Yes, cancel request"}
+          onCancel={() => setCancelBooking(null)}
+          onConfirm={async () => {
+            await handleCancelRequest(cancelBooking.id);
+            setCancelBooking(null);
+          }}
+          busy={busyBookingId === cancelBooking.id}
+        />
+      )}
+
+      {deleteItemId && (
+        <ConfirmActionModal
+          title="Delete listing"
+          description="This will permanently remove your listing from the marketplace."
+          confirmLabel={deletingItemId === deleteItemId ? "Deleting..." : "Yes, delete listing"}
+          onCancel={() => setDeleteItemId(null)}
+          onConfirm={async () => {
+            await handleDeleteItem(deleteItemId);
+            setDeleteItemId(null);
+          }}
+          busy={deletingItemId === deleteItemId}
+        />
+      )}
+
 
       {showForm && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setShowForm(false)}>
-          <form onClick={(e) => e.stopPropagation()} onSubmit={handleCreate} className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => { setShowForm(false); setLendStep(1); }}>
+          <form onClick={(e) => e.stopPropagation()} onSubmit={handleCreate} className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-5 shadow-2xl sm:p-8">
             <h2 className="font-display text-2xl">Lend something</h2>
-            <input required placeholder="What are you sharing? (e.g. Extension ladder)"
-              value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
-            <textarea placeholder="Anything neighbors should know? Condition, pickup notes…"
-              value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-              rows={3} className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
-            <div className="grid grid-cols-2 gap-3">
-              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
-                {categories.map((c) => (<option key={c}>{c}</option>))}
-              </select>
-              <select value={form.price_mode}
-                onChange={(e) => setForm({ ...form, price_mode: e.target.value as "free" | "rent" })}
-                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
-                <option value="free">Free to borrow</option>
-                <option value="rent">Rent per day</option>
-              </select>
-            </div>
-            {form.price_mode === "rent" && (
-              <input type="number" min="1" step="1" required placeholder="Price per day (USD)"
-                value={form.price_amount} onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
-                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
-            )}
-            <div>
-              <input type="number" min="0" step="1" required
-                placeholder="Replacement value if damaged (USD)"
-                value={form.deposit_amount}
-                onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })}
-                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
-              <p className="mt-1 px-1 text-xs text-muted-foreground">
-                Borrower will be shown this amount up-front and asked to consent. If the item comes back damaged, they pay this full amount in cash at return.
-              </p>
-            </div>
-            <div>
-              <label className="mb-2 block text-xs font-semibold text-muted-foreground uppercase tracking-wide">Item photo</label>
-              <div className="space-y-3">
-                <PhotoUpload
-                  value={form.image_urls[0] || null}
-                  onChange={(path) => {
-                    setForm((prev) => {
-                      const next = [...prev.image_urls];
-                      if (path) next[0] = path;
-                      else next.splice(0, 1);
-                      return { ...prev, image_urls: next, image_url: next[0] || "" };
-                    });
-                  }}
-                  folder="items"
-                  label="Main image"
-                />
-                {form.image_urls.slice(1).length > 0 && (
-                  <div className="grid grid-cols-3 gap-2">
-                    {form.image_urls.slice(1).map((img, index) => (
-                      <div key={`${img}-${index}`} className="relative overflow-hidden rounded-lg border border-border">
-                        <PhotoImg path={img} alt="Additional item" className="h-20 w-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setForm((prev) => {
-                              const next = [...prev.image_urls];
-                              next.splice(index + 1, 1);
-                              return { ...prev, image_urls: next, image_url: next[0] || "" };
-                            });
-                          }}
-                          className="absolute right-1 top-1 rounded-full bg-black/70 px-2 py-0.5 text-xs text-white"
-                        >
-                          x
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {form.image_urls.length < 5 && (
-                  <PhotoUpload
-                    value={null}
-                    onChange={(path) => {
-                      if (!path) return;
-                      setForm((prev) => ({
-                        ...prev,
-                        image_urls: [...prev.image_urls, path].slice(0, 5),
-                        image_url: prev.image_urls[0] || path,
-                      }));
+            <div className="rounded-xl border border-border bg-background/70 p-2">
+              <div className="grid grid-cols-3 gap-2 text-xs font-semibold uppercase tracking-wide">
+                {[
+                  { id: 1, label: "Details" },
+                  { id: 2, label: "Price" },
+                  { id: 3, label: "Photos" },
+                ].map((step) => (
+                  <button
+                    key={step.id}
+                    type="button"
+                    onClick={() => {
+                      const target = step.id as 1 | 2 | 3;
+                      if (target <= lendStep || validateLendStep(lendStep)) setLendStep(target);
                     }}
-                    folder="items"
-                    label="Add more images"
-                  />
-                )}
-                <p className="text-xs text-muted-foreground">Upload up to 5 images. First image is shown on the card cover.</p>
+                    className={`rounded-lg px-2 py-2 ${lendStep === step.id ? "bg-leaf text-leaf-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                  >
+                    {step.id}. {step.label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <input placeholder="Building / society"
-                value={form.building_name} onChange={(e) => setForm({ ...form, building_name: e.target.value })}
-                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
-              <input placeholder="Address (shown at pickup only)"
-                value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
-                className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
-            </div>
-            <div className="flex items-center gap-2">
-              <button type="button" onClick={useMyLocation}
-                className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">
-                <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> Use my location</span>
-              </button>
-              <span className="text-xs text-muted-foreground">
-                {form.lat && form.lng ? `Pin set (${Number(form.lat).toFixed(3)}, ${Number(form.lng).toFixed(3)})` : "So neighbors see distance"}
-              </span>
-            </div>
-            <div className="flex gap-2 pt-2">
-              <button type="button" onClick={() => setShowForm(false)}
-                className="flex-1 rounded-xl border border-border bg-background py-2.5 text-sm font-semibold">
+            {lendStep === 1 && (
+              <>
+                <input required placeholder="What are you sharing? (e.g. Extension ladder)"
+                  value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+                <textarea placeholder="Anything neighbors should know? Condition, pickup notes…"
+                  value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  rows={3} className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
+                  {categories.map((c) => (<option key={c}>{c}</option>))}
+                </select>
+              </>
+            )}
+
+            {lendStep === 2 && (
+              <>
+                <select value={form.price_mode}
+                  onChange={(e) => setForm({ ...form, price_mode: e.target.value as "free" | "rent" })}
+                  className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
+                  <option value="free">Free to borrow</option>
+                  <option value="rent">Rent per day</option>
+                </select>
+                {form.price_mode === "rent" && (
+                  <input type="number" min="1" step="1" required placeholder="Price per day (USD)"
+                    value={form.price_amount} onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
+                    className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+                )}
+                <div>
+                  <input type="number" min="0" step="1" required
+                    placeholder="Replacement value if damaged (USD)"
+                    value={form.deposit_amount}
+                    onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })}
+                    className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+                  <p className="mt-1 px-1 text-xs text-muted-foreground">
+                    Borrower will be shown this amount up-front and asked to consent. If the item comes back damaged, they pay this full amount in cash at return.
+                  </p>
+                </div>
+              </>
+            )}
+
+            {lendStep === 3 && (
+              <>
+                <div>
+                  <label className="mb-2 block text-xs font-semibold text-muted-foreground uppercase tracking-wide">Item photo (optional)</label>
+                  <div className="space-y-3">
+                    <PhotoUpload
+                      value={form.image_urls[0] || null}
+                      onChange={(path) => {
+                        setForm((prev) => {
+                          const next = [...prev.image_urls];
+                          if (path) next[0] = path;
+                          else next.splice(0, 1);
+                          return { ...prev, image_urls: next, image_url: next[0] || "" };
+                        });
+                      }}
+                      folder="items"
+                      label="Main image"
+                    />
+                    {form.image_urls.slice(1).length > 0 && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {form.image_urls.slice(1).map((img, index) => (
+                          <div key={`${img}-${index}`} className="relative overflow-hidden rounded-lg border border-border">
+                            <PhotoImg path={img} alt="Additional item" className="h-20 w-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setForm((prev) => {
+                                  const next = [...prev.image_urls];
+                                  next.splice(index + 1, 1);
+                                  return { ...prev, image_urls: next, image_url: next[0] || "" };
+                                });
+                              }}
+                              className="absolute right-1 top-1 rounded-full bg-black/70 px-2 py-0.5 text-xs text-white"
+                            >
+                              x
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {form.image_urls.length < 5 && (
+                      <PhotoUpload
+                        value={null}
+                        onChange={(path) => {
+                          if (!path) return;
+                          setForm((prev) => ({
+                            ...prev,
+                            image_urls: [...prev.image_urls, path].slice(0, 5),
+                            image_url: prev.image_urls[0] || path,
+                          }));
+                        }}
+                        folder="items"
+                        label="Add more images"
+                      />
+                    )}
+                    <p className="text-xs text-muted-foreground">You can skip now and add photos directly from the item card later.</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input placeholder="Building / society"
+                    value={form.building_name} onChange={(e) => setForm({ ...form, building_name: e.target.value })}
+                    className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+                  <input placeholder="Address (shown at pickup only)"
+                    value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
+                    className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={useMyLocation}
+                    className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">
+                    <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> Use my location</span>
+                  </button>
+                  <span className="text-xs text-muted-foreground">
+                    {form.lat && form.lng ? `Pin set (${Number(form.lat).toFixed(3)}, ${Number(form.lng).toFixed(3)})` : "So neighbors see distance"}
+                  </span>
+                </div>
+              </>
+            )}
+            <div className="grid gap-2 pt-2 sm:grid-cols-3">
+              <button type="button" onClick={() => { setShowForm(false); setLendStep(1); }}
+                className="rounded-xl border border-border bg-background py-2.5 text-sm font-semibold">
                 Cancel
               </button>
-              <button disabled={saving}
-                className="flex-1 rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground">
-                {saving ? "Sharing…" : "Share with neighbors"}
-              </button>
+              {lendStep > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setLendStep((prev) => (prev - 1) as 1 | 2 | 3)}
+                  className="rounded-xl border border-border bg-background py-2.5 text-sm font-semibold"
+                >
+                  Back
+                </button>
+              )}
+              {lendStep < 3 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!validateLendStep(lendStep)) return;
+                    setLendStep((prev) => (prev + 1) as 1 | 2 | 3);
+                  }}
+                  className="rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground"
+                >
+                  Next
+                </button>
+              ) : (
+                <button disabled={saving}
+                  className="rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground sm:col-start-3">
+                  {saving ? "Sharing..." : "Share with neighbors"}
+                </button>
+              )}
             </div>
           </form>
         </div>
       )}
+    </div>
+  );
+}
+
+function ConfirmActionModal({
+  title,
+  description,
+  confirmLabel,
+  onConfirm,
+  onCancel,
+  busy = false,
+}: {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  onConfirm: () => void | Promise<void>;
+  onCancel: () => void;
+  busy?: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onCancel}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-3xl bg-card p-5 shadow-2xl sm:p-8">
+        <h2 className="font-display text-2xl">{title}</h2>
+        <p className="text-sm text-muted-foreground">{description}</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <button type="button" onClick={onCancel} disabled={busy} className="rounded-xl border border-border py-2.5 text-sm font-semibold">
+            Keep request
+          </button>
+          <button type="button" onClick={() => void onConfirm()} disabled={busy} className="rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground disabled:opacity-60">
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -678,7 +1001,7 @@ function RequestConsentModal({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-3xl bg-card p-8 shadow-2xl">
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-3xl bg-card p-5 shadow-2xl sm:p-8">
         <h2 className="font-display text-2xl">Request "{item.title}"</h2>
 
         {item.price_mode === "rent" && (
@@ -714,12 +1037,12 @@ function RequestConsentModal({
           </label>
         </div>
 
-        <div className="flex gap-2">
-          <button onClick={onClose} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-semibold">
+        <div className="grid gap-2 sm:grid-cols-2">
+          <button onClick={onClose} className="rounded-xl border border-border py-2.5 text-sm font-semibold">
             Cancel
           </button>
           <button onClick={submit} disabled={!consent || submitting}
-            className="flex-1 rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground disabled:opacity-50">
+            className="rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground disabled:opacity-50">
             {submitting ? "Sending…" : "Send request"}
           </button>
         </div>
@@ -778,13 +1101,13 @@ function EditItemModal({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
-      <form onClick={(e) => e.stopPropagation()} onSubmit={submit} className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-8 shadow-2xl">
+      <form onClick={(e) => e.stopPropagation()} onSubmit={submit} className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-5 shadow-2xl sm:p-8">
         <h2 className="font-display text-2xl">Edit listing</h2>
         <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
           className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
         <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
           className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
             className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
             {["Tools","Electronics","Garden","Medical","Party","Baby","Kitchen","Camping","Cleaning","Sports","Pets","Furniture","Emergency"].map((c) => <option key={c}>{c}</option>)}
@@ -853,7 +1176,7 @@ function EditItemModal({
           )}
           <p className="text-xs text-muted-foreground">Up to 5 images. Cover image uses the first one.</p>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <input placeholder="Building / society" value={form.building_name}
             onChange={(e) => setForm({ ...form, building_name: e.target.value })}
             className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
@@ -861,9 +1184,9 @@ function EditItemModal({
             onChange={(e) => setForm({ ...form, address: e.target.value })}
             className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
         </div>
-        <div className="flex gap-2 pt-2">
-          <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-border bg-background py-2.5 text-sm font-semibold">Cancel</button>
-          <button disabled={saving} className="flex-1 rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground">
+        <div className="grid gap-2 pt-2 sm:grid-cols-2">
+          <button type="button" onClick={onClose} className="rounded-xl border border-border bg-background py-2.5 text-sm font-semibold">Cancel</button>
+          <button disabled={saving} className="rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground">
             {saving ? "Saving…" : "Save changes"}
           </button>
         </div>
