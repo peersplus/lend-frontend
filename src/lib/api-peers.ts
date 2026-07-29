@@ -96,3 +96,29 @@ export async function getProfileApi(id: string) {
 export async function updateMyPeerProfileApi(payload: Record<string, unknown>) {
   return request<any>('/api/peer-profile/me', { method: 'PATCH', body: JSON.stringify(payload) });
 }
+
+export async function listPublicBookingFeedbackApi(limit = 8) {
+  return request<any[]>(`/api/public/booking-feedback?limit=${encodeURIComponent(String(limit))}`);
+}
+
+export async function listPublicAppFeedbackApi(limit?: number) {
+  const safeLimit = Number.isFinite(limit) && Number(limit) > 0
+    ? `?limit=${encodeURIComponent(String(Math.floor(Number(limit))))}`
+    : '';
+  return request<any[]>(`/api/public/app-feedback${safeLimit}`);
+}
+
+export async function submitAppFeedbackApi(payload: {
+  category: 'feedback' | 'idea';
+  message: string;
+  email?: string;
+  name?: string;
+}) {
+  return request<{ id: string; saved: boolean; existing_email: boolean; known_user: boolean }>(
+    '/api/public/app-feedback',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+  );
+}

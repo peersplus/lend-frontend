@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as ItemsRouteImport } from './routes/items'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -70,6 +71,11 @@ const CommunityRoute = CommunityRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItemsRoute = ItemsRouteImport.update({
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/bookings': typeof BookingsRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
+  '/feedback': typeof FeedbackRoute
   '/items': typeof ItemsRouteWithChildren
   '/landing': typeof LandingRoute
   '/privacy': typeof PrivacyRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/bookings': typeof BookingsRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
+  '/feedback': typeof FeedbackRoute
   '/items': typeof ItemsRouteWithChildren
   '/landing': typeof LandingRoute
   '/privacy': typeof PrivacyRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/bookings': typeof BookingsRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
+  '/feedback': typeof FeedbackRoute
   '/items': typeof ItemsRouteWithChildren
   '/landing': typeof LandingRoute
   '/privacy': typeof PrivacyRoute
@@ -284,6 +293,7 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/community'
     | '/contact'
+    | '/feedback'
     | '/items'
     | '/landing'
     | '/privacy'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/community'
     | '/contact'
+    | '/feedback'
     | '/items'
     | '/landing'
     | '/privacy'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/community'
     | '/contact'
+    | '/feedback'
     | '/items'
     | '/landing'
     | '/privacy'
@@ -374,6 +386,7 @@ export interface RootRouteChildren {
   BookingsRoute: typeof BookingsRoute
   CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
+  FeedbackRoute: typeof FeedbackRoute
   ItemsRoute: typeof ItemsRouteWithChildren
   LandingRoute: typeof LandingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -444,6 +457,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/items': {
@@ -625,6 +645,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookingsRoute: BookingsRoute,
   CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
+  FeedbackRoute: FeedbackRoute,
   ItemsRoute: ItemsRouteWithChildren,
   LandingRoute: LandingRoute,
   PrivacyRoute: PrivacyRoute,

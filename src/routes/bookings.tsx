@@ -32,6 +32,9 @@ type Booking = {
   amount_paid: number | null;
   pickup_photo_url: string | null;
   return_photo_url: string | null;
+  borrower_rating: number | null;
+  borrower_feedback: string | null;
+  borrower_feedback_submitted_at: string | null;
   created_at: string;
   items: { title: string; image_url: string | null } | null;
 };
@@ -201,6 +204,11 @@ function BookingsPage() {
                 onApprove={() => update(b.id, { status: "approved" })}
                 onDecline={() => update(b.id, { status: "declined" })}
                 onSaveSchedule={(pickup, ret) => saveSchedule(b.id, pickup, ret)}
+                onSubmitFeedback={(rating, feedback) => update(b.id, {
+                  borrower_rating: rating,
+                  borrower_feedback: feedback,
+                  borrower_feedback_submitted_at: new Date().toISOString(),
+                })}
               />
 
             ))}
@@ -247,7 +255,7 @@ function fmt(iso: string | null): string {
 }
 
 function BookingRow({
-  b, role, askHandoff, onDispatch, onReturn, onCancel, onApprove, onDecline, onSaveSchedule,
+  b, role, askHandoff, onDispatch, onReturn, onCancel, onApprove, onDecline, onSaveSchedule, onSubmitFeedback,
 }: {
   b: Booking;
   role: "borrowed" | "lent";
@@ -258,6 +266,7 @@ function BookingRow({
   onApprove: () => void;
   onDecline: () => void;
   onSaveSchedule: (pickupISO: string | null, returnISO: string | null) => void;
+  onSubmitFeedback: (rating: number, feedback: string) => void;
 }) {
   const [showReturn, setShowReturn] = useState(false);
   const [showDispatch, setShowDispatch] = useState(false);
@@ -272,6 +281,18 @@ function BookingRow({
   const [editSchedule, setEditSchedule] = useState(false);
   const [pickupSched, setPickupSched] = useState(toLocalInput(b.pickup_scheduled_at));
   const [returnSched, setReturnSched] = useState(toLocalInput(b.return_scheduled_at));
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [rating, setRating] = useState<number>(0);
+  const [feedback, setFeedback] = useState("");
+
+  useEffect(() => {
+    const needsFeedback = role === "borrowed"
+      && ["returned", "defect_reported", "completed"].includes(b.status)
+      && !b.borrower_rating;
+    if (needsFeedback) {
+      setShowFeedback(true);
+    }
+  }, [b.borrower_rating, b.status, role]);
 
   const rentTotal = Number(b.agreed_rent_per_day ?? 0) * Number(b.agreed_days ?? 1);
   const canEditSchedule = role === "lent" && ["requested", "approved"].includes(b.status);
@@ -402,6 +423,17 @@ function BookingRow({
         )}
       </div>
 
+      {b.borrower_rating ? (
+        <div className="mt-3 rounded-xl border border-leaf/30 bg-leaf/5 p-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Trusted feedback</p>
+          <p className="mt-1 text-sm font-medium">
+            {"★".repeat(Math.max(1, Math.min(5, Number(b.borrower_rating))))}
+            <span className="ml-2 text-muted-foreground">{b.borrower_rating}/5</span>
+          </p>
+          {b.borrower_feedback && <p className="mt-1 text-sm text-muted-foreground">"{b.borrower_feedback}"</p>}
+        </div>
+      ) : null}
+
       {(b.pickup_photo_url || b.return_photo_url) && (
         <div className="mt-3 flex gap-3">
           {b.pickup_photo_url && (
@@ -494,6 +526,51 @@ function BookingRow({
             </button>
             <button onClick={() => setShowReturn(false)} className="rounded-full border border-border px-4 py-2 text-sm">
               Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showFeedback && role === "borrowed" && !b.borrower_rating && (
+        <div className="mt-4 rounded-xl border border-leaf/30 bg-leaf/5 p-4">
+          <p className="text-sm font-semibold">How was your experience?</p>
+          <p className="mt-1 text-xs text-muted-foreground">Rate this item handoff and share quick feedback.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[1, 2, 3, 4, 5].map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setRating(value)}
+                className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${rating >= value ? "border-leaf bg-leaf text-leaf-foreground" : "border-border bg-card"}`}
+              >
+                {value} ★
+              </button>
+            ))}
+          </div>
+          <textarea
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            rows={2}
+            placeholder="Share what went well for other neighbors"
+            className="mt-3 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+          />
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (rating < 1 || rating > 5) {
+                  toast.error("Please choose a rating before submitting.");
+                  return;
+                }
+                onSubmitFeedback(rating, feedback.trim());
+                setShowFeedback(false);
+              }}
+              className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
+            >
+              Submit feedback
+            </button>
+            <button type="button" onClick={() => setShowFeedback(false)} className="rounded-full border border-border px-4 py-2 text-sm">
+              Later
             </button>
           </div>
         </div>

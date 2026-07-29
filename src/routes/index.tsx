@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HeroCarousel } from "@/components/HeroCarousel";
+import { HomeTrustedFeedback } from "@/components/HomeTrustedFeedback";
 import { useReveal } from "@/hooks/useReveal";
 import heroElectronics from "@/assets/hero-electronics.jpg";
 import heroGarden from "@/assets/hero-garden.jpg";
@@ -615,28 +616,33 @@ function Home() {
                 Four levels of verification keep the community safe.
               </p>
             </div>
-            {[
-              { t: "Basic", d: "Phone + email confirmed" },
-              { t: "Address", d: "Mail-verified home address" },
-              { t: "ID", d: "Government ID matched" },
-              { t: "Trusted", d: "20+ positive exchanges" },
-            ].map((v, i) => (
-              <div
-                key={v.t}
-                className="border-l border-leaf-foreground/20 pl-4"
-                data-reveal
-                data-reveal-delay={String(120 + i * 100)}
-              >
-                <div className="mb-2 grid size-9 place-items-center rounded-full border border-leaf-foreground/30 text-sm">
-                  ✓
+            <div className="grid gap-4 md:col-span-3 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { t: "Basic", d: "Phone + email confirmed" },
+                { t: "Address", d: "Mail-verified home address" },
+                { t: "ID", d: "Government ID matched" },
+                { t: "Trusted", d: "20+ positive exchanges" },
+              ].map((v, i) => (
+                <div
+                  key={v.t}
+                  className="border-l border-leaf-foreground/20 pl-4"
+                  data-reveal
+                  data-reveal-delay={String(120 + i * 100)}
+                >
+                  <div className="mb-2 grid size-9 place-items-center rounded-full border border-leaf-foreground/30 text-sm">
+                    ✓
+                  </div>
+                  <p className="font-semibold">{v.t}</p>
+                  <p className="text-xs text-leaf-foreground/70">{v.d}</p>
                 </div>
-                <p className="font-semibold">{v.t}</p>
-                <p className="text-xs text-leaf-foreground/70">{v.d}</p>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            <div className="md:col-span-4">
+           <HomeTrustedFeedback />
+            </div>
           </div>
         </section>
-
         {/* CTA */}
         <section className="px-6 py-24">
           <div className="mx-auto max-w-3xl text-center" data-reveal="scale" data-scrub="zoom">

@@ -19,6 +19,7 @@ export function SiteHeader() {
     { to: "/items", label: "Browse" },
     { to: "/requests", label: "Requests" },
     { to: "/bookings", label: "Bookings" },
+    { to: "/feedback", label: "Feedback" },
     { to: "/safety", label: "Safety" },
     { to: "/about", label: "About" },
     ...(isSuperadmin ? [{ to: "/admin", label: "Admin" }] : []),
