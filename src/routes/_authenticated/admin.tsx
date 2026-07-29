@@ -9,7 +9,7 @@ import { toast } from "@/lib/sonner";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — Peers Plus" },
+      { title: "Admin — Peers Plus | Lend Peers Plus" },
       { name: "description", content: "Superadmin overview of all Peers Plus activity." },
       { property: "og:title", content: "Admin — Peers Plus" },
       { property: "og:description", content: "Manage requests, items, and bookings across the neighborhood." },
