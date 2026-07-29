@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import { toast } from "@/lib/sonner";
 import { PhotoImg } from "./PhotoImg";
 
 type Props = {
@@ -12,6 +12,8 @@ type Props = {
   crop?: boolean;
   cropTitle?: string;
   compact?: boolean;
+  dense?: boolean;
+  accept?: "image" | "video" | "media";
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -36,6 +38,16 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+async function uploadWithTimeout(url: string, options: RequestInit, timeoutMs: number) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
 export function PhotoUpload({
   value,
   onChange,
@@ -45,6 +57,8 @@ export function PhotoUpload({
   crop = false,
   cropTitle = "Crop and save",
   compact = false,
+  dense = false,
+  accept = "image",
 }: Props) {
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -56,14 +70,44 @@ export function PhotoUpload({
   const [dragging, setDragging] = useState(false);
   const dragStartRef = useRef<{ x: number; y: number; offsetX: number; offsetY: number } | null>(null);
 
+  const isVideoPath = value ? /\.(mp4|mov|webm|m4v)$/i.test(value) : false;
+  const inputAccept = accept === "video" ? "video/*" : accept === "media" ? "image/*,video/*" : "image/*";
+  const isVideoUpload = accept === "video" || isVideoPath;
+  const maxVideoBytes = 250 * 1024 * 1024;
+  const maxImageBytes = 20 * 1024 * 1024;
+  const uploadHint = accept === "video"
+    ? "MP4, MOV, or WebM - up to 250 MB"
+    : accept === "media"
+      ? "Images or videos - up to 250 MB"
+      : "PNG, JPG, or WebP - up to 20 MB";
+  const uploaderTitle = crop
+    ? "Add a polished profile photo"
+    : label;
+  const readyTitle = crop
+    ? "Profile photo ready"
+    : isVideoUpload
+      ? "Video ready"
+      : "Image ready";
+
   async function uploadFile(file: File) {
     if (!user) return;
-    if (file.size > 8 * 1024 * 1024) {
-      toast.error("Photo must be under 8 MB");
+    const maxBytes = (accept === "video" || accept === "media") ? maxVideoBytes : maxImageBytes;
+    if (file.size > maxBytes) {
+      toast.error((accept === "video" || accept === "media") ? "File must be under 250 MB" : "Photo must be under 20 MB");
       return;
     }
-    if (!file.type.startsWith("image/")) {
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+    if (accept === "image" && !isImage) {
       toast.error("Please pick an image file");
+      return;
+    }
+    if (accept === "video" && !isVideo) {
+      toast.error("Please pick a video file");
+      return;
+    }
+    if (accept === "media" && !isImage && !isVideo) {
+      toast.error("Please pick an image or video file");
       return;
     }
 
@@ -77,16 +121,32 @@ export function PhotoUpload({
 
     try {
       const token = await (await import("@/lib/firebase")).getFirebaseIdToken();
-      const response = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/storage/photos/upload`, {
-        method: "POST",
-        headers: { Authorization: token ? `Bearer ${token}` : "" },
-        body: formData,
-      });
+      const uploadUrl = `${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/storage/photos/upload`;
+      let response: Response;
+      try {
+        response = await uploadWithTimeout(uploadUrl, {
+          method: "POST",
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
+          body: formData,
+        }, 360000);
+      } catch (firstError: any) {
+        if (firstError?.name !== "AbortError") throw firstError;
+        // Retry once on timeout because mobile networks can be temporarily slow.
+        response = await uploadWithTimeout(uploadUrl, {
+          method: "POST",
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
+          body: formData,
+        }, 360000);
+      }
       const body = await response.json().catch(() => null);
       if (!response.ok) throw new Error(body?.error?.message || "Upload failed");
       onChange(path);
-      toast.success(crop ? "Profile photo updated" : "Photo uploaded");
+      toast.success(crop ? "Profile photo updated" : (isVideo ? "Video uploaded" : "Photo uploaded"));
     } catch (error: any) {
+      if (error?.name === "AbortError") {
+        toast.error("Upload timed out. Please retry on a stable network or use a smaller file.");
+        return;
+      }
       toast.error(error.message || "Upload failed");
     } finally {
       setUploading(false);
@@ -105,7 +165,7 @@ export function PhotoUpload({
     e.target.value = "";
     if (!file || !user) return;
 
-    if (crop) {
+    if (crop && accept === "image") {
       const dataUrl = await readFileAsDataUrl(file);
       setSourceUrl(dataUrl);
       setZoom(1);
@@ -192,39 +252,68 @@ export function PhotoUpload({
   return (
     <div className={className}>
       {value ? (
-        compact ? (
+        dense ? (
+          <div className="flex items-center gap-2 rounded-xl border border-border/80 bg-background/80 p-2 shadow-sm">
+            <div className="rounded-lg border border-border bg-muted/50 p-1">
+              {isVideoPath ? (
+                <div className="grid size-11 place-items-center rounded-md bg-black/70 text-[10px] font-semibold text-white">VIDEO</div>
+              ) : (
+                <PhotoImg path={value} className="size-11 rounded-md object-cover" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold">{readyTitle}</p>
+              <p className="truncate text-[11px] text-muted-foreground">{isVideoUpload ? "360 media attached" : "Image attached"}</p>
+            </div>
+            <label className="inline-flex cursor-pointer items-center rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold hover:bg-muted">
+              Replace
+              <input type="file" accept={inputAccept} capture={accept === "video" ? undefined : "environment"} onChange={handleFile} className="hidden" />
+            </label>
+            <button type="button" onClick={remove} className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold hover:bg-muted">
+              Remove
+            </button>
+          </div>
+        ) : compact ? (
           <div className="flex flex-col items-center gap-3 rounded-[24px] border border-border/80 bg-background/80 p-4 shadow-sm">
             <div className="relative">
               <div className="rounded-full border border-border bg-muted/50 p-1.5">
-                <PhotoImg path={value} className="size-24 rounded-full object-cover" />
+                {isVideoPath ? (
+                  <div className="grid size-24 place-items-center rounded-full bg-black/70 text-xs font-semibold text-white">VIDEO</div>
+                ) : (
+                  <PhotoImg path={value} className="size-24 rounded-full object-cover" />
+                )}
               </div>
               <label className="absolute bottom-0 right-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border bg-foreground text-lg text-background shadow-lg">
-                📷
-                <input type="file" accept="image/*" capture="environment" onChange={handleFile} className="hidden" />
+                +
+                <input type="file" accept={inputAccept} capture={accept === "video" ? undefined : "environment"} onChange={handleFile} className="hidden" />
               </label>
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold">Profile photo ready</p>
-              <p className="text-xs text-muted-foreground">Tap the camera icon to change it</p>
+              <p className="text-sm font-semibold">{readyTitle}</p>
+              <p className="text-xs text-muted-foreground">Use the edit button to replace this file</p>
             </div>
             <button type="button" onClick={remove} className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted">
-              Remove photo
+              {isVideoUpload ? "Remove video" : "Remove photo"}
             </button>
           </div>
         ) : (
           <div className="rounded-2xl border border-border/80 bg-background/80 p-3 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="rounded-2xl border border-border bg-muted/50 p-2">
-                <PhotoImg path={value} className="size-20 rounded-xl object-cover" />
+                {isVideoPath ? (
+                  <div className="grid size-20 place-items-center rounded-xl bg-black/70 text-xs font-semibold text-white">VIDEO</div>
+                ) : (
+                  <PhotoImg path={value} className="size-20 rounded-xl object-cover" />
+                )}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold">Profile photo ready</p>
-                <p className="text-xs text-muted-foreground">Use a clear image with your face centered and well lit.</p>
+                <p className="text-sm font-semibold">{readyTitle}</p>
+                <p className="text-xs text-muted-foreground">{isVideoUpload ? "Ready to publish in listing view." : "Use a clear image to improve trust and response rate."}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted">
-                    <span className="text-sm">📷</span>
-                    Replace photo
-                    <input type="file" accept="image/*" capture="environment" onChange={handleFile} className="hidden" />
+                    <span className="text-sm">+</span>
+                    {isVideoPath ? "Replace video" : "Replace photo"}
+                    <input type="file" accept={inputAccept} capture={accept === "video" ? undefined : "environment"} onChange={handleFile} className="hidden" />
                   </label>
                   <button type="button" onClick={remove} className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted">
                     Remove
@@ -234,15 +323,30 @@ export function PhotoUpload({
             </div>
           </div>
         )
+      ) : dense ? (
+        <label className="group flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-border bg-muted/20 px-3 py-2 transition hover:border-leaf hover:bg-leaf/5">
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-foreground">{uploaderTitle}</p>
+            <p className="truncate text-[11px] text-muted-foreground">{uploadHint}</p>
+          </div>
+          <span className="rounded-full border border-border bg-background px-3 py-1 text-[11px] font-medium">
+            {accept === "video" ? "Choose video" : accept === "media" ? "Choose file" : "Choose image"}
+          </span>
+          <input type="file" accept={inputAccept} capture={accept === "video" ? undefined : "environment"} onChange={handleFile} className="hidden" disabled={uploading} />
+        </label>
       ) : (
         <label className="group flex cursor-pointer flex-col items-center justify-center gap-3 rounded-[24px] border border-dashed border-border bg-gradient-to-br from-muted/60 to-background px-5 py-8 text-center transition hover:border-leaf hover:bg-leaf/5">
-          <div className="rounded-full bg-leaf/10 p-3 text-2xl text-leaf">📸</div>
+          <div className="rounded-full bg-leaf/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-leaf">Upload</div>
           <div>
-            <p className="text-sm font-semibold text-foreground">{crop ? "Add a polished profile photo" : label}</p>
-            <p className="mt-1 text-xs text-muted-foreground">PNG, JPG, or WebP • up to 8 MB</p>
+            <p className="text-sm font-semibold text-foreground">{uploaderTitle}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {uploadHint}
+            </p>
           </div>
-          <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-medium">Choose image</span>
-          <input type="file" accept="image/*" capture="environment" onChange={handleFile} className="hidden" disabled={uploading} />
+          <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-medium">
+            {accept === "video" ? "Choose video" : accept === "media" ? "Choose file" : "Choose image"}
+          </span>
+          <input type="file" accept={inputAccept} capture={accept === "video" ? undefined : "environment"} onChange={handleFile} className="hidden" disabled={uploading} />
         </label>
       )}
 

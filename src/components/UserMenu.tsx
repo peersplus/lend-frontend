@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { PhotoImg } from "@/components/PhotoImg";
-import { toast } from "sonner";
+import { getMyPeerProfileApi } from "@/lib/api-peers";
+import { toast } from "@/lib/sonner";
 import { signOutFirebase } from "@/lib/firebase";
 
 type Profile = {
   display_name: string | null;
+  full_name?: string | null;
   avatar_url: string | null;
   neighborhood: string | null;
 };
@@ -19,8 +21,32 @@ export function UserMenu() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) { setProfile(null); return; }
-    setProfile(null);
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await getMyPeerProfileApi();
+        if (cancelled) return;
+        setProfile({
+          display_name: data?.display_name ?? null,
+          full_name: data?.full_name ?? null,
+          avatar_url: data?.avatar_url ?? null,
+          neighborhood: data?.neighborhood ?? null,
+        });
+      } catch {
+        if (!cancelled) {
+          setProfile(null);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   useEffect(() => {
@@ -41,8 +67,9 @@ export function UserMenu() {
     );
   }
 
-  const name = profile?.display_name || user.email?.split("@")[0] || "Neighbor";
-  const initials = name.split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase()).join("");
+  const name = profile?.display_name || profile?.full_name || user.displayName || user.email?.split("@")[0] || "Neighbor";
+  const avatarPath = profile?.avatar_url || user.photoURL || null;
+  const initial = (name.trim().charAt(0) || "N").toUpperCase();
 
   async function signOut() {
     await signOutFirebase();
@@ -56,11 +83,11 @@ export function UserMenu() {
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2 rounded-full border border-border bg-card py-1.5 pl-1.5 pr-3 text-sm font-medium hover:bg-muted"
       >
-        {profile?.avatar_url ? (
-          <PhotoImg path={profile.avatar_url} alt="" className="size-8 rounded-full object-cover" />
+        {avatarPath ? (
+          <PhotoImg path={avatarPath} alt="" className="size-8 rounded-full object-cover" />
         ) : (
           <span className="grid size-8 place-items-center rounded-full bg-leaf/15 text-xs font-semibold text-leaf">
-            {initials || "🙂"}
+            {initial}
           </span>
         )}
         <span className="hidden max-w-[9rem] truncate sm:inline">{name}</span>

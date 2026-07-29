@@ -9,7 +9,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
-import { toast } from "sonner";
+import { toast } from "@/lib/sonner";
 
 
 
@@ -50,6 +50,7 @@ function RequestsPage() {
   const { user } = useAuth();
   const { isSuperadmin } = useRole();
   const navigate = useNavigate();
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [rows, setRows] = useState<Request[]>([]);
   const [offersByReq, setOffersByReq] = useState<Record<string, Offer[]>>({});
   const [loading, setLoading] = useState(true);
@@ -69,6 +70,11 @@ function RequestsPage() {
     radius_km: 5,
     image_url: "" as string,
   });
+
+  function isUnauthorizedError(error: unknown) {
+    const message = String((error as any)?.message || "").toLowerCase();
+    return message.includes("unauthorized") || message.includes("401") || message.includes("sign in");
+  }
 
   function notifyUpdate(r: Request, status: "closed" | "open" | "deleted") {
     const anon = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? "";
@@ -101,6 +107,12 @@ function RequestsPage() {
         setRows(list);
         await loadOffers(list.map((r) => r.id));
       } catch (error: any) {
+        if (isUnauthorizedError(error)) {
+          setShowAuthPrompt(true);
+          setRows([]);
+          setLoading(false);
+          return;
+        }
         toast.error(error.message || 'Unable to load requests');
         setRows([]);
       }
@@ -111,7 +123,10 @@ function RequestsPage() {
 
 
   async function offerHelp(r: Request) {
-    if (!user) return navigate({ to: "/auth" });
+    if (!user) {
+      setShowAuthPrompt(true);
+      return;
+    }
     try {
       const inserted = await createRequestOfferApi({ request_id: r.id, helper_id: user.uid });
       if (inserted?.id) {
@@ -123,6 +138,10 @@ function RequestsPage() {
         }).catch(() => {});
       }
     } catch (error: any) {
+      if (isUnauthorizedError(error)) {
+        setShowAuthPrompt(true);
+        return;
+      }
       toast.error(error.message || 'Unable to offer help');
       return;
     }
@@ -134,6 +153,10 @@ function RequestsPage() {
     try {
       await updateRequestApi(r.id, { status });
     } catch (error: any) {
+      if (isUnauthorizedError(error)) {
+        setShowAuthPrompt(true);
+        return;
+      }
       return toast.error(error.message || 'Unable to update request');
     }
     setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, status } : x)));
@@ -147,6 +170,10 @@ function RequestsPage() {
     try {
       await deleteRequestApi(r.id);
     } catch (error: any) {
+      if (isUnauthorizedError(error)) {
+        setShowAuthPrompt(true);
+        return;
+      }
       return toast.error(error.message || 'Unable to delete request');
     }
     setRows((prev) => prev.filter((x) => x.id !== r.id));
@@ -172,6 +199,10 @@ function RequestsPage() {
       });
       setRows((prev) => [data as Request, ...prev]);
     } catch (error: any) {
+      if (isUnauthorizedError(error)) {
+        setShowAuthPrompt(true);
+        return;
+      }
       toast.error(error.message || 'Unable to post request');
       return;
     }
@@ -468,6 +499,24 @@ function RequestsPage() {
         </footer>
       </main>
       <SiteFooter />
+      {showAuthPrompt && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setShowAuthPrompt(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-3xl bg-card p-6 shadow-2xl">
+            <h2 className="font-display text-2xl">Sign in required</h2>
+            <p className="text-sm text-muted-foreground">
+              You can continue viewing requests on this screen. Sign in only when you want to post, offer help, or manage requests.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button type="button" onClick={() => setShowAuthPrompt(false)} className="rounded-xl border border-border py-2.5 text-sm font-semibold">
+                Keep viewing
+              </button>
+              <Link to="/auth" onClick={() => setShowAuthPrompt(false)} className="rounded-xl bg-leaf py-2.5 text-center text-sm font-semibold text-leaf-foreground">
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
       {editing && (
         <EditRequestModal
           request={editing}

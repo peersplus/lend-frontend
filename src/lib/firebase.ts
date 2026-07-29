@@ -1,13 +1,17 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import {
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
   getAuth,
   GoogleAuthProvider,
   onAuthStateChanged,
+  reauthenticateWithCredential,
+  sendPasswordResetEmail,
   sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updatePassword,
   updateProfile,
   type Auth,
   type User,
@@ -198,6 +202,59 @@ export async function sendVerificationEmail(user: User) {
     : undefined;
 
   await sendEmailVerification(user, redirectUrl ? { url: redirectUrl } : undefined);
+}
+
+export async function sendForgotPasswordEmail(email: string) {
+  const client = getFirebaseClient();
+  if (!client) {
+    throw new Error("Firebase client is not configured. Set the VITE_FIREBASE_* environment variables.");
+  }
+  const trimmedEmail = email.trim();
+  if (!trimmedEmail) {
+    throw new Error("Please enter your email address.");
+  }
+
+  const actionCodeSettings = typeof window !== "undefined"
+    ? { url: `${window.location.origin}/auth` }
+    : undefined;
+
+  await sendPasswordResetEmail(client.auth, trimmedEmail, actionCodeSettings);
+}
+
+export async function changeCurrentUserPassword(input: { currentPassword: string; newPassword: string }) {
+  const client = getFirebaseClient();
+  if (!client) {
+    throw new Error("Firebase client is not configured. Set the VITE_FIREBASE_* environment variables.");
+  }
+
+  const user = client.auth.currentUser;
+  if (!user || !user.email) {
+    throw new Error("You must be signed in to change password.");
+  }
+
+  if (!input.currentPassword.trim()) {
+    throw new Error("Please enter your current password.");
+  }
+
+  if (!input.newPassword.trim() || input.newPassword.length < 6) {
+    throw new Error("New password must be at least 6 characters.");
+  }
+
+  const credential = EmailAuthProvider.credential(user.email, input.currentPassword);
+  try {
+    await reauthenticateWithCredential(user, credential);
+  } catch (error: any) {
+    const code = String(error?.code || "");
+    if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+      throw new Error("Current password is incorrect.");
+    }
+    if (code === "auth/too-many-requests") {
+      throw new Error("Too many attempts. Please wait a few minutes and try again.");
+    }
+    throw error;
+  }
+
+  await updatePassword(user, input.newPassword);
 }
 
 async function syncFirebaseUser(

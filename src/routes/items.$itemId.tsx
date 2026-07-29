@@ -5,10 +5,11 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoImg } from "@/components/PhotoImg";
 import { PhotoUpload } from "@/components/PhotoUpload";
+import { Immersive360Video } from "@/components/Immersive360Video";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { createBookingApi, listBookingsApi, listItemsApi, updateBookingApi, updateItemApi } from "@/lib/api-peers";
-import { toast } from "sonner";
+import { toast } from "@/lib/sonner";
 
 type Item = {
   id: string;
@@ -21,6 +22,7 @@ type Item = {
   deposit_amount: number | null;
   image_url: string | null;
   image_urls?: string[] | null;
+  video_url?: string | null;
   building_name: string | null;
   address: string | null;
   created_at: string;
@@ -61,6 +63,7 @@ function ItemDetailsPage() {
   const [requesting, setRequesting] = useState(false);
   const [busyBookingId, setBusyBookingId] = useState<string | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -126,6 +129,20 @@ function ItemDetailsPage() {
     }
   }
 
+  async function saveVideo(nextVideo: string | null) {
+    if (!item) return;
+    setSavingImages(true);
+    try {
+      await updateItemApi(item.id, { video_url: nextVideo || null });
+      setItem((prev) => (prev ? { ...prev, video_url: nextVideo || null } : prev));
+      toast.success(nextVideo ? "360 video updated." : "360 video removed.");
+    } catch (error: any) {
+      toast.error(error?.message || "Unable to update 360 video");
+    } finally {
+      setSavingImages(false);
+    }
+  }
+
   function showPrevImage() {
     if (images.length < 2) return;
     setActiveImage((idx) => (idx - 1 + images.length) % images.length);
@@ -154,6 +171,10 @@ function ItemDetailsPage() {
       toast.success("Request cancelled.");
       await refreshMyBooking();
     } catch (error: any) {
+      if (String(error?.message || "").toLowerCase().includes("unauthorized")) {
+        setShowAuthPrompt(true);
+        return;
+      }
       toast.error(error?.message || "Unable to cancel request");
     } finally {
       setBusyBookingId(null);
@@ -168,6 +189,10 @@ function ItemDetailsPage() {
       toast.success(booking.urgency === "urgent" ? "High alert sent to owner." : "Reminder sent to owner.");
       await refreshMyBooking();
     } catch (error: any) {
+      if (String(error?.message || "").toLowerCase().includes("unauthorized")) {
+        setShowAuthPrompt(true);
+        return;
+      }
       toast.error(error?.message || "Unable to remind owner");
     } finally {
       setBusyBookingId(null);
@@ -181,11 +206,13 @@ function ItemDetailsPage() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <Link to="/items" className="rounded-full border border-input bg-background px-4 py-2 text-sm font-semibold hover:bg-muted">
-            Back to items
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <Link to="/items" search={{}} className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background px-4 py-2 text-sm font-semibold hover:bg-muted">
+            <ChevronLeft className="h-4 w-4" /> Back to items
           </Link>
-          <p className="text-xs text-muted-foreground">More details view</p>
+          <p className="rounded-full border border-border/70 bg-card px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Item details
+          </p>
         </div>
 
         {loading ? (
@@ -194,26 +221,35 @@ function ItemDetailsPage() {
           <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
             <h1 className="font-display text-2xl">Item not found</h1>
             <p className="mt-2 text-sm text-muted-foreground">This item may have been removed.</p>
-            <Link to="/items" className="mt-4 inline-flex rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
+            <Link to="/items" search={{}} className="mt-4 inline-flex rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
               Browse available items
             </Link>
           </div>
         ) : (
-          <section className="grid gap-6 rounded-3xl border border-border/70 bg-card/80 p-4 sm:p-6 lg:grid-cols-[1.15fr_1fr]">
-            <div className="space-y-3">
-              <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted ring-1 ring-black/5 sm:aspect-[4/3]">
-                {images[activeImage] ? (
+          <section className="grid gap-6 rounded-3xl border border-border/70 bg-card/85 p-4 shadow-sm sm:p-6 lg:grid-cols-[1.15fr_1fr] lg:gap-7">
+            <div className="space-y-4">
+              <div className={`relative overflow-hidden rounded-2xl bg-muted ring-1 ring-black/5 ${item.video_url ? "mx-auto w-full max-w-3xl aspect-[16/10] sm:aspect-[16/9]" : "aspect-square sm:aspect-[4/3]"}`}>
+                {item.video_url ? (
+                  <Immersive360Video path={item.video_url} compact className="h-full w-full" />
+                ) : images[activeImage] ? (
                   <PhotoImg path={images[activeImage]} alt={item.title} className="h-full w-full object-cover" />
                 ) : (
-                  <div className="grid h-full w-full place-items-center bg-gradient-to-br from-muted to-cream">
-                    <span className="font-display text-2xl text-muted-foreground/70">{item.category}</span>
+                  <div className="grid h-full w-full place-items-center bg-gradient-to-br from-muted via-card to-cream text-center">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">No media yet</p>
+                      <span className="mt-2 block font-display text-2xl text-muted-foreground/80">{item.category}</span>
+                    </div>
                   </div>
                 )}
                 <span className={`absolute left-3 top-3 rounded-md px-2 py-1 text-[10px] font-bold uppercase ${item.price_mode === "free" ? "bg-leaf text-leaf-foreground" : "bg-foreground text-background"}`}>
                   {item.price_mode === "free" ? "Free" : `$${item.price_amount}/day`}
                 </span>
 
-                {images.length > 1 && (
+                {item.video_url && (
+                  <span className="absolute bottom-3 left-3 rounded-md bg-black/70 px-2 py-1 text-[10px] font-semibold text-white">360 VIDEO</span>
+                )}
+
+                {images.length > 1 && !item.video_url && (
                   <>
                     <button
                       type="button"
@@ -246,7 +282,7 @@ function ItemDetailsPage() {
                 )}
               </div>
 
-              {images.length > 1 && (
+              {images.length > 1 && !item.video_url && (
                 <div className="grid grid-cols-5 gap-2 sm:grid-cols-6">
                   {images.map((img, idx) => (
                     <button
@@ -262,8 +298,33 @@ function ItemDetailsPage() {
               )}
 
               {canManageImages && (
-                <div className="space-y-2 rounded-xl border border-border/70 bg-background/70 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Manage images</p>
+                <div className="space-y-3 rounded-2xl border border-border/70 bg-background/75 p-3 sm:p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Manage media</p>
+                    <p className="text-[11px] text-muted-foreground">Cover image = first photo</p>
+                  </div>
+                  <PhotoUpload
+                    value={item.video_url || null}
+                    onChange={(path) => {
+                      void saveVideo(path || null);
+                    }}
+                    folder="items"
+                    accept="video"
+                    dense
+                    label={savingImages ? "Saving video..." : "Upload 360 video"}
+                  />
+                  {item.video_url && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void saveVideo(null);
+                      }}
+                      disabled={savingImages}
+                      className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                    >
+                      Remove video
+                    </button>
+                  )}
                   {images.length < 5 && (
                     <PhotoUpload
                       value={null}
@@ -272,11 +333,12 @@ function ItemDetailsPage() {
                         void saveImages([...images, path].slice(0, 5));
                       }}
                       folder="items"
+                      dense
                       label={savingImages ? "Saving image..." : "Upload image"}
                     />
                   )}
                   {images.length > 0 && (
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
                       {images.map((img, idx) => (
                         <div key={`${img}-${idx}`} className="relative overflow-hidden rounded-lg border border-border">
                           <PhotoImg path={img} alt={`${item.title} ${idx + 1}`} className="h-14 w-full object-cover" />
@@ -296,34 +358,34 @@ function ItemDetailsPage() {
                       ))}
                     </div>
                   )}
-                  <p className="text-xs text-muted-foreground">Up to 5 images. The first image is used as cover.</p>
+                  <p className="text-xs text-muted-foreground">Up to 5 images and 1 immersive video.</p>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">{item.category}</p>
-                <h1 className="mt-1 font-display text-3xl">{item.title}</h1>
+            <div className="space-y-4 lg:pt-1">
+              <div className="rounded-2xl border border-border/70 bg-background/70 p-4 sm:p-5">
+                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{item.category}</p>
+                <h1 className="mt-1 font-display text-3xl leading-tight sm:text-[2.1rem]">{item.title}</h1>
               </div>
 
-              <p className="rounded-xl border border-border/70 bg-background/70 p-4 text-sm leading-6 text-foreground">
+              <p className="rounded-2xl border border-border/70 bg-background/70 p-4 text-sm leading-6 text-foreground">
                 {item.description || "No extra description provided by the owner yet."}
               </p>
 
-              <div className="grid gap-3 rounded-xl border border-border/70 bg-background/70 p-4 text-sm sm:grid-cols-2">
-                <div>
+              <div className="grid gap-3 rounded-2xl border border-border/70 bg-background/70 p-4 text-sm sm:grid-cols-2">
+                <div className="rounded-xl border border-border/60 bg-card/60 p-3">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">Price mode</p>
                   <p className="mt-1 font-semibold">{item.price_mode === "free" ? "Free borrow" : `Rent $${item.price_amount}/day`}</p>
                 </div>
-                <div>
+                <div className="rounded-xl border border-border/60 bg-card/60 p-3">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">Replacement value</p>
                   <p className="mt-1 font-semibold">{item.deposit_amount != null ? `$${item.deposit_amount}` : "Not set"}</p>
                 </div>
               </div>
 
               {(item.building_name || item.address) && (
-                <div className="rounded-xl border border-border/70 bg-background/70 p-4 text-sm">
+                <div className="rounded-2xl border border-border/70 bg-background/70 p-4 text-sm">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">Pickup area</p>
                   <p className="mt-2 inline-flex items-start gap-2 text-foreground">
                     <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
@@ -333,18 +395,18 @@ function ItemDetailsPage() {
               )}
 
               <div className="flex flex-wrap gap-2">
-                <Link to="/items" className="rounded-full border border-input bg-background px-4 py-2 text-sm font-semibold hover:bg-muted">
+                <Link to="/items" search={{}} className="rounded-full border border-input bg-background px-4 py-2 text-sm font-semibold hover:bg-muted">
                   Back
                 </Link>
                 {!user ? (
-                  <Link to="/auth" className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground">
+                  <button type="button" onClick={() => setShowAuthPrompt(true)} className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground shadow-sm hover:bg-leaf/90">
                     Sign in to request
-                  </Link>
+                  </button>
                 ) : !isOwner && !showRequestActions ? (
                   <button
                     type="button"
                     onClick={() => setRequesting(true)}
-                    className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground"
+                    className="rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground shadow-sm hover:bg-leaf/90"
                   >
                     Request this item
                   </button>
@@ -412,6 +474,25 @@ function ItemDetailsPage() {
           }}
           busy={busyBookingId === myBooking.id}
         />
+      )}
+
+      {showAuthPrompt && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setShowAuthPrompt(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-3xl bg-card p-6 shadow-2xl">
+            <h2 className="font-display text-2xl">Sign in required</h2>
+            <p className="text-sm text-muted-foreground">
+              You can keep viewing this item. Sign in only if you want to request or manage booking actions.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button type="button" onClick={() => setShowAuthPrompt(false)} className="rounded-xl border border-border py-2.5 text-sm font-semibold">
+                Keep viewing
+              </button>
+              <Link to="/auth" onClick={() => setShowAuthPrompt(false)} className="rounded-xl bg-leaf py-2.5 text-center text-sm font-semibold text-leaf-foreground">
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -488,6 +569,11 @@ function RequestConsentModal({
       await onRequested?.();
       onClose();
     } catch (error: any) {
+      if (String(error?.message || "").toLowerCase().includes("unauthorized")) {
+        toast.dismiss();
+        onClose();
+        return;
+      }
       toast.error(error?.message || "Unable to send request");
     } finally {
       setSubmitting(false);

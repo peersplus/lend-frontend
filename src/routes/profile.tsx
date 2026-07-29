@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
-import { toast } from "sonner";
+import { toast } from "@/lib/sonner";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({

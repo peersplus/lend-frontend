@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
-import { toast } from "sonner";
+import { toast } from "@/lib/sonner";
 
 type Booking = {
   id: string;
@@ -55,6 +55,12 @@ function BookingsPage() {
   const [rows, setRows] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [askHandoff, setAskHandoff] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
+  function isUnauthorizedError(error: unknown) {
+    const message = String((error as any)?.message || "").toLowerCase();
+    return message.includes("unauthorized") || message.includes("401") || message.includes("sign in");
+  }
 
   useEffect(() => {
     if (!user) return;
@@ -76,6 +82,12 @@ function BookingsPage() {
       const data = await listBookingsApi(tab);
       setRows((data as any) ?? []);
     } catch (error: any) {
+      if (isUnauthorizedError(error)) {
+        setShowAuthPrompt(true);
+        setRows([]);
+        setLoading(false);
+        return;
+      }
       toast.error(error.message || 'Unable to load bookings');
       setRows([]);
     }
@@ -89,6 +101,10 @@ function BookingsPage() {
       await updateBookingApi(id, patch);
       load();
     } catch (error: any) {
+      if (isUnauthorizedError(error)) {
+        setShowAuthPrompt(true);
+        return;
+      }
       toast.error(error.message || 'Unable to update booking');
     }
   }
@@ -192,6 +208,25 @@ function BookingsPage() {
         )}
       </main>
       <SiteFooter />
+
+      {showAuthPrompt && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setShowAuthPrompt(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-3xl bg-card p-6 shadow-2xl">
+            <h2 className="font-display text-2xl">Sign in required</h2>
+            <p className="text-sm text-muted-foreground">
+              You can stay on this bookings page. Sign in to continue actions like approve, cancel, dispatch, or return.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button type="button" onClick={() => setShowAuthPrompt(false)} className="rounded-xl border border-border py-2.5 text-sm font-semibold">
+                Stay here
+              </button>
+              <Link to="/auth" onClick={() => setShowAuthPrompt(false)} className="rounded-xl bg-leaf py-2.5 text-center text-sm font-semibold text-leaf-foreground">
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

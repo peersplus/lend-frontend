@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
+import { toast } from "@/lib/sonner";
 import { LOGO_URL } from "@/lib/brand";
 import {
+  sendForgotPasswordEmail,
   getFirebaseAuthErrorMessage,
   getFirebaseClient,
   signInWithEmail,
@@ -37,7 +39,10 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotBusy, setForgotBusy] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; title: string; description?: string } | null>(null);
 
   useEffect(() => {
@@ -95,6 +100,29 @@ function AuthPage() {
         description: errorMessage.description,
         duration: 6000,
       });
+    }
+  }
+
+  async function handleForgotPassword() {
+    setForgotBusy(true);
+    setFeedback(null);
+    try {
+      await sendForgotPasswordEmail(email);
+      toast.success("Password reset email sent.", {
+        description: "Check your inbox for the reset link.",
+      });
+      setFeedback({
+        type: "success",
+        title: "Password reset email sent",
+        description: "Please open the link in your inbox to set a new password.",
+      });
+      setForgotOpen(false);
+    } catch (err) {
+      const errorMessage = getFirebaseAuthErrorMessage(err);
+      toast.error(errorMessage.title, { description: errorMessage.description });
+      setFeedback({ type: "error", title: errorMessage.title, description: errorMessage.description });
+    } finally {
+      setForgotBusy(false);
     }
   }
 
@@ -170,15 +198,36 @@ function AuthPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-leaf/40"
             />
-            <input
-              required
-              type="password"
-              minLength={6}
-              placeholder="Password (min 6 characters)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-leaf/40"
-            />
+            <div className="relative">
+              <input
+                required
+                type={showPassword ? "text" : "password"}
+                minLength={6}
+                placeholder="Password (min 6 characters)"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 pr-11 text-sm outline-none focus:ring-2 focus:ring-leaf/40"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {mode === "signin" && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setForgotOpen(true)}
+                  className="text-xs font-semibold text-leaf underline underline-offset-4"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
             <button
               type="submit"
               disabled={busy}
@@ -202,6 +251,41 @@ function AuthPage() {
             </button>
           </p>
         </div>
+
+        {forgotOpen && (
+          <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setForgotOpen(false)}>
+            <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-3xl border border-border bg-card p-6 shadow-xl">
+              <h2 className="font-display text-2xl">Reset password</h2>
+              <p className="text-sm text-muted-foreground">
+                We will send a password reset link to your email.
+              </p>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-leaf/40"
+              />
+              <div className="grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setForgotOpen(false)}
+                  className="rounded-xl border border-border py-2.5 text-sm font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleForgotPassword()}
+                  disabled={forgotBusy}
+                  className="rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground disabled:opacity-60"
+                >
+                  {forgotBusy ? "Sending..." : "Send reset link"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

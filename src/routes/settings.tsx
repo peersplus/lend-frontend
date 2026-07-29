@@ -1,13 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { getFirebaseIdToken } from "@/lib/firebase";
+import { changeCurrentUserPassword, getFirebaseAuthErrorMessage, getFirebaseIdToken } from "@/lib/firebase";
 import { useWebPush } from "@/hooks/useWebPush";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { requestLocation } from "@/lib/geolocate";
-import { toast } from "sonner";
+import { toast } from "@/lib/sonner";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -36,7 +37,16 @@ function SettingsPage() {
   });
 
   const [saving, setSaving] = useState(false);
+  const [passwordBusy, setPasswordBusy] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [ready, setReady] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   useEffect(() => {
     if (loading) return;
@@ -113,6 +123,45 @@ function SettingsPage() {
       toast.error(error.message || "Unable to save settings");
     }
 
+  };
+
+  const changePassword = async () => {
+    if (!user) return;
+
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast.error("Please fill all password fields.");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      toast.error("New password must be at least 6 characters.");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("New password and confirm password do not match.");
+      return;
+    }
+
+    setPasswordBusy(true);
+    try {
+      await changeCurrentUserPassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      toast.success("Password updated successfully.");
+    } catch (err) {
+      const directMessage = err instanceof Error ? err.message : "";
+      if (directMessage === "Current password is incorrect.") {
+        toast.error("Current password is incorrect.");
+        return;
+      }
+      const message = getFirebaseAuthErrorMessage(err);
+      toast.error(message.title, { description: message.description });
+    } finally {
+      setPasswordBusy(false);
+    }
   };
 
   if (loading || !ready) return <div className="p-8">Loading…</div>;
@@ -281,6 +330,78 @@ function SettingsPage() {
                 </p>
               </div>
             </label>
+          </section>
+
+          <section className="rounded-lg border border-border bg-card p-6">
+            <h2 className="font-semibold">Change password</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Update your login password for better account security.
+            </p>
+            <div className="mt-4 grid gap-3">
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? "text" : "password"}
+                  placeholder="Current password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }))}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword((prev) => !prev)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted"
+                  aria-label={showCurrentPassword ? "Hide current password" : "Show current password"}
+                >
+                  {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  placeholder="New password (min 6 characters)"
+                  minLength={6}
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }))}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword((prev) => !prev)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted"
+                  aria-label={showNewPassword ? "Hide new password" : "Show new password"}
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm new password"
+                  minLength={6}
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted"
+                  aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => void changePassword()}
+                  disabled={passwordBusy}
+                  className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                >
+                  {passwordBusy ? "Updating..." : "Update password"}
+                </button>
+              </div>
+            </div>
           </section>
 
 

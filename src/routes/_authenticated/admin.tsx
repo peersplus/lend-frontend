@@ -4,7 +4,7 @@ import { useRole } from "@/hooks/useRole";
 import { getFirebaseIdToken } from "@/lib/firebase";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { toast } from "sonner";
+import { toast } from "@/lib/sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({

@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { createMessageApi, getProfileApi, listBookingsApi, listMessagesApi } from "@/lib/api-peers";
 import { UserMenu } from "@/components/UserMenu";
 import { PhotoImg } from "@/components/PhotoImg";
-import { toast } from "sonner";
+import { toast } from "@/lib/sonner";
 
 export const Route = createFileRoute("/chat/$bookingId")({
   head: ({ params }) => ({

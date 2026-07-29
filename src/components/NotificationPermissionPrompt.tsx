@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebPush } from "@/hooks/useWebPush";
 import { getFirebaseIdToken } from "@/lib/firebase";
-import { toast } from "sonner";
+import { toast } from "@/lib/sonner";
 
 const DISMISS_KEY = "peers-notif-prompt-dismissed";
 

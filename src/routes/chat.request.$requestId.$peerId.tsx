@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { createMessageApi, listMessagesApi } from "@/lib/api-peers";
 import { UserMenu } from "@/components/UserMenu";
-import { toast } from "sonner";
+import { toast } from "@/lib/sonner";
 
 export const Route = createFileRoute("/chat/request/$requestId/$peerId")({
   head: () => ({
