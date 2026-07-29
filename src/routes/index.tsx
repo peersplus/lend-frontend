@@ -4,6 +4,9 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { useReveal } from "@/hooks/useReveal";
+import heroElectronics from "@/assets/hero-electronics.jpg";
+import heroGarden from "@/assets/hero-garden.jpg";
+import heroHospital from "@/assets/hero-hospital.jpg";
 
 
 export const Route = createFileRoute("/")({
@@ -50,6 +53,146 @@ const emergencies = [
   { need: "Wheelchair for visiting grandparent", who: "Example request", when: "Nearby" },
   { need: "Portable generator — power out on 5th Ave", who: "Example request", when: "Nearby" },
 ];
+
+const firstTimeGuide = [
+  {
+    n: "01",
+    title: "Choose your role",
+    body: "Borrow what you need, lend what you already own, or do both. No long setup.",
+  },
+  {
+    n: "02",
+    title: "Use verified exchanges",
+    body: "Pickup and return are confirmed with QR plus photos so both sides stay protected.",
+  },
+  {
+    n: "03",
+    title: "Pay only if required",
+    body: "Most items are free. If rent/deposit exists, you see terms before you request.",
+  },
+];
+
+const DAY_THEMES: Record<number, {
+  badge: string;
+  headline: string;
+  accent: string;
+  description: string;
+  audience: string[];
+}> = {
+  0: {
+    badge: "Sunday reset and family prep",
+    headline: "Plan your week",
+    accent: "without overspending.",
+    description: "Borrow what your home needs for the coming week and return when you're done.",
+    audience: ["Family prep", "Home reset", "Weekend chores"],
+  },
+  1: {
+    badge: "Monday essentials",
+    headline: "Start your week",
+    accent: "with less stress.",
+    description: "Need a laptop stand, baby gear, or quick kitchen support? Your neighborhood already has it.",
+    audience: ["Busy professionals", "Caregivers", "Parents"],
+  },
+  2: {
+    badge: "Tuesday practical sharing",
+    headline: "Borrow practical tools",
+    accent: "for everyday fixes.",
+    description: "From drills to cleaning machines, find short-use items nearby instead of buying new.",
+    audience: ["Home fixes", "Tool sharing", "Savings first"],
+  },
+  3: {
+    badge: "Midweek support",
+    headline: "Get help faster",
+    accent: "when schedules get tight.",
+    description: "Request a ride, extra hands, or urgent neighborhood support with verified members.",
+    audience: ["Midweek rush", "Local help", "Verified support"],
+  },
+  4: {
+    badge: "Thursday event prep",
+    headline: "Prepare gatherings",
+    accent: "without buying one-time items.",
+    description: "Borrow party, kitchen, and hosting essentials before weekend plans begin.",
+    audience: ["Party prep", "Kitchen gear", "Host smart"],
+  },
+  5: {
+    badge: "Friday community vibe",
+    headline: "Weekend starts",
+    accent: "with smarter sharing.",
+    description: "Find camping, sports, and celebration items from neighbors around you.",
+    audience: ["Weekend plans", "Outdoor gear", "Social sharing"],
+  },
+  6: {
+    badge: "Saturday action day",
+    headline: "Get things done",
+    accent: "with neighborhood resources.",
+    description: "Handle repairs, family activities, and events using trusted local borrowing.",
+    audience: ["Projects day", "Family time", "Community trust"],
+  },
+};
+
+const FESTIVAL_SPOTLIGHTS: Array<{
+  id: string;
+  label: string;
+  start: string; // MM-DD
+  end: string;   // MM-DD
+  heroLine: string;
+  categories: string[];
+}> = [
+  {
+    id: "new-year",
+    label: "New Year Week",
+    start: "01-01",
+    end: "01-10",
+    heroLine: "New year, lighter home. Borrow before you buy.",
+    categories: ["Party", "Kitchen", "Cleaning"],
+  },
+  {
+    id: "holi-season",
+    label: "Holi Season",
+    start: "03-10",
+    end: "03-20",
+    heroLine: "Festival prep made easy with shared party and cleaning gear.",
+    categories: ["Party", "Cleaning", "Kitchen"],
+  },
+  {
+    id: "rakhi-month",
+    label: "Rakhi Month",
+    start: "08-01",
+    end: "08-31",
+    heroLine: "Welcome loved ones with shared kitchen and hosting essentials.",
+    categories: ["Kitchen", "Party", "Furniture"],
+  },
+  {
+    id: "festive-quarter",
+    label: "Festive Season",
+    start: "10-01",
+    end: "11-10",
+    heroLine: "Celebrate smarter with neighborhood sharing for gifts and gatherings.",
+    categories: ["Party", "Kitchen", "Electronics"],
+  },
+  {
+    id: "christmas-week",
+    label: "Christmas Week",
+    start: "12-15",
+    end: "12-31",
+    heroLine: "Holiday hosting feels easier with trusted nearby borrowing.",
+    categories: ["Party", "Kitchen", "Baby"],
+  },
+];
+
+function monthDayNumber(value: string) {
+  const [month, day] = value.split("-").map(Number);
+  return month * 100 + day;
+}
+
+function getFestivalSpotlight(date: Date) {
+  const current = (date.getMonth() + 1) * 100 + date.getDate();
+  return FESTIVAL_SPOTLIGHTS.find((entry) => {
+    const start = monthDayNumber(entry.start);
+    const end = monthDayNumber(entry.end);
+    return start <= end ? current >= start && current <= end : current >= start || current <= end;
+  }) || null;
+}
 
 const flowSteps = [
   {
@@ -128,6 +271,14 @@ const flowSteps = [
 function Home() {
   const { user } = useAuth();
   useReveal();
+  const today = new Date();
+  const dayTheme = DAY_THEMES[today.getDay()] || DAY_THEMES[1];
+  const festivalSpotlight = getFestivalSpotlight(today);
+  const todayLabel = new Intl.DateTimeFormat("en-IN", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  }).format(today);
 
 
   return (
@@ -136,60 +287,159 @@ function Home() {
 
       <main>
         {/* Hero */}
-        <section className="px-6 pt-16 pb-20 md:pt-24">
+        <section className="relative overflow-hidden px-6 pt-16 pb-20 md:pt-24">
+          <div className="pointer-events-none absolute -top-16 -left-20 h-72 w-72 rounded-full bg-clay/20 blur-3xl" />
+          <div className="pointer-events-none absolute top-10 right-0 h-80 w-80 rounded-full bg-leaf/20 blur-3xl" />
           <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-12">
             <div className="lg:col-span-7" data-reveal="left">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm">
                 <span className="size-1.5 rounded-full bg-accent" />
-                Neighbors helping neighbors, one shed at a time
+                {dayTheme.badge}
               </div>
-              <h1 className="mb-6 text-balance font-display text-5xl leading-[1.05] md:text-7xl">
-                Borrow a ladder. <span className="italic text-leaf">Lend a hand.</span>
+              <h1 className="mb-6 text-balance font-display text-5xl leading-[1.04] md:text-7xl">
+                {dayTheme.headline} <span className="italic text-leaf">{dayTheme.accent}</span>
               </h1>
-              <p className="mb-10 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
-                Your neighborhood library of things. Access tools, medical gear, party supplies and
-                more from verified neighbors — for free or a small fee. Built on trust, not
-                transactions.
+              <p className="mb-7 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
+                {dayTheme.description} {festivalSpotlight ? festivalSpotlight.heroLine : "A trusted app for homes, families, and everyday life."}
               </p>
+              <div className="mb-9 flex flex-wrap gap-2">
+                {dayTheme.audience.map((label) => (
+                  <span key={label} className="rounded-full border border-border bg-background/90 px-3 py-1.5 text-xs font-medium text-muted-foreground">{label}</span>
+                ))}
+                {festivalSpotlight && (
+                  <span className="rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent">
+                    {festivalSpotlight.label} spotlight
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap gap-3">
                 <Link
-               
                   to="/items"
-                  className="inline-flex items-center gap-2 rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20 transition-transform hover:-translate-y-0.5"
+                  search={{ lend: undefined, cat: undefined }}
+                  className="inline-flex items-center gap-2 rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/25 transition-transform hover:-translate-y-0.5"
                 >
                   Browse nearby
                   <span aria-hidden>→</span>
                 </Link>
                 <Link
                   to={user ? "/items" : "/auth"}
+                  search={user ? { lend: undefined, cat: undefined } : undefined}
                   className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
                 >
                   {user ? "Lend something" : "Join your block"}
                 </Link>
               </div>
-              <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex -space-x-2">
-                    <span className="size-7 rounded-full border-2 border-background bg-clay/40" />
-                    <span className="size-7 rounded-full border-2 border-background bg-leaf/40" />
-                    <span className="size-7 rounded-full border-2 border-background bg-amber-400/50" />
-                    <span className="size-7 rounded-full border-2 border-background bg-sky-400/40" />
-                  </span>
-                  <span>
-                    <b className="text-foreground">Be among the first</b> verified neighbors
-                  </span>
-                </div>
-                <div>
-                  <b className="text-foreground">Free</b> to join & lend
-                </div>
-                <div>
-                  <b className="text-foreground">Verified</b> people only
-                </div>
+              <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
+                {[
+                  { label: "Today", value: todayLabel },
+                  { label: "Pickup confidence", value: "Photo + handoff records" },
+                  { label: "Budget friendly", value: "Free or fair local fees" },
+                ].map((point) => (
+                  <div key={point.label} className="rounded-2xl border border-border/80 bg-card/80 p-3">
+                    <p className="text-xs text-muted-foreground">{point.label}</p>
+                    <p className="mt-1 text-sm font-semibold">{point.value}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
             <div className="relative lg:col-span-5" data-reveal="right" data-reveal-delay="120" data-scrub="parallax-slow">
               <HeroCarousel />
+              <div className="pointer-events-none absolute -bottom-4 -right-2 rounded-2xl border border-border/70 bg-card/90 px-4 py-2 text-xs font-semibold text-muted-foreground shadow-lg">
+                {festivalSpotlight ? `${festivalSpotlight.label} now live` : "Built for everyday trust and easier sharing"}
+              </div>
+              {festivalSpotlight && (
+                <div className="absolute -top-4 left-1/2 z-20 w-[92%] -translate-x-1/2 rounded-2xl border border-accent/30 bg-background/95 p-3 shadow-lg backdrop-blur">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">Festival picks</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {festivalSpotlight.categories.map((category) => (
+                      <Link
+                        key={category}
+                        to="/items"
+                        search={{ lend: undefined, cat: category }}
+                        className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium text-foreground hover:bg-muted"
+                      >
+                        {category}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* First-time explainer */}
+        <section className="px-6 pb-20">
+          <div className="mx-auto grid max-w-7xl items-start gap-8 rounded-3xl border border-border/70 bg-card/70 p-5 shadow-sm sm:p-8 lg:grid-cols-[1.1fr_1fr]">
+            <div data-reveal="left">
+              <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                Start here
+              </p>
+              <h2 className="text-3xl md:text-4xl">
+                New here? Understand everything <span className="italic text-leaf">before your first request.</span>
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                Peers Plus and Help is a neighborhood sharing app. You borrow from nearby verified people,
+                return on time, and grow trust with every exchange.
+              </p>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {firstTimeGuide.map((step, idx) => (
+                  <div
+                    key={step.n}
+                    className="rounded-2xl border border-border bg-background/80 p-4"
+                    data-reveal="scale"
+                    data-reveal-delay={String(80 + idx * 80)}
+                  >
+                    <p className="mb-1 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-clay">
+                      {step.n}
+                    </p>
+                    <h3 className="mb-1.5 text-sm font-semibold">{step.title}</h3>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{step.body}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Link
+                  to={user ? "/items" : "/auth"}
+                  search={user ? { lend: undefined, cat: undefined } : undefined}
+                  className="rounded-full bg-leaf px-5 py-2.5 text-sm font-semibold text-leaf-foreground"
+                >
+                  {user ? "Go to listings" : "Create free account"}
+                </Link>
+                <Link to="/safety" className="rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold hover:bg-muted">
+                  Read trust & safety
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2" data-reveal="right" data-reveal-delay="120">
+              <div className="relative overflow-hidden rounded-2xl border border-border bg-background" style={{ transform: "perspective(900px) rotateY(-7deg) rotateX(2deg)" }}>
+                <img src={heroElectronics} alt="Neighbor sharing electronics" className="h-40 w-full object-cover" />
+                <div className="p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Borrow</p>
+                  <p className="text-sm">Find useful items near you in minutes.</p>
+                </div>
+              </div>
+              <div className="relative overflow-hidden rounded-2xl border border-border bg-background" style={{ transform: "perspective(900px) rotateY(7deg) rotateX(2deg)" }}>
+                <img src={heroGarden} alt="Neighbor lending garden tools" className="h-40 w-full object-cover" />
+                <div className="p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Lend</p>
+                  <p className="text-sm">List once, help your block often.</p>
+                </div>
+              </div>
+              <div className="relative overflow-hidden rounded-2xl border border-border bg-background sm:col-span-2" style={{ transform: "perspective(900px) rotateX(2deg)" }}>
+                <img src={heroHospital} alt="Community support for hospital visit" className="h-44 w-full object-cover" />
+                <div className="flex flex-wrap items-center justify-between gap-2 p-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Help</p>
+                    <p className="text-sm">Post urgent or everyday requests and get neighborhood support.</p>
+                  </div>
+                  <span className="rounded-full bg-accent/20 px-2.5 py-1 text-[11px] font-semibold text-accent">Verified first</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -204,7 +454,7 @@ function Home() {
                 </p>
                 <h2 className="text-3xl md:text-4xl">Everything, right around the corner</h2>
               </div>
-              <Link to="/items" className="hidden text-sm font-medium text-leaf underline decoration-leaf/30 underline-offset-4 md:inline">
+              <Link to="/items" search={{ lend: undefined, cat: undefined }} className="hidden text-sm font-medium text-leaf underline decoration-leaf/30 underline-offset-4 md:inline">
                 Browse all listings →
               </Link>
             </div>
@@ -213,6 +463,7 @@ function Home() {
                 <Link
                   key={c.label}
                   to="/items"
+                  search={{ lend: undefined, cat: undefined }}
                   id={`cat-${c.label.toLowerCase()}`}
                   data-reveal="scale"
                   data-reveal-delay={String((i % 6) * 60)}
@@ -286,7 +537,7 @@ function Home() {
               >
                 {user ? "Open my feed" : "Register in 30 seconds"}
               </Link>
-              <Link to="/items" className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold">
+              <Link to="/items" search={{ lend: undefined, cat: undefined }} className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold">
                 See what's nearby
               </Link>
             </div>
@@ -404,7 +655,7 @@ function Home() {
               >
                 {user ? "Open the app" : "Get started — it's free"}
               </Link>
-              <Link to="/items" className="rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold" data-scrub="cta">
+              <Link to="/items" search={{ lend: undefined, cat: undefined }} className="rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold" data-scrub="cta">
                 See what's nearby
               </Link>
             </div>

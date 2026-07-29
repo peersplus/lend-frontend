@@ -1,4 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import heroElectronics from "@/assets/hero-electronics.jpg";
+import heroGarden from "@/assets/hero-garden.jpg";
+import heroHospital from "@/assets/hero-hospital.jpg";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 /**
  * Standalone marketing landing page for peersplus.com.
@@ -34,8 +39,23 @@ export const Route = createFileRoute("/landing")({
   component: LandingPage,
 });
 
-const LOGO =
-  "https://cdn.lovable.dev/projects/ded194ea-5232-4886-86cb-a35e37bf8690/peers-plus-logo.png";
+const firstTimeGuide = [
+  {
+    n: "01",
+    title: "Choose your role",
+    body: "Borrow what you need, lend what you already own, or do both. No long setup.",
+  },
+  {
+    n: "02",
+    title: "Use verified exchanges",
+    body: "Pickup and return are confirmed with QR plus photos so both sides stay protected.",
+  },
+  {
+    n: "03",
+    title: "Pay only if required",
+    body: "Most items are free. If rent/deposit exists, you see terms before you request.",
+  },
+];
 
 const features = [
   {
@@ -135,34 +155,7 @@ const faqs = [
 function LandingPage() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1B1D1A] antialiased">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-black/5 bg-[#FAF7F2]/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={LOGO} alt="Peers Plus" className="h-9 w-auto" />
-          </Link>
-          <nav className="hidden items-center gap-7 text-sm font-medium text-[#4B5147] md:flex">
-            <a href="#features" className="hover:text-[#1B1D1A]">Features</a>
-            <a href="#how" className="hover:text-[#1B1D1A]">How it works</a>
-            <a href="#trust" className="hover:text-[#1B1D1A]">Trust & safety</a>
-            <a href="#faq" className="hover:text-[#1B1D1A]">FAQ</a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Link
-              to="/auth"
-              className="hidden rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-[#1B1D1A] hover:bg-black/5 sm:inline-flex"
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/items"
-              className="inline-flex rounded-full bg-[#3F6B4A] px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-[#3F6B4A]/30 hover:bg-[#345a3d]"
-            >
-              Open the app
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main>
         {/* Hero */}
@@ -187,6 +180,7 @@ function LandingPage() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   to="/items"
+                  search={{ lend: undefined, cat: undefined }}
                   className="inline-flex items-center gap-2 rounded-full bg-[#3F6B4A] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#3F6B4A]/25 transition-transform hover:-translate-y-0.5"
                 >
                   Browse nearby →
@@ -232,6 +226,75 @@ function LandingPage() {
                   <button className="rounded-full bg-[#3F6B4A] px-4 py-2 text-sm font-semibold text-white">
                     Request
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* First-time explainer */}
+        <section className="px-5 pb-20">
+          <div className="mx-auto grid max-w-6xl items-start gap-8 rounded-3xl border border-black/5 bg-white/90 p-5 shadow-sm sm:p-8 lg:grid-cols-[1.1fr_1fr]">
+            <div>
+              <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-[#4B5147]">
+                Start here
+              </p>
+              <h2 className="font-serif text-3xl md:text-4xl">
+                New here? Understand everything <span className="italic text-[#3F6B4A]">before your first request.</span>
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#4B5147] sm:text-base">
+                Peers Plus is a neighborhood sharing app. You borrow from nearby verified people,
+                return on time, and grow trust with every exchange.
+              </p>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {firstTimeGuide.map((step) => (
+                  <div key={step.n} className="rounded-2xl border border-black/10 bg-[#FAF7F2] p-4">
+                    <p className="mb-1 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-[#C2410C]">
+                      {step.n}
+                    </p>
+                    <h3 className="mb-1.5 text-sm font-semibold">{step.title}</h3>
+                    <p className="text-xs leading-relaxed text-[#4B5147]">{step.body}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Link
+                  to="/auth"
+                  className="rounded-full bg-[#3F6B4A] px-5 py-2.5 text-sm font-semibold text-white"
+                >
+                  Create free account
+                </Link>
+                <Link to="/safety" className="rounded-full border border-black/10 bg-white px-5 py-2.5 text-sm font-semibold hover:bg-black/5">
+                  Read trust and safety
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-white" style={{ transform: "perspective(900px) rotateY(-7deg) rotateX(2deg)" }}>
+                <img src={heroElectronics} alt="Neighbor sharing electronics" className="h-40 w-full object-cover" />
+                <div className="p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#4B5147]">Borrow</p>
+                  <p className="text-sm">Find useful items near you in minutes.</p>
+                </div>
+              </div>
+              <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-white" style={{ transform: "perspective(900px) rotateY(7deg) rotateX(2deg)" }}>
+                <img src={heroGarden} alt="Neighbor lending garden tools" className="h-40 w-full object-cover" />
+                <div className="p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#4B5147]">Lend</p>
+                  <p className="text-sm">List once, help your block often.</p>
+                </div>
+              </div>
+              <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-white sm:col-span-2" style={{ transform: "perspective(900px) rotateX(2deg)" }}>
+                <img src={heroHospital} alt="Community support for hospital visit" className="h-44 w-full object-cover" />
+                <div className="flex flex-wrap items-center justify-between gap-2 p-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[#4B5147]">Help</p>
+                    <p className="text-sm">Post urgent or everyday requests and get neighborhood support.</p>
+                  </div>
+                  <span className="rounded-full bg-[#E4EFDD] px-2.5 py-1 text-[11px] font-semibold text-[#3F6B4A]">Verified first</span>
                 </div>
               </div>
             </div>
@@ -331,7 +394,7 @@ function LandingPage() {
               </ul>
               <Link
                 to="/items"
-                search={{ lend: "1" }}
+                search={{ lend: "1", cat: undefined }}
                 className="mt-8 inline-flex rounded-full bg-[#3F6B4A] px-6 py-3 text-sm font-semibold text-white"
               >
                 + Post a lend
@@ -350,6 +413,7 @@ function LandingPage() {
               </ul>
               <Link
                 to="/items"
+                search={{ lend: undefined, cat: undefined }}
                 className="mt-8 inline-flex rounded-full bg-[#1B1D1A] px-6 py-3 text-sm font-semibold text-white"
               >
                 Browse nearby →
@@ -400,6 +464,7 @@ function LandingPage() {
               </Link>
               <Link
                 to="/items"
+                search={{ lend: undefined, cat: undefined }}
                 className="rounded-full border border-white/20 px-7 py-3.5 text-sm font-semibold text-white"
               >
                 Explore listings
@@ -409,24 +474,7 @@ function LandingPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-black/5 bg-[#FAF7F2] px-5 py-12">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 text-sm text-[#4B5147] md:flex-row">
-          <div className="flex items-center gap-3">
-            <img src={LOGO} alt="Peers Plus" className="h-8 w-auto" />
-            <span>© {new Date().getFullYear()} Peers Plus. Lend locally.</span>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-5">
-            <Link to="/about" className="hover:text-[#1B1D1A]">About</Link>
-            <Link to="/safety" className="hover:text-[#1B1D1A]">Safety</Link>
-            <Link to="/privacy" className="hover:text-[#1B1D1A]">Privacy</Link>
-            <Link to="/contact" className="hover:text-[#1B1D1A]">Contact</Link>
-            <a href="mailto:peersplushr@gmail.com" className="hover:text-[#1B1D1A]">
-              peersplushr@gmail.com
-            </a>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
