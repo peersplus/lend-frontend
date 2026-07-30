@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { createMessageApi, getProfileApi, listBookingsApi, listMessagesApi } from "@/lib/api-peers";
 import { UserMenu } from "@/components/UserMenu";
 import { PhotoImg } from "@/components/PhotoImg";
+import { CenteredLoader } from "@/components/CenteredLoader";
 import { toast } from "@/lib/sonner";
 
 export const Route = createFileRoute("/chat/$bookingId")({
@@ -121,7 +122,7 @@ function ChatPage() {
     }
   }
 
-  if (loading || !ready) return <div className="p-8 text-muted-foreground">Loading…</div>;
+  if (loading || !ready) return <CenteredLoader label="Loading chat..." fullScreen />;
   if (!booking) return null;
 
   const active = ["approved","picked_up","returned","defect_reported","completed"].includes(booking.status);

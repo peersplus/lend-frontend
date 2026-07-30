@@ -14,6 +14,8 @@ type Props = {
   compact?: boolean;
   dense?: boolean;
   accept?: "image" | "video" | "media";
+  storeDirectUrl?: boolean;
+  captureMode?: "environment" | "user" | "none";
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -59,10 +61,16 @@ export function PhotoUpload({
   compact = false,
   dense = false,
   accept = "image",
+  storeDirectUrl = false,
+  captureMode = "environment",
 }: Props) {
   const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
   const [cropOpen, setCropOpen] = useState(false);
+  const [sourcePickerOpen, setSourcePickerOpen] = useState(false);
+  const [activeAccept, setActiveAccept] = useState<string>("image/*");
+  const [activeCapture, setActiveCapture] = useState<"environment" | "user" | undefined>(undefined);
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const [offsetX, setOffsetX] = useState(0);
@@ -72,6 +80,7 @@ export function PhotoUpload({
 
   const isVideoPath = value ? /\.(mp4|mov|webm|m4v)$/i.test(value) : false;
   const inputAccept = accept === "video" ? "video/*" : accept === "media" ? "image/*,video/*" : "image/*";
+  const inputCapture = captureMode === "none" ? undefined : captureMode;
   const isVideoUpload = accept === "video" || isVideoPath;
   const maxVideoBytes = 250 * 1024 * 1024;
   const maxImageBytes = 20 * 1024 * 1024;
@@ -88,6 +97,48 @@ export function PhotoUpload({
     : isVideoUpload
       ? "Video ready"
       : "Image ready";
+
+  const primaryCameraLabel = accept === "video"
+    ? "Record video"
+    : accept === "media"
+      ? "Take photo"
+      : "Take photo";
+
+  function openInputWithCapture(capture: "environment" | "user" | undefined, nextAccept = inputAccept) {
+    if (uploading) return;
+    setActiveAccept(nextAccept);
+    setActiveCapture(capture);
+    window.setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 0);
+  }
+
+  function openPicker() {
+    if (uploading) return;
+    setSourcePickerOpen(true);
+  }
+
+  function extractStoragePathFromValue(input: string) {
+    if (!input) return null;
+    if (!/^https?:\/\//i.test(input)) return input;
+
+    try {
+      const { pathname } = new URL(input);
+      // Cloudinary delivery URL example:
+      // /<cloud>/<resource>/upload/v123/photos/<uid>/<folder>/<file>.ext
+      const marker = "/upload/";
+      const markerIndex = pathname.indexOf(marker);
+      if (markerIndex === -1) return null;
+      let tail = pathname.slice(markerIndex + marker.length).replace(/^v\d+\//, "");
+      const photosPrefix = "photos/";
+      const photosIndex = tail.indexOf(photosPrefix);
+      if (photosIndex === -1) return null;
+      tail = tail.slice(photosIndex + photosPrefix.length);
+      return tail || null;
+    } catch {
+      return null;
+    }
+  }
 
   async function uploadFile(file: File) {
     if (!user) return;
@@ -140,7 +191,8 @@ export function PhotoUpload({
       }
       const body = await response.json().catch(() => null);
       if (!response.ok) throw new Error(body?.error?.message || "Upload failed");
-      onChange(path);
+      const publicUrl = body?.data?.publicUrl || body?.data?.fullPath || null;
+      onChange(storeDirectUrl && publicUrl ? publicUrl : path);
       toast.success(crop ? "Profile photo updated" : (isVideo ? "Video uploaded" : "Photo uploaded"));
     } catch (error: any) {
       if (error?.name === "AbortError") {
@@ -231,7 +283,8 @@ export function PhotoUpload({
   }
 
   async function remove() {
-    if (value && user && value.startsWith(user.uid + "/")) {
+    const removablePath = value ? extractStoragePathFromValue(value) : null;
+    if (removablePath && user && removablePath.startsWith(user.uid + "/")) {
       try {
         const token = await (await import("@/lib/firebase")).getFirebaseIdToken();
         await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/api/storage/photos/remove`, {
@@ -240,7 +293,7 @@ export function PhotoUpload({
             "Content-Type": "application/json",
             Authorization: token ? `Bearer ${token}` : "",
           },
-          body: JSON.stringify({ paths: [value] }),
+          body: JSON.stringify({ paths: [removablePath] }),
         });
       } catch {
         // best effort
@@ -251,6 +304,16 @@ export function PhotoUpload({
 
   return (
     <div className={className}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={activeAccept}
+        capture={activeCapture}
+        onChange={handleFile}
+        className="hidden"
+        disabled={uploading}
+      />
+
       {value ? (
         dense ? (
           <div className="flex items-center gap-2 rounded-xl border border-border/80 bg-background/80 p-2 shadow-sm">
@@ -265,10 +328,9 @@ export function PhotoUpload({
               <p className="truncate text-xs font-semibold">{readyTitle}</p>
               <p className="truncate text-[11px] text-muted-foreground">{isVideoUpload ? "360 media attached" : "Image attached"}</p>
             </div>
-            <label className="inline-flex cursor-pointer items-center rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold hover:bg-muted">
+            <button type="button" onClick={openPicker} className="inline-flex cursor-pointer items-center rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold hover:bg-muted">
               Replace
-              <input type="file" accept={inputAccept} capture={accept === "video" ? undefined : "environment"} onChange={handleFile} className="hidden" />
-            </label>
+            </button>
             <button type="button" onClick={remove} className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold hover:bg-muted">
               Remove
             </button>
@@ -283,10 +345,9 @@ export function PhotoUpload({
                   <PhotoImg path={value} className="size-24 rounded-full object-cover" />
                 )}
               </div>
-              <label className="absolute bottom-0 right-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border bg-foreground text-lg text-background shadow-lg">
+              <button type="button" onClick={openPicker} className="absolute bottom-0 right-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border bg-foreground text-lg text-background shadow-lg">
                 +
-                <input type="file" accept={inputAccept} capture={accept === "video" ? undefined : "environment"} onChange={handleFile} className="hidden" />
-              </label>
+              </button>
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold">{readyTitle}</p>
@@ -310,11 +371,10 @@ export function PhotoUpload({
                 <p className="text-sm font-semibold">{readyTitle}</p>
                 <p className="text-xs text-muted-foreground">{isVideoUpload ? "Ready to publish in listing view." : "Use a clear image to improve trust and response rate."}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted">
+                  <button type="button" onClick={openPicker} className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted">
                     <span className="text-sm">+</span>
                     {isVideoPath ? "Replace video" : "Replace photo"}
-                    <input type="file" accept={inputAccept} capture={accept === "video" ? undefined : "environment"} onChange={handleFile} className="hidden" />
-                  </label>
+                  </button>
                   <button type="button" onClick={remove} className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted">
                     Remove
                   </button>
@@ -324,7 +384,7 @@ export function PhotoUpload({
           </div>
         )
       ) : dense ? (
-        <label className="group flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-border bg-muted/20 px-3 py-2 transition hover:border-leaf hover:bg-leaf/5">
+        <button type="button" onClick={openPicker} disabled={uploading} className="group flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-border bg-muted/20 px-3 py-2 text-left transition hover:border-leaf hover:bg-leaf/5 disabled:opacity-60">
           <div className="min-w-0">
             <p className="truncate text-xs font-semibold text-foreground">{uploaderTitle}</p>
             <p className="truncate text-[11px] text-muted-foreground">{uploadHint}</p>
@@ -332,10 +392,9 @@ export function PhotoUpload({
           <span className="rounded-full border border-border bg-background px-3 py-1 text-[11px] font-medium">
             {accept === "video" ? "Choose video" : accept === "media" ? "Choose file" : "Choose image"}
           </span>
-          <input type="file" accept={inputAccept} capture={accept === "video" ? undefined : "environment"} onChange={handleFile} className="hidden" disabled={uploading} />
-        </label>
+        </button>
       ) : (
-        <label className="group flex cursor-pointer flex-col items-center justify-center gap-3 rounded-[24px] border border-dashed border-border bg-gradient-to-br from-muted/60 to-background px-5 py-8 text-center transition hover:border-leaf hover:bg-leaf/5">
+        <button type="button" onClick={openPicker} disabled={uploading} className="group flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-[24px] border border-dashed border-border bg-gradient-to-br from-muted/60 to-background px-5 py-8 text-center transition hover:border-leaf hover:bg-leaf/5 disabled:opacity-60">
           <div className="rounded-full bg-leaf/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-leaf">Upload</div>
           <div>
             <p className="text-sm font-semibold text-foreground">{uploaderTitle}</p>
@@ -346,8 +405,56 @@ export function PhotoUpload({
           <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-medium">
             {accept === "video" ? "Choose video" : accept === "media" ? "Choose file" : "Choose image"}
           </span>
-          <input type="file" accept={inputAccept} capture={accept === "video" ? undefined : "environment"} onChange={handleFile} className="hidden" disabled={uploading} />
-        </label>
+        </button>
+      )}
+
+      {sourcePickerOpen && (
+        <div className="fixed inset-0 z-[75] flex items-end justify-center bg-black/55 p-4 sm:items-center">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-4 shadow-2xl">
+            <p className="text-base font-semibold">Select source</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {accept === "video" ? "Capture a video now or pick one from files." : "Use camera or choose from gallery/files."}
+            </p>
+            <div className="mt-4 grid gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSourcePickerOpen(false);
+                  openInputWithCapture(inputCapture, accept === "video" ? "video/*" : "image/*");
+                }}
+                className="rounded-xl border border-border bg-background px-4 py-2.5 text-left text-sm font-medium hover:bg-muted"
+              >
+                {primaryCameraLabel}
+              </button>
+              {accept === "media" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSourcePickerOpen(false);
+                    openInputWithCapture(inputCapture, "video/*");
+                  }}
+                  className="rounded-xl border border-border bg-background px-4 py-2.5 text-left text-sm font-medium hover:bg-muted"
+                >
+                  Record video
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => { setSourcePickerOpen(false); openInputWithCapture(undefined, inputAccept); }}
+                className="rounded-xl border border-border bg-background px-4 py-2.5 text-left text-sm font-medium hover:bg-muted"
+              >
+                Choose from gallery/files
+              </button>
+              <button
+                type="button"
+                onClick={() => setSourcePickerOpen(false)}
+                className="rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {cropOpen && sourceUrl && (

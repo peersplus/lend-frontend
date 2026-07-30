@@ -7,6 +7,7 @@ import { useWebPush } from "@/hooks/useWebPush";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { CenteredLoader } from "@/components/CenteredLoader";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "@/lib/sonner";
 
@@ -164,7 +165,7 @@ function SettingsPage() {
     }
   };
 
-  if (loading || !ready) return <div className="p-8">Loading…</div>;
+  if (loading || !ready) return <CenteredLoader label="Loading settings..." fullScreen />;
 
   return (
     <div className="min-h-screen bg-background">

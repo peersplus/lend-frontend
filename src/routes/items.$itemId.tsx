@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoImg } from "@/components/PhotoImg";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { Immersive360Video } from "@/components/Immersive360Video";
+import { CenteredLoader } from "@/components/CenteredLoader";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { createBookingApi, listBookingsApi, listItemsApi, updateBookingApi, updateItemApi } from "@/lib/api-peers";
@@ -216,7 +217,9 @@ function ItemDetailsPage() {
         </div>
 
         {loading ? (
-          <div className="rounded-2xl border border-border bg-card p-6 text-muted-foreground">Loading item details...</div>
+          <div className="rounded-2xl border border-border bg-card p-3">
+            <CenteredLoader label="Loading item details..." className="min-h-[180px]" />
+          </div>
         ) : !item ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
             <h1 className="font-display text-2xl">Item not found</h1>

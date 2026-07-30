@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { MediaVideo } from "@/components/MediaVideo";
+import { CenteredLoader } from "@/components/CenteredLoader";
 import { haversineKm, formatDistance } from "@/lib/geo";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "@/lib/sonner";
@@ -467,7 +468,7 @@ function ItemsPage() {
 
 
         {loading ? (
-          <p className="text-muted-foreground">Loading…</p>
+          <CenteredLoader label="Loading items..." />
         ) : items.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-border bg-card p-12 text-center">
             <p className="mb-4 text-muted-foreground">Nothing listed yet — be the first neighbor to share.</p>

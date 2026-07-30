@@ -9,6 +9,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
+import { CenteredLoader } from "@/components/CenteredLoader";
 import { toast } from "@/lib/sonner";
 
 
@@ -367,7 +368,7 @@ function RequestsPage() {
             if (q && !(r.title.toLowerCase().includes(q) || (r.description ?? "").toLowerCase().includes(q))) return false;
             return true;
           });
-          if (loading) return <p className="text-muted-foreground">Loading…</p>;
+          if (loading) return <CenteredLoader label="Loading requests..." />;
           if (filtered.length === 0) return (
             <div className="rounded-lg border border-dashed border-border p-12 text-center text-muted-foreground">
               {rows.length === 0 ? "No open requests yet. Be the first to ask your neighborhood." : "No requests match your filters."}

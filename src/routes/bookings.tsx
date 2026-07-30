@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
+import { CenteredLoader } from "@/components/CenteredLoader";
 import { toast } from "@/lib/sonner";
 
 type Booking = {
@@ -185,7 +186,7 @@ function BookingsPage() {
         </div>
 
         {loading ? (
-          <p className="text-muted-foreground">Loading…</p>
+          <CenteredLoader label="Loading bookings..." />
         ) : rows.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
             Nothing here yet.

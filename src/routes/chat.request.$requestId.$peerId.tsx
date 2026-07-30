@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { createMessageApi, listMessagesApi } from "@/lib/api-peers";
 import { UserMenu } from "@/components/UserMenu";
+import { CenteredLoader } from "@/components/CenteredLoader";
 import { toast } from "@/lib/sonner";
 
 export const Route = createFileRoute("/chat/request/$requestId/$peerId")({
@@ -87,7 +88,7 @@ function RequestChatPage() {
     }
   }
 
-  if (loading || !ready) return <div className="p-8 text-muted-foreground">Loading…</div>;
+  if (loading || !ready) return <CenteredLoader label="Loading chat..." fullScreen />;
   if (!req) return null;
 
   return (

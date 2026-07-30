@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
+import { CenteredLoader } from "@/components/CenteredLoader";
 import { toast } from "@/lib/sonner";
 
 export const Route = createFileRoute("/profile")({
@@ -29,6 +30,7 @@ function ProfilePage() {
   });
   const [ready, setReady] = useState(false);
   const [saving, setSaving] = useState(false);
+    const [avatarSaving, setAvatarSaving] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -73,7 +75,26 @@ function ProfilePage() {
 
   }
 
-  if (loading || !ready) return <div className="p-8 text-muted-foreground">Loading…</div>;
+  async function handleAvatarChange(nextValue: string | null) {
+    const nextAvatar = nextValue ?? "";
+    const previousAvatar = form.avatar_url;
+
+    setForm((prev) => ({ ...prev, avatar_url: nextAvatar }));
+    setAvatarSaving(true);
+    try {
+      await updateMyPeerProfileApi({
+        avatar_url: nextAvatar || null,
+      });
+      toast.success("Profile photo saved");
+    } catch (error: any) {
+      setForm((prev) => ({ ...prev, avatar_url: previousAvatar }));
+      toast.error(error.message || "Unable to save profile photo");
+    } finally {
+      setAvatarSaving(false);
+    }
+  }
+
+  if (loading || !ready) return <CenteredLoader label="Loading profile..." fullScreen />;
 
   const initials = (form.display_name || user!.email || "N")
     .split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase()).join("");
@@ -92,14 +113,19 @@ function ProfilePage() {
             <div className="flex flex-col gap-5 md:flex-row md:items-center">
               <div className="flex-1">
                 <p className="text-sm font-semibold">Profile photo</p>
-                <p className="mt-1 text-sm text-muted-foreground">Use a clear, friendly headshot so neighbors recognize you quickly.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Use a clear, friendly headshot so neighbors recognize you quickly.
+                  {avatarSaving ? " Saving photo..." : ""}
+                </p>
               </div>
               <div className="md:min-w-[240px]">
                 <PhotoUpload
                   value={form.avatar_url || null}
-                  onChange={(p) => setForm({ ...form, avatar_url: p ?? "" })}
+                  onChange={handleAvatarChange}
                   folder="avatars"
                   label="Upload profile photo"
+                  storeDirectUrl
+                  captureMode="user"
                   crop
                   cropTitle="Crop your profile photo"
                   compact
