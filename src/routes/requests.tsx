@@ -78,10 +78,9 @@ function RequestsPage() {
   }
 
   function notifyUpdate(r: Request, status: "closed" | "open" | "deleted") {
-    const anon = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? "";
     fetch("/api/public/hooks/request-updated", {
       method: "POST",
-      headers: { "Content-Type": "application/json", apikey: anon },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ request_id: r.id, status, title: r.title, owner_id: r.owner_id }),
     }).catch(() => {});
   }
@@ -131,10 +130,9 @@ function RequestsPage() {
     try {
       const inserted = await createRequestOfferApi({ request_id: r.id, helper_id: user.uid });
       if (inserted?.id) {
-        const anon = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? "";
         fetch("/api/public/hooks/offer-created", {
           method: "POST",
-          headers: { "Content-Type": "application/json", apikey: anon },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ offer_id: inserted.id }),
         }).catch(() => {});
       }
@@ -559,19 +557,16 @@ function EditRequestModal({
       urgency,
       radius_km: radiusKm,
     };
-    const { data, error } = await supabase
-      .from("requests")
-      .update(patch)
-      .eq("id", request.id)
-      .select("*")
-      .maybeSingle();
-    setSaving(false);
-    if (error) {
-      toast.error(error.message);
+    try {
+      const data = await updateRequestApi(request.id, patch);
+      setSaving(false);
+      toast.success("Request updated");
+      onSaved({ ...request, ...(data as Request) });
+    } catch (error: any) {
+      setSaving(false);
+      toast.error(error?.message || "Unable to update request");
       return;
     }
-    toast.success("Request updated");
-    onSaved({ ...request, ...(data as Request) });
   }
 
   return (

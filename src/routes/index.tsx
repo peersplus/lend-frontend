@@ -560,6 +560,13 @@ function Home() {
                 Broadcast an urgent request — a wheelchair, oxygen tank, storm-prep gear — and get
                 priority notifications to everyone in your radius.
               </p>
+              <div className="mb-6 rounded-xl border border-accent/20 bg-accent/10 p-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-accent">AI priority match</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  Urgent requests are parsed instantly and matched to nearby neighbors who likely have
+                  the exact item, then sent as high-priority push alerts.
+                </p>
+              </div>
               <ul className="space-y-3">
                 {emergencies.map((e) => (
                   <li key={e.need} className="rounded-xl border border-accent/15 bg-card p-3">
@@ -583,11 +590,12 @@ function Home() {
                 (03) Why neighbors choose us
               </p>
               <h2 className="mb-10 text-3xl md:text-4xl">Small favors, big community</h2>
-              <div className="grid gap-6 sm:grid-cols-3">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   { n: "🤝", t: "Real people", d: "Every neighbor is address-verified. No anonymous accounts, no strangers." },
                   { n: "📸", t: "Photo protection", d: "Both sides snap a photo at pickup and return — no arguments later." },
                   { n: "💚", t: "Free or fair", d: "Most items are free. Rentals are capped, and 100% goes to the lender." },
+                  { n: "🤖", t: "AI urgent routing", d: "Urgent requests are matched to nearby relevant owners and pushed with high-priority alerts." },
                 ].map((s, i) => (
                   <div
                     key={s.t}
