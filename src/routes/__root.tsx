@@ -80,21 +80,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { title: "Peers Plus and Help" },
+      { title: "PeersPlus" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       {
         name: "description",
         content:
           "Peers Plus helps neighbors borrow, lend, and share household items in a trusted local community.",
       },
-      { itemProp: "name", content: "Peers Plus and Help" },
+      { itemProp: "name", content: "PeersPlus" },
       {
         itemProp: "description",
         content:
           "Peers Plus helps neighbors borrow, lend, and share household items in a trusted local community.",
       },
       { itemProp: "image", content: `${SITE_URL}/og-logos.png?v=20260802` },
-      { name: "author", content: "Peers Plus and Help" },
+      { name: "author", content: "PeersPlus" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Peers Plus" },
       { property: "og:image", content: `${SITE_URL}/og-logos.png?v=20260802` },

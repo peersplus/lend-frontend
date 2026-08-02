@@ -35,16 +35,16 @@ function ContactPage() {
         <div className="mt-8 rounded-2xl border border-leaf/40 bg-leaf/5 p-6">
           <p className="text-sm font-semibold uppercase tracking-wide text-leaf">Email support</p>
           <a
-            href="mailto:peersplushr@gmail.com"
+            href="mailto:support@peersplus.com"
             className="mt-2 block font-display text-3xl italic text-foreground hover:text-leaf"
           >
-            peersplushr@gmail.com
+            support@peersplus.com
           </a>
           <p className="mt-3 text-sm text-muted-foreground">
             Include the request or booking link, and a short description of what happened. Screenshots help.
           </p>
           <a
-            href="mailto:peersplushr@gmail.com?subject=Peers%2BHelp%20support%20request"
+            href="mailto:support@peersplus.com?subject=PeersPlus%20support%20request"
             className="mt-4 inline-block rounded-full bg-leaf px-5 py-2.5 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90"
           >
             Open email

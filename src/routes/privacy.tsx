@@ -63,7 +63,7 @@ function PrivacyPage() {
         <H>Deleting your data</H>
         <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
           You can delete your requests and listings from the app. To close your account and remove your profile,
-          email <a className="text-leaf underline" href="mailto:peersplushr@gmail.com">peersplushr@gmail.com</a> from the
+          email <a className="text-leaf underline" href="mailto:support@peersplus.com">support@peersplus.com</a> from the
           address on your account and we'll process it.
         </p>
 
@@ -75,7 +75,7 @@ function PrivacyPage() {
 
         <H>Contact</H>
         <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
-          Questions or a privacy request? Email <a className="text-leaf underline" href="mailto:peersplushr@gmail.com">peersplushr@gmail.com</a>.
+          Questions or a privacy request? Email <a className="text-leaf underline" href="mailto:support@peersplus.com">support@peersplus.com</a>.
         </p>
       </main>
       <SiteFooter />

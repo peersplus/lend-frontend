@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import heroElectronics from "@/assets/hero-electronics.jpg";
 import heroGarden from "@/assets/hero-garden.jpg";
 import heroHospital from "@/assets/hero-hospital.jpg";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { buildSeoHead } from "@/lib/seo";
+import { detectNearbyAreaLabel } from "@/lib/nearby-area";
 
 /**
  * Standalone marketing landing page for peersplus.com.
@@ -16,9 +18,9 @@ import { buildSeoHead } from "@/lib/seo";
 export const Route = createFileRoute("/landing")({
   head: () =>
     buildSeoHead({
-      title: "Peers Plus — Borrow, Lend & Help Your Neighbors",
+      title: "PeersPlus — Borrow, lend, and help neighbours",
       description:
-        "Peers Plus is your neighborhood platform to borrow tools, medical gear, baby equipment and more from verified neighbors. Free to join, built on trust, powered by community.",
+        "PeersPlus connects neighbours who want to borrow, lend, and help each other locally. Now building the first sharing community in your nearby area.",
       path: "/landing",
     }),
   component: LandingPage,
@@ -32,8 +34,8 @@ const firstTimeGuide = [
   },
   {
     n: "02",
-    title: "Use verified exchanges",
-    body: "Pickup and return are confirmed with QR plus photos so both sides stay protected.",
+    title: "Use safer exchanges",
+    body: "QR and photo handoff records are rolling out. Until then, confirm terms in chat before meeting.",
   },
   {
     n: "03",
@@ -79,7 +81,7 @@ const steps = [
   {
     n: "01",
     t: "Register & verify",
-    d: "Sign up with email or Google, add your neighborhood, verify your address. You control what neighbors see.",
+    d: "Sign up with email or Google, add your neighborhood, and set your profile. Advanced verification is rolling out in phases.",
   },
   {
     n: "02",
@@ -93,8 +95,8 @@ const steps = [
   },
   {
     n: "04",
-    t: "Pick up with a photo",
-    d: "Meet, snap a handoff photo, and scan the QR to confirm. Both sides know the item's condition.",
+    t: "Pick up confidently",
+    d: "Meet and confirm condition together. Photo and QR handoff flows are being expanded.",
   },
   {
     n: "05",
@@ -105,8 +107,7 @@ const steps = [
 
 const trust = [
   { t: "Basic", d: "Phone + email confirmed" },
-  { t: "Address", d: "Mail-verified home address" },
-  { t: "ID", d: "Government ID matched" },
+  { t: "Address", d: "Address checks rolling out in stages" },
   { t: "Trusted", d: "20+ positive exchanges" },
 ];
 
@@ -121,7 +122,7 @@ const faqs = [
   },
   {
     q: "How do you keep it safe?",
-    a: "Every neighbor is address-verified. Both sides capture a photo at pickup and return. Chat unlocks only after a request is accepted. We show verification levels on every profile.",
+    a: "PeersPlus uses profile checks, transparent chat, and trust signals. Advanced verification and expanded handoff records are being rolled out in phases.",
   },
   {
     q: "Is Peers Plus responsible for exchanges?",
@@ -138,6 +139,25 @@ const faqs = [
 ];
 
 function LandingPage() {
+  const [nearbyArea, setNearbyArea] = useState<string | null>(null);
+  const launchAreaLine = useMemo(
+    () => nearbyArea
+      ? `Now building the first PeersPlus sharing community in ${nearbyArea}.`
+      : "Now building the first PeersPlus sharing community in your nearby area.",
+    [nearbyArea],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    detectNearbyAreaLabel().then((area) => {
+      if (cancelled || !area) return;
+      setNearbyArea(area);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1B1D1A] antialiased">
       <SiteHeader />
@@ -151,35 +171,42 @@ function LandingPage() {
             <div>
               <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-3 py-1.5 text-xs font-medium text-[#4B5147]">
                 <span className="size-1.5 rounded-full bg-[#C2410C]" />
-                Neighbors helping neighbors — free to join
+                Neighbours sharing and helping neighbours
+              </span>
+              <span className="mb-4 inline-flex items-center rounded-full border border-[#3F6B4A]/25 bg-[#E4EFDD] px-3 py-1 text-xs font-semibold text-[#3F6B4A]">
+                {launchAreaLine}
               </span>
               <h1 className="mb-6 text-balance font-serif text-5xl leading-[1.05] md:text-6xl lg:text-7xl">
                 Borrow a ladder.{" "}
                 <span className="italic text-[#3F6B4A]">Lend a hand.</span>
               </h1>
               <p className="mb-9 max-w-lg text-lg leading-relaxed text-[#4B5147]">
-                Peers Plus is your neighborhood library of things — tools, medical gear, baby
+                PeersPlus is your neighborhood library of things — tools, medical gear, baby
                 supplies, party equipment and everyday help. Verified people only. No fees.
                 Built on trust.
+              </p>
+              <p className="mb-6 rounded-xl border border-[#C2410C]/20 bg-[#F5E7D8] px-3 py-2 text-xs leading-relaxed text-[#4B5147]">
+                PeersPlus connects community members. Assistance is offered voluntarily by individual users and is not provided by PeersPlus staff.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
                   to="/items"
-                  search={{ lend: undefined, cat: undefined }}
+                  search={{ lend: undefined, cat: undefined, lendOpen: undefined }}
                   className="inline-flex items-center gap-2 rounded-full bg-[#3F6B4A] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#3F6B4A]/25 transition-transform hover:-translate-y-0.5"
                 >
                   Browse nearby →
                 </Link>
                 <Link
                   to="/auth"
+                  search={{ redirectTo: undefined }}
                   className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-7 py-3.5 text-sm font-semibold text-[#1B1D1A] hover:bg-black/5"
                 >
                   Join your block
                 </Link>
               </div>
               <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-[#4B5147]">
-                <li>✓ Address-verified neighbors</li>
-                <li>✓ Photo at pickup & return</li>
+                <li>✓ Trust features expanding step by step</li>
+                <li>✓ Handoff records improving (more coming soon)</li>
                 <li>✓ 0% platform fee</li>
               </ul>
             </div>
@@ -228,8 +255,12 @@ function LandingPage() {
                 New here? Understand everything <span className="italic text-[#3F6B4A]">before your first request.</span>
               </h2>
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#4B5147] sm:text-base">
-                Peers Plus is a neighborhood sharing app. You borrow from nearby verified people,
+                PeersPlus is a neighborhood sharing platform. You borrow from nearby people,
                 return on time, and grow trust with every exchange.
+              </p>
+
+              <p className="mt-3 rounded-xl border border-[#3F6B4A]/20 bg-[#E4EFDD]/60 px-3 py-2 text-xs leading-relaxed text-[#4B5147]">
+                PeersPlus connects community members. Assistance is offered voluntarily by individual users and is not provided by PeersPlus staff.
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -247,6 +278,7 @@ function LandingPage() {
               <div className="mt-6 flex flex-wrap gap-2">
                 <Link
                   to="/auth"
+                  search={{ redirectTo: undefined }}
                   className="rounded-full bg-[#3F6B4A] px-5 py-2.5 text-sm font-semibold text-white"
                 >
                   Create free account
@@ -279,7 +311,7 @@ function LandingPage() {
                     <p className="text-xs font-semibold uppercase tracking-wide text-[#4B5147]">Help</p>
                     <p className="text-sm">Post urgent or everyday requests and get neighborhood support.</p>
                   </div>
-                  <span className="rounded-full bg-[#E4EFDD] px-2.5 py-1 text-[11px] font-semibold text-[#3F6B4A]">Verified first</span>
+                  <span className="rounded-full bg-[#F5E7D8] px-2.5 py-1 text-[11px] font-semibold text-[#8A5A34]">Coming soon: expanded trust badges</span>
                 </div>
               </div>
             </div>
@@ -297,6 +329,9 @@ function LandingPage() {
                 One neighborhood, endless things you can share.
               </h2>
             </div>
+            <p className="mb-8 rounded-xl border border-[#3F6B4A]/20 bg-[#E4EFDD]/60 px-4 py-3 text-xs leading-relaxed text-[#4B5147]">
+              PeersPlus connects community members. Assistance is offered voluntarily by individual users and is not provided by PeersPlus staff.
+            </p>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {features.map((f) => (
                 <div
@@ -348,7 +383,7 @@ function LandingPage() {
             <div className="md:col-span-1">
               <h3 className="font-serif text-4xl italic">Trust, verified.</h3>
               <p className="mt-3 text-sm text-white/70">
-                Four verification levels keep the community safe and accountable.
+                Verification and trust features are rolling out in stages.
               </p>
             </div>
             {trust.map((v) => (
@@ -379,7 +414,7 @@ function LandingPage() {
               </ul>
               <Link
                 to="/items"
-                search={{ lend: "1", cat: undefined }}
+                search={{ lend: "1", cat: undefined, lendOpen: undefined }}
                 className="mt-8 inline-flex rounded-full bg-[#3F6B4A] px-6 py-3 text-sm font-semibold text-white"
               >
                 + Post a lend
@@ -398,7 +433,7 @@ function LandingPage() {
               </ul>
               <Link
                 to="/items"
-                search={{ lend: undefined, cat: undefined }}
+                search={{ lend: undefined, cat: undefined, lendOpen: undefined }}
                 className="mt-8 inline-flex rounded-full bg-[#1B1D1A] px-6 py-3 text-sm font-semibold text-white"
               >
                 Browse nearby →
@@ -437,19 +472,20 @@ function LandingPage() {
               Your block already has <span className="italic text-[#C7E0B7]">everything you need.</span>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/70">
-              Join Peers Plus today. Meet your neighbors. Borrow, lend, help — and keep more of
+              Join PeersPlus today. Meet your neighbors. Borrow, lend, help — and keep more of
               what matters within walking distance.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
                 to="/auth"
+                search={{ redirectTo: undefined }}
                 className="rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[#1B1D1A]"
               >
                 Get started — it's free
               </Link>
               <Link
                 to="/items"
-                search={{ lend: undefined, cat: undefined }}
+                search={{ lend: undefined, cat: undefined, lendOpen: undefined }}
                 className="rounded-full border border-white/20 px-7 py-3.5 text-sm font-semibold text-white"
               >
                 Explore listings

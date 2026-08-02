@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -6,6 +7,7 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { HomeTrustedFeedback } from "@/components/HomeTrustedFeedback";
 import { useReveal } from "@/hooks/useReveal";
 import { buildSeoHead } from "@/lib/seo";
+import { detectNearbyAreaLabel } from "@/lib/nearby-area";
 import heroElectronics from "@/assets/hero-electronics.jpg";
 import heroGarden from "@/assets/hero-garden.jpg";
 import heroHospital from "@/assets/hero-hospital.jpg";
@@ -14,9 +16,9 @@ import heroHospital from "@/assets/hero-hospital.jpg";
 export const Route = createFileRoute("/")({
   head: () =>
     buildSeoHead({
-      title: "Peers Plus and Help — Borrow, lend, and share with your neighbors",
+      title: "PeersPlus — Borrow, lend, and share with neighbours",
       description:
-        "A trusted neighborhood platform to borrow, rent, or receive household items from verified people nearby. Tools, medical gear, party supplies, baby equipment and more.",
+        "PeersPlus is a neighborhood platform where people borrow, lend, and help each other locally. Now building the first sharing community in your nearby area.",
       path: "/",
     }),
   component: Home,
@@ -50,8 +52,8 @@ const firstTimeGuide = [
   },
   {
     n: "02",
-    title: "Use verified exchanges",
-    body: "Pickup and return are confirmed with QR plus photos so both sides stay protected.",
+    title: "Use safer exchanges",
+    body: "Photo and QR handoff records are rolling out. Until then, confirm details in chat before meeting.",
   },
   {
     n: "03",
@@ -258,6 +260,7 @@ const flowSteps = [
 
 function Home() {
   const { user } = useAuth();
+  const [nearbyArea, setNearbyArea] = useState<string | null>(null);
   useReveal();
   const today = new Date();
   const dayTheme = DAY_THEMES[today.getDay()] || DAY_THEMES[1];
@@ -267,6 +270,30 @@ function Home() {
     month: "short",
     day: "numeric",
   }).format(today);
+  const launchAreaLine = useMemo(
+    () => nearbyArea
+      ? `Now building the first PeersPlus sharing community in ${nearbyArea}.`
+      : "Now building the first PeersPlus sharing community in your nearby area.",
+    [nearbyArea],
+  );
+
+  const availabilityLine = useMemo(
+    () => nearbyArea
+      ? `Currently available near ${nearbyArea}. Below are real platform journeys and examples from the live product flow.`
+      : "Currently available in nearby launch areas. Below are real platform journeys and examples from the live product flow.",
+    [nearbyArea],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    detectNearbyAreaLabel().then((area) => {
+      if (cancelled || !area) return;
+      setNearbyArea(area);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
 
   return (
@@ -283,6 +310,9 @@ function Home() {
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm">
                 <span className="size-1.5 rounded-full bg-accent" />
                 {dayTheme.badge}
+              </div>
+              <div className="mb-4 inline-flex items-center rounded-full border border-leaf/30 bg-leaf/10 px-3 py-1 text-xs font-semibold text-leaf">
+                {launchAreaLine}
               </div>
               <h1 className="mb-6 text-balance font-display text-5xl leading-[1.04] md:text-7xl">
                 {dayTheme.headline} <span className="italic text-leaf">{dayTheme.accent}</span>
@@ -303,24 +333,34 @@ function Home() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   to="/items"
-                  search={{ lend: undefined, cat: undefined }}
+                  search={{ lend: undefined, cat: undefined, lendOpen: undefined }}
                   className="inline-flex items-center gap-2 rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/25 transition-transform hover:-translate-y-0.5"
                 >
                   Browse nearby
                   <span aria-hidden>→</span>
                 </Link>
-                <Link
-                  to={user ? "/items" : "/auth"}
-                  search={user ? { lend: undefined, cat: undefined } : undefined}
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
-                >
-                  {user ? "Lend something" : "Join your block"}
-                </Link>
+                {user ? (
+                  <Link
+                    to="/items"
+                    search={{ lend: undefined, cat: undefined, lendOpen: undefined }}
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+                  >
+                    Lend something
+                  </Link>
+                ) : (
+                  <Link
+                    to="/auth"
+                    search={{ redirectTo: undefined }}
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+                  >
+                    Join your block
+                  </Link>
+                )}
               </div>
               <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
                 {[
                   { label: "Today", value: todayLabel },
-                  { label: "Pickup confidence", value: "Photo + handoff records" },
+                  { label: "Pickup confidence", value: "Handoff tools improving (more coming soon)" },
                   { label: "Budget friendly", value: "Free or fair local fees" },
                 ].map((point) => (
                   <div key={point.label} className="rounded-2xl border border-border/80 bg-card/80 p-3">
@@ -344,7 +384,7 @@ function Home() {
                       <Link
                         key={category}
                         to="/items"
-                        search={{ lend: undefined, cat: category }}
+                        search={{ lend: undefined, cat: category, lendOpen: undefined }}
                         className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium text-foreground hover:bg-muted"
                       >
                         {category}
@@ -368,8 +408,12 @@ function Home() {
                 New here? Understand everything <span className="italic text-leaf">before your first request.</span>
               </h2>
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Peers Plus and Help is a neighborhood sharing app. You borrow from nearby verified people,
+                PeersPlus is a neighborhood sharing platform. You borrow from nearby people,
                 return on time, and grow trust with every exchange.
+              </p>
+
+              <p className="mt-3 rounded-xl border border-accent/30 bg-accent/5 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                PeersPlus connects community members. Assistance is offered voluntarily by individual users and is not provided by PeersPlus staff.
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -390,13 +434,23 @@ function Home() {
               </div>
 
               <div className="mt-6 flex flex-wrap gap-2">
-                <Link
-                  to={user ? "/items" : "/auth"}
-                  search={user ? { lend: undefined, cat: undefined } : undefined}
-                  className="rounded-full bg-leaf px-5 py-2.5 text-sm font-semibold text-leaf-foreground"
-                >
-                  {user ? "Go to listings" : "Create free account"}
-                </Link>
+                {user ? (
+                  <Link
+                    to="/items"
+                    search={{ lend: undefined, cat: undefined, lendOpen: undefined }}
+                    className="rounded-full bg-leaf px-5 py-2.5 text-sm font-semibold text-leaf-foreground"
+                  >
+                    Go to listings
+                  </Link>
+                ) : (
+                  <Link
+                    to="/auth"
+                    search={{ redirectTo: undefined }}
+                    className="rounded-full bg-leaf px-5 py-2.5 text-sm font-semibold text-leaf-foreground"
+                  >
+                    Create free account
+                  </Link>
+                )}
                 <Link to="/safety" className="rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold hover:bg-muted">
                   Read trust & safety
                 </Link>
@@ -432,6 +486,57 @@ function Home() {
           </div>
         </section>
 
+        {/* Platform evidence */}
+        <section className="border-y border-border/60 bg-background px-6 py-20">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-8 max-w-3xl" data-reveal>
+              <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">(01A) Platform evidence</p>
+              <h2 className="text-3xl md:text-4xl">What users can see in the product today</h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                {availabilityLine}
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <article className="rounded-2xl border border-border bg-card p-5" data-reveal="scale" data-reveal-delay="60">
+                <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Borrower journey</p>
+                <p className="mt-2 text-sm text-muted-foreground">Browse items, request from owner, chat, and complete return directly in app.</p>
+                <Link to="/items" search={{ lend: undefined, cat: undefined, lendOpen: undefined }} className="mt-3 inline-flex text-sm font-semibold text-leaf underline">Open listings</Link>
+              </article>
+
+              <article className="rounded-2xl border border-border bg-card p-5" data-reveal="scale" data-reveal-delay="120">
+                <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Lender journey</p>
+                <p className="mt-2 text-sm text-muted-foreground">Post a lend, review requests, approve neighbors, and manage returns.</p>
+                <Link to="/items" search={{ lend: "1", cat: undefined, lendOpen: undefined }} className="mt-3 inline-flex text-sm font-semibold text-leaf underline">Post a lend</Link>
+              </article>
+
+              <article className="rounded-2xl border border-border bg-card p-5" data-reveal="scale" data-reveal-delay="180">
+                <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Sample verified profile</p>
+                <p className="mt-2 text-sm text-muted-foreground">See profile basics, identity signals, and trust indicators used by the community.</p>
+                <Link to="/profile" className="mt-3 inline-flex text-sm font-semibold text-leaf underline">View profile</Link>
+              </article>
+
+              <article className="rounded-2xl border border-border bg-card p-5" data-reveal="scale" data-reveal-delay="240">
+                <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Real listing example</p>
+                <p className="mt-2 text-sm text-muted-foreground">Explore active categories and cards exactly as neighbors browse them.</p>
+                <Link to="/items" search={{ lend: undefined, cat: "Tools", lendOpen: undefined }} className="mt-3 inline-flex text-sm font-semibold text-leaf underline">Open Tools listings</Link>
+              </article>
+
+              <article className="rounded-2xl border border-border bg-card p-5" data-reveal="scale" data-reveal-delay="300">
+                <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Product screenshots</p>
+                <p className="mt-2 text-sm text-muted-foreground">Live screenshots and user stories are being added as community usage grows.</p>
+                <span className="mt-3 inline-flex rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-700">Coming soon</span>
+              </article>
+
+              <article className="rounded-2xl border border-border bg-card p-5" data-reveal="scale" data-reveal-delay="360">
+                <p className="text-xs font-semibold uppercase tracking-wide text-leaf">Community testimonials</p>
+                <p className="mt-2 text-sm text-muted-foreground">Early testimonials will be published once verified local borrowing history is available.</p>
+                <span className="mt-3 inline-flex rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-700">Coming soon</span>
+              </article>
+            </div>
+          </div>
+        </section>
+
         {/* Categories */}
         <section id="browse" className="bg-muted/40 px-6 py-20">
           <div className="mx-auto max-w-7xl">
@@ -442,7 +547,7 @@ function Home() {
                 </p>
                 <h2 className="text-3xl md:text-4xl">Everything, right around the corner</h2>
               </div>
-              <Link to="/items" search={{ lend: undefined, cat: undefined }} className="hidden text-sm font-medium text-leaf underline decoration-leaf/30 underline-offset-4 md:inline">
+              <Link to="/items" search={{ lend: undefined, cat: undefined, lendOpen: undefined }} className="hidden text-sm font-medium text-leaf underline decoration-leaf/30 underline-offset-4 md:inline">
                 Browse all listings →
               </Link>
             </div>
@@ -451,7 +556,7 @@ function Home() {
                 <Link
                   key={c.label}
                   to="/items"
-                  search={{ lend: undefined, cat: undefined }}
+                  search={{ lend: undefined, cat: undefined, lendOpen: undefined }}
                   id={`cat-${c.label.toLowerCase()}`}
                   data-reveal="scale"
                   data-reveal-delay={String((i % 6) * 60)}
@@ -481,8 +586,8 @@ function Home() {
                 Register, take, return — <span className="italic text-leaf">right from your phone.</span>
               </h2>
               <p className="text-muted-foreground">
-                Three quick screens keep every exchange safe: verify your address, scan a QR at pickup,
-                and snap a return photo. No cash, no awkwardness — just neighbors keeping their word.
+                Three quick screens help neighbors coordinate better. Advanced address verification,
+                QR flows, and handoff photo records are being rolled out in phases.
               </p>
             </div>
 
@@ -518,14 +623,26 @@ function Home() {
             </div>
 
             <div className="mt-14 flex flex-wrap items-center justify-center gap-3" data-scrub="rise">
-              <Link
-                to={user ? "/items" : "/auth"}
-                className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20"
-                data-scrub="cta"
-              >
-                {user ? "Open my feed" : "Register in 30 seconds"}
-              </Link>
-              <Link to="/items" search={{ lend: undefined, cat: undefined }} className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold">
+              {user ? (
+                <Link
+                  to="/items"
+                  search={{ lend: undefined, cat: undefined, lendOpen: undefined }}
+                  className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20"
+                  data-scrub="cta"
+                >
+                  Open my feed
+                </Link>
+              ) : (
+                <Link
+                  to="/auth"
+                  search={{ redirectTo: undefined }}
+                  className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20"
+                  data-scrub="cta"
+                >
+                  Register in 30 seconds
+                </Link>
+              )}
+              <Link to="/items" search={{ lend: undefined, cat: undefined, lendOpen: undefined }} className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold">
                 See what's nearby
               </Link>
             </div>
@@ -545,15 +662,21 @@ function Home() {
               <h3 className="mb-2 font-display text-2xl">When neighbors need help fast</h3>
               <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
                 Broadcast an urgent request — a wheelchair, oxygen tank, storm-prep gear — and get
-                priority notifications to everyone in your radius.
+                faster visibility in your nearby community.
+              </p>
+              <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-amber-700">
+                Coming soon: AI urgent routing and high-priority push alerts
               </p>
               <div className="mb-6 rounded-xl border border-accent/20 bg-accent/10 p-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-accent">AI priority match</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-accent">AI priority match (coming soon)</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  Urgent requests are parsed instantly and matched to nearby neighbors who likely have
-                  the exact item, then sent as high-priority push alerts.
+                  Planned feature: urgent requests will be matched to nearby neighbors likely to help,
+                  then highlighted with priority delivery.
                 </p>
               </div>
+              <p className="mb-6 rounded-xl border border-accent/30 bg-background/70 p-3 text-xs leading-relaxed text-muted-foreground">
+                PeersPlus connects community members. Assistance is offered voluntarily by individual users and is not provided by PeersPlus staff.
+              </p>
               <ul className="space-y-3">
                 {emergencies.map((e) => (
                   <li key={e.need} className="rounded-xl border border-accent/15 bg-card p-3">
@@ -564,12 +687,23 @@ function Home() {
                   </li>
                 ))}
               </ul>
-              <Link
-                to={user ? "/items" : "/auth"}
-                className="mt-6 block w-full rounded-xl bg-accent py-3 text-center text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
-              >
-                Post emergency request
-              </Link>
+              {user ? (
+                <Link
+                  to="/items"
+                  search={{ lend: undefined, cat: undefined, lendOpen: undefined }}
+                  className="mt-6 block w-full rounded-xl bg-accent py-3 text-center text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
+                >
+                  Post emergency request
+                </Link>
+              ) : (
+                <Link
+                  to="/auth"
+                  search={{ redirectTo: undefined }}
+                  className="mt-6 block w-full rounded-xl bg-accent py-3 text-center text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
+                >
+                  Post emergency request
+                </Link>
+              )}
             </div>
 
             <div className="lg:col-span-2" data-reveal="right" data-reveal-delay="120">
@@ -579,10 +713,10 @@ function Home() {
               <h2 className="mb-10 text-3xl md:text-4xl">Small favors, big community</h2>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { n: "🤝", t: "Real people", d: "Every neighbor is address-verified. No anonymous accounts, no strangers." },
-                  { n: "📸", t: "Photo protection", d: "Both sides snap a photo at pickup and return — no arguments later." },
-                  { n: "💚", t: "Free or fair", d: "Most items are free. Rentals are capped, and 100% goes to the lender." },
-                  { n: "🤖", t: "AI urgent routing", d: "Urgent requests are matched to nearby relevant owners and pushed with high-priority alerts." },
+                  { n: "🤝", t: "Real people", d: "Verified profiles and trust signals are improving in stages as the community grows." },
+                  { n: "📸", t: "Handoff records", d: "Photo and QR handoff records are being expanded to more flows." },
+                  { n: "💚", t: "Free or fair", d: "Most items are free and any optional lender fee is shown before you request." },
+                  { n: "🤖", t: "AI urgent routing", d: "Coming soon: matching urgent requests with nearby relevant owners." },
                 ].map((s, i) => (
                   <div
                     key={s.t}
@@ -608,14 +742,13 @@ function Home() {
             <div className="md:col-span-1" data-reveal="left">
               <h3 className="font-display text-3xl italic">Trust, verified.</h3>
               <p className="mt-3 text-sm text-leaf-foreground/70">
-                Four levels of verification keep the community safe.
+                Verification and trust features are rolling out in stages.
               </p>
             </div>
             <div className="grid gap-4 md:col-span-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { t: "Basic", d: "Phone + email confirmed" },
-                { t: "Address", d: "Mail-verified home address" },
-                { t: "ID", d: "Government ID matched" },
+                { t: "Address", d: "Address checks improving in rollout phases" },
                 { t: "Trusted", d: "20+ positive exchanges" },
               ].map((v, i) => (
                 <div
@@ -634,7 +767,10 @@ function Home() {
             </div>
 
             <div className="md:col-span-4">
-           <HomeTrustedFeedback />
+              <p className="mb-3 rounded-xl border border-leaf-foreground/25 bg-leaf-foreground/10 px-3 py-2 text-xs leading-relaxed text-leaf-foreground/80">
+                PeersPlus connects community members. Assistance is offered voluntarily by individual users and is not provided by PeersPlus staff.
+              </p>
+              <HomeTrustedFeedback />
             </div>
           </div>
         </section>
@@ -645,18 +781,30 @@ function Home() {
               Your block has <span className="italic text-leaf">everything you need.</span>
             </h2>
             <p className="mb-8 text-lg text-muted-foreground">
-              Join Peers Plus and Help and start borrowing, lending, and meeting your neighbors
+              Join PeersPlus and start borrowing, lending, and meeting your neighbors
               today.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link
-                to={user ? "/items" : "/auth"}
-                className="rounded-full bg-leaf px-8 py-3.5 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20"
-                data-scrub="cta"
-              >
-                {user ? "Open the app" : "Get started — it's free"}
-              </Link>
-              <Link to="/items" search={{ lend: undefined, cat: undefined }} className="rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold" data-scrub="cta">
+              {user ? (
+                <Link
+                  to="/items"
+                  search={{ lend: undefined, cat: undefined, lendOpen: undefined }}
+                  className="rounded-full bg-leaf px-8 py-3.5 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20"
+                  data-scrub="cta"
+                >
+                  Open the app
+                </Link>
+              ) : (
+                <Link
+                  to="/auth"
+                  search={{ redirectTo: undefined }}
+                  className="rounded-full bg-leaf px-8 py-3.5 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20"
+                  data-scrub="cta"
+                >
+                  Get started — it's free
+                </Link>
+              )}
+              <Link to="/items" search={{ lend: undefined, cat: undefined, lendOpen: undefined }} className="rounded-full border border-border bg-card px-8 py-3.5 text-sm font-semibold" data-scrub="cta">
                 See what's nearby
               </Link>
             </div>

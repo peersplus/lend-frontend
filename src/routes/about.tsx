@@ -53,7 +53,7 @@ function AboutPage() {
         <div className="mt-10 rounded-2xl border border-leaf/30 bg-leaf/5 p-6">
           <p className="font-semibold">Have a question, an idea, or a story to share?</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Email us any time at <a className="text-leaf underline" href="mailto:peersplushr@gmail.com">peersplushr@gmail.com</a>.
+            Email us any time at <a className="text-leaf underline" href="mailto:support@peersplus.com">support@peersplus.com</a>.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link to="/contact" className="rounded-full bg-leaf px-5 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90">
