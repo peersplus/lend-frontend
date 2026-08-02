@@ -87,6 +87,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Peers Plus helps neighbors borrow, lend, and share household items in a trusted local community.",
       },
+      { itemProp: "name", content: "Peers Plus and Help" },
+      {
+        itemProp: "description",
+        content:
+          "Peers Plus helps neighbors borrow, lend, and share household items in a trusted local community.",
+      },
+      { itemProp: "image", content: `${SITE_URL}/og-logos.png?v=20260802` },
       { name: "author", content: "Peers Plus and Help" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Peers Plus" },

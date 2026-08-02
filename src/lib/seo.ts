@@ -38,6 +38,9 @@ export function buildSeoHead({
     meta: [
       { title },
       { name: "description", content: description },
+      { itemProp: "name", content: title },
+      { itemProp: "description", content: description },
+      { itemProp: "image", content: image },
       { name: "robots", content: noIndex ? "noindex, nofollow" : "index, follow" },
       { property: "og:type", content: type },
       { property: "og:title", content: title },
