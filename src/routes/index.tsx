@@ -311,8 +311,10 @@ function Home() {
                 <span className="size-1.5 rounded-full bg-accent" />
                 {dayTheme.badge}
               </div>
-              <div className="mb-4 inline-flex items-center rounded-full border border-leaf/30 bg-leaf/10 px-3 py-1 text-xs font-semibold text-leaf">
-                {launchAreaLine}
+              <div className="mb-4 min-h-[2.25rem]">
+                <span className="inline-flex items-center rounded-full border border-leaf/30 bg-leaf/10 px-3 py-1 text-xs font-semibold text-leaf">
+                  {launchAreaLine}
+                </span>
               </div>
               <h1 className="mb-6 text-balance font-display text-5xl leading-[1.04] md:text-7xl">
                 {dayTheme.headline} <span className="italic text-leaf">{dayTheme.accent}</span>

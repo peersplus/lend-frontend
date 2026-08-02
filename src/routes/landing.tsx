@@ -173,9 +173,11 @@ function LandingPage() {
                 <span className="size-1.5 rounded-full bg-[#C2410C]" />
                 Neighbours sharing and helping neighbours
               </span>
-              <span className="mb-4 inline-flex items-center rounded-full border border-[#3F6B4A]/25 bg-[#E4EFDD] px-3 py-1 text-xs font-semibold text-[#3F6B4A]">
-                {launchAreaLine}
-              </span>
+              <div className="mb-4 min-h-[2.25rem]">
+                <span className="inline-flex items-center rounded-full border border-[#3F6B4A]/25 bg-[#E4EFDD] px-3 py-1 text-xs font-semibold text-[#3F6B4A]">
+                  {launchAreaLine}
+                </span>
+              </div>
               <h1 className="mb-6 text-balance font-serif text-5xl leading-[1.05] md:text-6xl lg:text-7xl">
                 Borrow a ladder.{" "}
                 <span className="italic text-[#3F6B4A]">Lend a hand.</span>

@@ -57,11 +57,13 @@ export function UserMenu() {
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
-  if (loading) return null;
+  if (loading) {
+    return <div className="h-9 w-full rounded-full border border-border/60 bg-card/60" aria-hidden />;
+  }
 
   if (!user) {
     return (
-      <Link to="/auth" className="rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background hover:bg-foreground/90">
+      <Link to="/auth" className="inline-flex h-9 w-full items-center justify-center rounded-full bg-foreground px-4 text-sm font-semibold text-background hover:bg-foreground/90">
         Sign in
       </Link>
     );
@@ -81,7 +83,7 @@ export function UserMenu() {
     <div ref={wrap} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full border border-border bg-card py-1.5 pl-1.5 pr-3 text-sm font-medium hover:bg-muted"
+        className="flex h-9 w-full items-center gap-2 rounded-full border border-border bg-card py-1.5 pl-1.5 pr-3 text-sm font-medium hover:bg-muted"
       >
         {avatarPath ? (
           <PhotoImg path={avatarPath} alt="" className="size-8 rounded-full object-cover" />
@@ -90,7 +92,7 @@ export function UserMenu() {
             {initial}
           </span>
         )}
-        <span className="hidden max-w-[9rem] truncate sm:inline">{name}</span>
+        <span className="hidden min-w-0 max-w-[9rem] truncate sm:inline">{name}</span>
       </button>
 
       {open && (

@@ -13,6 +13,9 @@ type GeocodeResponse = {
 };
 
 const GOOGLE_GEOCODE_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+const AREA_CACHE_KEY = "nearby-area-label-v1";
+const AREA_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+let inFlightLookup: Promise<string | null> | null = null;
 
 function pickAreaFromComponents(components: GeocodeComponent[]): string | null {
   const priority = [
@@ -77,16 +80,48 @@ export async function detectNearbyAreaLabel(): Promise<string | null> {
   if (typeof window === "undefined") return null;
 
   try {
-    if ("permissions" in navigator && (navigator as Navigator & { permissions?: Permissions }).permissions) {
-      const permissionStatus = await navigator.permissions.query({ name: "geolocation" as PermissionName });
-      if (permissionStatus.state !== "granted") return null;
+    const raw = window.localStorage.getItem(AREA_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as { area?: string; ts?: number };
+      const area = String(parsed?.area || "").trim();
+      const ts = Number(parsed?.ts || 0);
+      if (area && Number.isFinite(ts) && Date.now() - ts < AREA_CACHE_TTL_MS) {
+        return area;
+      }
     }
   } catch {
-    return null;
+    // ignore cache read errors
   }
 
-  const coords = await getCoordsWithoutPrompt();
-  if (!coords) return null;
+  if (inFlightLookup) return inFlightLookup;
 
-  return reverseGeocodeArea(coords.lat, coords.lng);
+  inFlightLookup = (async () => {
+    try {
+      try {
+        if ("permissions" in navigator && (navigator as Navigator & { permissions?: Permissions }).permissions) {
+          const permissionStatus = await navigator.permissions.query({ name: "geolocation" as PermissionName });
+          if (permissionStatus.state !== "granted") return null;
+        }
+      } catch {
+        return null;
+      }
+
+      const coords = await getCoordsWithoutPrompt();
+      if (!coords) return null;
+
+      const area = await reverseGeocodeArea(coords.lat, coords.lng);
+      if (area) {
+        try {
+          window.localStorage.setItem(AREA_CACHE_KEY, JSON.stringify({ area, ts: Date.now() }));
+        } catch {
+          // ignore cache write errors
+        }
+      }
+      return area;
+    } finally {
+      inFlightLookup = null;
+    }
+  })();
+
+  return inFlightLookup;
 }

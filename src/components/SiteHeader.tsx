@@ -64,13 +64,15 @@ export function SiteHeader() {
               });
             }}
             data-header-cta
-            className="inline-flex items-center gap-1.5 rounded-full bg-leaf px-3 py-2 text-sm font-semibold text-leaf-foreground shadow-sm shadow-leaf/20 transition-transform hover:-translate-y-0.5 hover:bg-leaf/90 sm:px-4"
+            className="inline-flex h-9 w-9 items-center justify-center gap-1.5 rounded-full bg-leaf px-0 text-sm font-semibold text-leaf-foreground shadow-sm shadow-leaf/20 transition-transform hover:-translate-y-0.5 hover:bg-leaf/90 sm:w-[136px] sm:px-4"
             aria-label="Post a lend"
           >
             <span aria-hidden className="text-base leading-none text-leaf-foreground">+</span>
             <span className="hidden sm:inline">Post a Lend</span>
           </button>
-          <UserMenu />
+          <div className="w-[96px] sm:w-[168px]">
+            <UserMenu />
+          </div>
           <button
             type="button"
             aria-label="Menu"
