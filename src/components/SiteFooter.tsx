@@ -17,6 +17,8 @@ export function SiteFooter() {
           <ul className="space-y-2">
             <li><Link to="/about" className="hover:text-primary">About us</Link></li>
             <li><Link to="/community" className="hover:text-primary">Community code</Link></li>
+            <li><Link to="/faq" className="hover:text-primary">FAQ</Link></li>
+            <li><Link to="/sitemap" className="hover:text-primary">HTML sitemap</Link></li>
             <li><Link to="/contact" className="hover:text-primary">Contact support</Link></li>
           </ul>
         </div>

@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as ItemsRouteImport } from './routes/items'
 import { Route as LandingRouteImport } from './routes/landing'
@@ -24,6 +25,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SitemapRouteImport } from './routes/sitemap'
 import { Route as VerificationRouteImport } from './routes/verification'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ChatBookingIdRouteImport } from './routes/chat.$bookingId'
@@ -73,6 +75,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FeedbackRoute = FeedbackRouteImport.update({
   id: '/feedback',
   path: '/feedback',
@@ -111,6 +118,11 @@ const SafetyRoute = SafetyRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapRoute = SitemapRouteImport.update({
+  id: '/sitemap',
+  path: '/sitemap',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VerificationRoute = VerificationRouteImport.update({
@@ -199,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/bookings': typeof BookingsRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
   '/feedback': typeof FeedbackRoute
   '/items': typeof ItemsRouteWithChildren
   '/landing': typeof LandingRoute
@@ -207,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/requests': typeof RequestsRoute
   '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
+  '/sitemap': typeof SitemapRoute
   '/verification': typeof VerificationRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/chat/$bookingId': typeof ChatBookingIdRoute
@@ -229,6 +243,7 @@ export interface FileRoutesByTo {
   '/bookings': typeof BookingsRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
   '/feedback': typeof FeedbackRoute
   '/items': typeof ItemsRouteWithChildren
   '/landing': typeof LandingRoute
@@ -237,6 +252,7 @@ export interface FileRoutesByTo {
   '/requests': typeof RequestsRoute
   '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
+  '/sitemap': typeof SitemapRoute
   '/verification': typeof VerificationRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/chat/$bookingId': typeof ChatBookingIdRoute
@@ -261,6 +277,7 @@ export interface FileRoutesById {
   '/bookings': typeof BookingsRoute
   '/community': typeof CommunityRoute
   '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
   '/feedback': typeof FeedbackRoute
   '/items': typeof ItemsRouteWithChildren
   '/landing': typeof LandingRoute
@@ -269,6 +286,7 @@ export interface FileRoutesById {
   '/requests': typeof RequestsRoute
   '/safety': typeof SafetyRoute
   '/settings': typeof SettingsRoute
+  '/sitemap': typeof SitemapRoute
   '/verification': typeof VerificationRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/chat/$bookingId': typeof ChatBookingIdRoute
@@ -293,6 +311,7 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/community'
     | '/contact'
+    | '/faq'
     | '/feedback'
     | '/items'
     | '/landing'
@@ -301,6 +320,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/safety'
     | '/settings'
+    | '/sitemap'
     | '/verification'
     | '/admin'
     | '/chat/$bookingId'
@@ -323,6 +343,7 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/community'
     | '/contact'
+    | '/faq'
     | '/feedback'
     | '/items'
     | '/landing'
@@ -331,6 +352,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/safety'
     | '/settings'
+    | '/sitemap'
     | '/verification'
     | '/admin'
     | '/chat/$bookingId'
@@ -354,6 +376,7 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/community'
     | '/contact'
+    | '/faq'
     | '/feedback'
     | '/items'
     | '/landing'
@@ -362,6 +385,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/safety'
     | '/settings'
+    | '/sitemap'
     | '/verification'
     | '/_authenticated/admin'
     | '/chat/$bookingId'
@@ -386,6 +410,7 @@ export interface RootRouteChildren {
   BookingsRoute: typeof BookingsRoute
   CommunityRoute: typeof CommunityRoute
   ContactRoute: typeof ContactRoute
+  FaqRoute: typeof FaqRoute
   FeedbackRoute: typeof FeedbackRoute
   ItemsRoute: typeof ItemsRouteWithChildren
   LandingRoute: typeof LandingRoute
@@ -394,6 +419,7 @@ export interface RootRouteChildren {
   RequestsRoute: typeof RequestsRoute
   SafetyRoute: typeof SafetyRoute
   SettingsRoute: typeof SettingsRoute
+  SitemapRoute: typeof SitemapRoute
   VerificationRoute: typeof VerificationRoute
   ChatBookingIdRoute: typeof ChatBookingIdRoute
   ApiPublicHooksBookingPickupRoute: typeof ApiPublicHooksBookingPickupRoute
@@ -459,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/feedback': {
       id: '/feedback'
       path: '/feedback'
@@ -513,6 +546,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap': {
+      id: '/sitemap'
+      path: '/sitemap'
+      fullPath: '/sitemap'
+      preLoaderRoute: typeof SitemapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verification': {
@@ -645,6 +685,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookingsRoute: BookingsRoute,
   CommunityRoute: CommunityRoute,
   ContactRoute: ContactRoute,
+  FaqRoute: FaqRoute,
   FeedbackRoute: FeedbackRoute,
   ItemsRoute: ItemsRouteWithChildren,
   LandingRoute: LandingRoute,
@@ -653,6 +694,7 @@ const rootRouteChildren: RootRouteChildren = {
   RequestsRoute: RequestsRoute,
   SafetyRoute: SafetyRoute,
   SettingsRoute: SettingsRoute,
+  SitemapRoute: SitemapRoute,
   VerificationRoute: VerificationRoute,
   ChatBookingIdRoute: ChatBookingIdRoute,
   ApiPublicHooksBookingPickupRoute: ApiPublicHooksBookingPickupRoute,
