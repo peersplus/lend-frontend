@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Home } from "lucide-react";
 import { toast } from "@/lib/sonner";
 import { LOGO_URL } from "@/lib/brand";
+import { buildSeoHead } from "@/lib/seo";
 import {
   sendForgotPasswordEmail,
   getFirebaseAuthErrorMessage,
@@ -14,23 +15,22 @@ import {
 
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: [
-      { title: "Join Peers Plus — Sign in or create your neighbor account" },
-      {
-        name: "description",
-        content:
-          "Verify your address, meet the neighbors, and start borrowing or lending items nearby.",
-      },
-      { property: "og:title", content: "Join Peers Plus" },
-      {
-        property: "og:description",
-        content: "Sign in or create your verified neighbor account.",
-      },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Join Peers Plus — Sign in or create your neighbor account",
+      description:
+        "Verify your address, meet the neighbors, and start borrowing or lending items nearby.",
+      path: "/auth",
+      noIndex: true,
+    }),
   component: AuthPage,
 });
+
+const trustPoints = [
+  "Verified neighbors, not anonymous listings.",
+  "Borrow and lend local items with clear pickup terms.",
+  "Keep your exact address private until you approve an exchange.",
+];
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ function AuthPage() {
   useEffect(() => {
     const client = getFirebaseClient();
     if (client?.auth.currentUser) {
-      navigate({ to: "/items", search: {} });
+      navigate({ to: "/items" });
     }
   }, [navigate]);
 
@@ -70,7 +70,7 @@ function AuthPage() {
       } else {
         await signInWithEmail({ email, password });
         toast.success("Welcome back!");
-        navigate({ to: "/items", search: {} });
+        navigate({ to: "/items" });
       }
     } catch (err) {
       const errorMessage = getFirebaseAuthErrorMessage(err);
@@ -92,7 +92,7 @@ function AuthPage() {
     try {
       await signInWithGoogle();
       toast.success("Signed in with Google");
-      navigate({ to: "/items", search: {} });
+      navigate({ to: "/items" });
     } catch (err) {
       const errorMessage = getFirebaseAuthErrorMessage(err);
       setFeedback({ type: "error", title: errorMessage.title, description: errorMessage.description });
@@ -127,39 +127,77 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream px-6 py-12">
-      <div className="mx-auto max-w-md">
-        <Link to="/" className="mb-8 flex items-center gap-2" aria-label="Peers Plus home">
-          <img src={LOGO_URL} alt="Peers Plus" className="h-10 w-auto" />
-        </Link>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(170,210,139,0.35),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(248,203,141,0.24),_transparent_30%),linear-gradient(180deg,_#fbfaf6_0%,_#f6f1e8_100%)] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl flex-col gap-6 lg:grid lg:items-center lg:grid-cols-[1.05fr_0.95fr]">
+        <section className="order-2 relative overflow-hidden rounded-[2rem] border border-white/60 bg-[var(--leaf)] px-8 py-10 text-white shadow-[0_25px_80px_rgba(15,23,42,0.35)] sm:px-10 sm:py-12 lg:order-1">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(166,199,111,0.28),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.08),_transparent_24%)]" />
+          <div className="relative">
+            <Link to="/" className="inline-flex items-center gap-2" aria-label="Peers Plus home">
+              <img src={LOGO_URL} alt="Peers Plus" className="h-10 w-auto brightness-0 invert" />
+            </Link>
 
+            <div className="mt-6 max-w-xl space-y-6">
+              <p className="inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
+                Secure neighborhood access
+              </p>
+              <div className="space-y-4">
+                <h1 className="font-display text-4xl leading-tight sm:text-5xl">
+                  A better way to join your neighborhood exchange.
+                </h1>
+                <p className="max-w-lg text-base leading-7 text-white/72 sm:text-lg">
+                  Sign in with a clean, trust-first experience built for borrowing, lending, and helping nearby neighbors.
+                </p>
+              </div>
 
-        <div className="rounded-3xl border border-border bg-card p-8 shadow-xl">
-          <h1 className="mb-2 font-display text-3xl">
-            {mode === "signin" ? "Welcome back" : "Join the neighborhood"}
-          </h1>
-          <p className="mb-6 text-sm text-muted-foreground">
-            {mode === "signin"
-              ? "Sign in to borrow, lend, and message neighbors."
-              : "Create a verified account. Your address stays private."}
-          </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {trustPoints.map((point) => (
+                  <div key={point} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-white/82 backdrop-blur">
+                    {point}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="order-1 rounded-[2rem] border border-border/70 bg-card/95 p-5 shadow-[0_20px_70px_rgba(15,23,42,0.16)] sm:p-8 lg:order-2">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Welcome</p>
+              <h2 className="mt-2 font-display text-3xl leading-tight">
+                {mode === "signin" ? "Sign in" : "Create your account"}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                {mode === "signin"
+                  ? "Get back to browsing items, messages, and requests."
+                  : "Create a verified account and keep your address private."}
+              </p>
+            </div>
+            <Link
+              to="/"
+              aria-label="Go home"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition-colors hover:bg-muted"
+            >
+              <Home className="h-4 w-4" />
+            </Link>
+          </div>
 
           {feedback && (
             <div
               role="alert"
-              className={`mb-4 rounded-xl border px-3 py-2 text-sm ${feedback.type === "success"
-                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+              className={`mt-5 rounded-2xl border px-4 py-3 text-sm ${feedback.type === "success"
+                ? "border-emerald-300 bg-emerald-50 text-emerald-800"
                 : "border-red-300 bg-red-50 text-red-700"}`}
             >
               <p className="font-semibold">{feedback.title}</p>
-              {feedback.description && <p className="mt-1 text-xs">{feedback.description}</p>}
+              {feedback.description && <p className="mt-1 text-xs leading-5">{feedback.description}</p>}
             </div>
           )}
 
           <button
             type="button"
             onClick={handleGoogle}
-            className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background py-2.5 text-sm font-semibold hover:bg-muted"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-background py-3 text-sm font-semibold transition-colors hover:bg-muted"
           >
             <span className="grid size-5 place-items-center rounded-full bg-white text-xs font-bold text-[#4285F4]">
               G
@@ -167,7 +205,7 @@ function AuthPage() {
             Continue with Google
           </button>
 
-          <div className="my-4 flex items-center gap-3 text-xs uppercase tracking-widest text-muted-foreground">
+          <div className="my-5 flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
             <span className="h-px flex-1 bg-border" /> or email <span className="h-px flex-1 bg-border" />
           </div>
 
@@ -179,14 +217,14 @@ function AuthPage() {
                   placeholder="Your name"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-leaf/40"
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-shadow focus:ring-2 focus:ring-leaf/40"
                 />
                 <input
                   required
                   placeholder="Neighborhood (e.g. Maplewood)"
                   value={neighborhood}
                   onChange={(e) => setNeighborhood(e.target.value)}
-                  className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-leaf/40"
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-shadow focus:ring-2 focus:ring-leaf/40"
                 />
               </>
             )}
@@ -196,7 +234,7 @@ function AuthPage() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-leaf/40"
+              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-shadow focus:ring-2 focus:ring-leaf/40"
             />
             <div className="relative">
               <input
@@ -206,7 +244,7 @@ function AuthPage() {
                 placeholder="Password (min 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 pr-11 text-sm outline-none focus:ring-2 focus:ring-leaf/40"
+                className="w-full rounded-2xl border border-input bg-background px-4 py-3 pr-11 text-sm outline-none transition-shadow focus:ring-2 focus:ring-leaf/40"
               />
               <button
                 type="button"
@@ -231,7 +269,7 @@ function AuthPage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20 disabled:opacity-60"
+              className="w-full rounded-2xl bg-leaf py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20 transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60"
             >
               {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
             </button>
@@ -250,7 +288,7 @@ function AuthPage() {
               {mode === "signin" ? "Create an account" : "Sign in"}
             </button>
           </p>
-        </div>
+        </section>
 
         {forgotOpen && (
           <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setForgotOpen(false)}>

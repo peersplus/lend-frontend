@@ -13,6 +13,8 @@ import { haversineKm, formatDistance } from "@/lib/geo";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "@/lib/sonner";
 import { buildSeoHead } from "@/lib/seo";
+import { formatCurrency, getCurrencyCode } from "@/lib/money";
+import { buildItemTitleSuggestions } from "@/lib/item-suggestions";
 import { ChevronLeft, ChevronRight, ImagePlus, LayoutGrid, List, MapPin } from "lucide-react";
 
 
@@ -100,6 +102,24 @@ function ItemsPage() {
   });
   const [saving, setSaving] = useState(false);
   const [filters, setFilters] = useState({ q: "", category: "", price: "all" as "all" | "free" | "rent", mine: false });
+  const currencyCode = getCurrencyCode();
+
+  const titleSuggestions = useMemo(
+    () => buildItemTitleSuggestions(form.category, Boolean(form.image_urls[0] || form.image_url)),
+    [form.category, form.image_urls, form.image_url],
+  );
+
+  function updateCoverImage(path: string | null) {
+    setForm((prev) => {
+      if (path) {
+        const next = [path, ...prev.image_urls.filter((entry) => entry !== path)];
+        return { ...prev, image_url: path, image_urls: next.slice(0, 5) };
+      }
+
+      const next = prev.image_urls.slice(1);
+      return { ...prev, image_url: next[0] || "", image_urls: next };
+    });
+  }
   
 
   useEffect(() => {
@@ -514,7 +534,7 @@ function ItemsPage() {
                   <span className={`absolute left-3 top-3 rounded-md px-2 py-1 text-[10px] font-bold uppercase backdrop-blur ${
                     item.price_mode === "free" ? "bg-leaf/90 text-leaf-foreground" : "bg-foreground/85 text-background"
                   }`}>
-                    {item.price_mode === "free" ? "Free" : `$${item.price_amount}/day`}
+                    {item.price_mode === "free" ? "Free" : `${formatCurrency(Number(item.price_amount ?? 0), { currency: currencyCode })}/day`}
                   </span>
                   {km != null && (
                     <span className="absolute right-3 top-3 rounded-md bg-background/90 px-2 py-1 text-[10px] font-semibold backdrop-blur">
@@ -555,7 +575,7 @@ function ItemsPage() {
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="min-w-0 flex-1 text-lg font-semibold">{item.title}</h3>
+                    <h3 className="min-w-0 flex-1 text-base font-semibold leading-snug sm:text-lg">{item.title}</h3>
                     {(item.building_name || item.address) && (
                       <button
                         type="button"
@@ -569,7 +589,7 @@ function ItemsPage() {
                       </button>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{item.description ?? item.category}</p>
+                  <p className="line-clamp-2 text-sm text-muted-foreground">{item.description ?? item.category}</p>
 
                   {images.length > 1 && (
                     <div className="mt-2 flex items-center gap-1.5">
@@ -586,7 +606,7 @@ function ItemsPage() {
 
                   {item.deposit_amount != null && (
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Replacement value if damaged: <strong>${item.deposit_amount}</strong>
+                      Replacement value if damaged: <strong>{formatCurrency(Number(item.deposit_amount ?? 0), { currency: currencyCode })}</strong>
                     </p>
                   )}
 
@@ -816,10 +836,10 @@ function ItemsPage() {
 
       {showForm && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => { setShowForm(false); setLendStep(1); }}>
-          <form onClick={(e) => e.stopPropagation()} onSubmit={handleCreate} className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-5 shadow-2xl sm:p-8">
+          <form onClick={(e) => e.stopPropagation()} onSubmit={handleCreate} className="w-full max-w-lg space-y-2 overflow-y-auto rounded-3xl bg-card p-4 shadow-2xl sm:max-h-[88vh] sm:p-5">
             <h2 className="font-display text-2xl">Lend something</h2>
-            <div className="rounded-xl border border-border bg-background/70 p-2">
-              <div className="grid grid-cols-3 gap-2 text-xs font-semibold uppercase tracking-wide">
+            <div className="rounded-xl border border-border bg-background/70 p-1.5">
+              <div className="grid grid-cols-3 gap-1.5 text-xs font-semibold uppercase tracking-wide">
                 {[
                   { id: 1, label: "Details" },
                   { id: 2, label: "Price" },
@@ -832,7 +852,7 @@ function ItemsPage() {
                       const target = step.id as 1 | 2 | 3;
                       if (target <= lendStep || validateLendStep(lendStep)) setLendStep(target);
                     }}
-                    className={`rounded-lg px-2 py-2 ${lendStep === step.id ? "bg-leaf text-leaf-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                    className={`rounded-lg px-2 py-1.5 ${lendStep === step.id ? "bg-leaf text-leaf-foreground" : "text-muted-foreground hover:bg-muted"}`}
                   >
                     {step.id}. {step.label}
                   </button>
@@ -842,12 +862,38 @@ function ItemsPage() {
 
             {lendStep === 1 && (
               <>
+                <div className="space-y-2 rounded-2xl border border-border bg-background/70 p-2.5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">AI-assisted starter</p>
+                  <PhotoUpload
+                    value={form.image_urls[0] || form.image_url || null}
+                    onChange={updateCoverImage}
+                    folder="items"
+                    dense
+                    label={form.image_urls[0] || form.image_url ? "Replace cover image" : "Upload a cover image"}
+                  />
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Suggested names</label>
+                    <div className="flex flex-wrap gap-2">
+                      {titleSuggestions.map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => setForm((prev) => ({ ...prev, title: suggestion }))}
+                          className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-leaf hover:text-leaf"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-1.5 text-xs text-muted-foreground">Upload a photo and choose a name, or type your own title below.</p>
+                  </div>
+                </div>
                 <input required placeholder="What are you sharing? (e.g. Extension ladder)"
                   value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
                   className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
                 <textarea placeholder="Anything neighbors should know? Condition, pickup notes…"
                   value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  rows={3} className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
+                  rows={2} className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
                 <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
                   className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
                   {categories.map((c) => (<option key={c}>{c}</option>))}
@@ -864,13 +910,13 @@ function ItemsPage() {
                   <option value="rent">Rent per day</option>
                 </select>
                 {form.price_mode === "rent" && (
-                  <input type="number" min="1" step="1" required placeholder="Price per day (USD)"
+                  <input type="number" min="1" step="1" required placeholder={`Price per day (${currencyCode})`}
                     value={form.price_amount} onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
                     className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
                 )}
                 <div>
                   <input type="number" min="0" step="1" required
-                    placeholder="Replacement value if damaged (USD)"
+                    placeholder={`Replacement value if damaged (${currencyCode})`}
                     value={form.deposit_amount}
                     onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })}
                     className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
@@ -884,8 +930,8 @@ function ItemsPage() {
             {lendStep === 3 && (
               <>
                 <div>
-                  <label className="mb-2 block text-xs font-semibold text-muted-foreground uppercase tracking-wide">Item photo (optional)</label>
-                  <div className="space-y-3">
+                  <label className="mb-2 block text-xs font-semibold text-muted-foreground uppercase tracking-wide">More photos and video (optional)</label>
+                  <div className="space-y-2.5">
                     <PhotoUpload
                       value={form.video_url || null}
                       onChange={(path) => {
@@ -894,19 +940,16 @@ function ItemsPage() {
                       folder="items"
                       accept="video"
                       label="Upload 360 video"
+                      dense
                     />
                     <PhotoUpload
                       value={form.image_urls[0] || null}
                       onChange={(path) => {
-                        setForm((prev) => {
-                          const next = [...prev.image_urls];
-                          if (path) next[0] = path;
-                          else next.splice(0, 1);
-                          return { ...prev, image_urls: next, image_url: next[0] || "" };
-                        });
+                        updateCoverImage(path);
                       }}
                       folder="items"
                       label="Main image"
+                      dense
                     />
                     {form.image_urls.slice(1).length > 0 && (
                       <div className="grid grid-cols-3 gap-2">
@@ -943,9 +986,10 @@ function ItemsPage() {
                         }}
                         folder="items"
                         label="Add more images"
+                        dense
                       />
                     )}
-                    <p className="text-xs text-muted-foreground">You can skip now and add photos directly from the item card later.</p>
+                    <p className="text-xs text-muted-foreground">You can skip now and add more photos directly from the item card later.</p>
                   </div>
                 </div>
 
@@ -1006,7 +1050,7 @@ function ItemsPage() {
 
       {showAuthPrompt && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => setShowAuthPrompt(false)}>
-          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-3xl bg-card p-6 shadow-2xl">
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-3 rounded-3xl bg-card p-5 shadow-2xl sm:max-h-[85vh] sm:overflow-y-auto">
             <h2 className="font-display text-2xl">Sign in required</h2>
             <p className="text-sm text-muted-foreground">
               You can continue browsing here. Sign in only when you want to request, remind, or manage bookings.
@@ -1082,6 +1126,7 @@ function RequestConsentModal({
   const deposit = Number(item.deposit_amount ?? 0);
   const rent = item.price_mode === "rent" ? Number(item.price_amount ?? 0) : 0;
   const rentTotal = rent * days;
+  const currencyCode = getCurrencyCode();
 
   async function submit() {
     if (!consent) return toast.error("Please accept the terms first.");
@@ -1129,16 +1174,16 @@ function RequestConsentModal({
               <option value="urgent">🚨 Urgent — owner should reply within 30 minutes</option>
             </select>
           </label>
-          {rent > 0 && <p><strong>Rent:</strong> ${rent}/day × {days} = <strong>${rentTotal}</strong> — paid in cash at return</p>}
-          <p><strong>Replacement value:</strong> ${deposit}</p>
+          {rent > 0 && <p><strong>Rent:</strong> {formatCurrency(rent, { currency: currencyCode })}/day × {days} = <strong>{formatCurrency(rentTotal, { currency: currencyCode })}</strong> — paid in cash at return</p>}
+          <p><strong>Replacement value:</strong> {formatCurrency(deposit, { currency: currencyCode })}</p>
         </div>
 
         <div className="rounded-xl border-2 border-clay/40 bg-clay/5 p-4 text-sm">
           <p className="font-semibold text-clay">Please read carefully</p>
           <p className="mt-1 text-foreground">
             If the item comes back with any defect, damage or missing parts, you agree to pay the
-            <strong> full replacement value of ${deposit}</strong> to the owner in cash at return
-            {rent > 0 ? ` (in addition to the $${rentTotal} rent).` : "."}
+            <strong> full replacement value of {formatCurrency(deposit, { currency: currencyCode })}</strong> to the owner in cash at return
+            {rent > 0 ? ` (in addition to the ${formatCurrency(rentTotal, { currency: currencyCode })} rent).` : "."}
           </p>
           <label className="mt-3 flex items-start gap-2 cursor-pointer">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1" />
@@ -1183,6 +1228,18 @@ function EditItemModal({
   });
   const [saving, setSaving] = useState(false);
   const [editStep, setEditStep] = useState<1 | 2 | 3>(1);
+  const currencyCode = getCurrencyCode();
+
+  function updateCoverImage(path: string | null) {
+    setForm((prev) => {
+      if (path) {
+        const next = [path, ...prev.image_urls.filter((entry) => entry !== path)];
+        return { ...prev, image_urls: next.slice(0, 5) };
+      }
+
+      return { ...prev, image_urls: prev.image_urls.slice(1) };
+    });
+  }
 
   function validateEditStep(step: 1 | 2 | 3) {
     if (step === 1) {
@@ -1237,10 +1294,10 @@ function EditItemModal({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
-      <form onClick={(e) => e.stopPropagation()} onSubmit={submit} className="w-full max-w-lg space-y-3 rounded-3xl bg-card p-5 shadow-2xl sm:p-8">
+      <form onClick={(e) => e.stopPropagation()} onSubmit={submit} className="w-full max-w-lg space-y-2 overflow-y-auto rounded-3xl bg-card p-4 shadow-2xl sm:max-h-[88vh] sm:p-5">
         <h2 className="font-display text-2xl">Edit listing</h2>
-        <div className="rounded-xl border border-border bg-background/70 p-2">
-          <div className="grid grid-cols-3 gap-2 text-xs font-semibold uppercase tracking-wide">
+        <div className="rounded-xl border border-border bg-background/70 p-1.5">
+          <div className="grid grid-cols-3 gap-1.5 text-xs font-semibold uppercase tracking-wide">
             {[
               { id: 1, label: "Details" },
               { id: 2, label: "Price" },
@@ -1253,7 +1310,7 @@ function EditItemModal({
                   const target = step.id as 1 | 2 | 3;
                   if (target <= editStep || validateEditStep(editStep)) setEditStep(target);
                 }}
-                className={`rounded-lg px-2 py-2 ${editStep === step.id ? "bg-leaf text-leaf-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                className={`rounded-lg px-2 py-1.5 ${editStep === step.id ? "bg-leaf text-leaf-foreground" : "text-muted-foreground hover:bg-muted"}`}
               >
                 {step.id}. {step.label}
               </button>
@@ -1265,7 +1322,7 @@ function EditItemModal({
           <>
             <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
               className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
-            <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+            <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
               className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
             <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
               className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
@@ -1282,11 +1339,11 @@ function EditItemModal({
               <option value="rent">Rent per day</option>
             </select>
             {form.price_mode === "rent" && (
-              <input type="number" min="1" placeholder="Price per day (USD)"
+              <input type="number" min="1" placeholder={`Price per day (${currencyCode})`}
                 value={form.price_amount} onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
                 className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
             )}
-            <input type="number" min="0" placeholder="Replacement value if damaged (USD)"
+            <input type="number" min="0" placeholder={`Replacement value if damaged (${currencyCode})`}
               value={form.deposit_amount} onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })}
               className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
           </>
@@ -1310,12 +1367,7 @@ function EditItemModal({
               <PhotoUpload
                 value={form.image_urls[0] || null}
                 onChange={(path) => {
-                  setForm((prev) => {
-                    const next = [...prev.image_urls];
-                    if (path) next[0] = path;
-                    else next.splice(0, 1);
-                    return { ...prev, image_urls: next };
-                  });
+                  updateCoverImage(path);
                 }}
                 folder="items"
                 label="Main image"
