@@ -15,6 +15,9 @@ import {
 
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    redirectTo: typeof s.redirectTo === "string" ? s.redirectTo : undefined,
+  }),
   head: () =>
     buildSeoHead({
       title: "Join Peers Plus — Sign in or create your neighbor account",
@@ -34,6 +37,7 @@ const trustPoints = [
 
 function AuthPage() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,12 +49,19 @@ function AuthPage() {
   const [forgotBusy, setForgotBusy] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; title: string; description?: string } | null>(null);
 
+  function goAfterAuth() {
+    const target = search.redirectTo && search.redirectTo.startsWith("/")
+      ? search.redirectTo
+      : "/items";
+    window.location.assign(target);
+  }
+
   useEffect(() => {
     const client = getFirebaseClient();
     if (client?.auth.currentUser) {
-      navigate({ to: "/items" });
+      goAfterAuth();
     }
-  }, [navigate]);
+  }, [navigate, search.redirectTo]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -70,7 +81,7 @@ function AuthPage() {
       } else {
         await signInWithEmail({ email, password });
         toast.success("Welcome back!");
-        navigate({ to: "/items" });
+        goAfterAuth();
       }
     } catch (err) {
       const errorMessage = getFirebaseAuthErrorMessage(err);
@@ -92,7 +103,7 @@ function AuthPage() {
     try {
       await signInWithGoogle();
       toast.success("Signed in with Google");
-      navigate({ to: "/items" });
+      goAfterAuth();
     } catch (err) {
       const errorMessage = getFirebaseAuthErrorMessage(err);
       setFeedback({ type: "error", title: errorMessage.title, description: errorMessage.description });
@@ -128,6 +139,13 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(170,210,139,0.35),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(248,203,141,0.24),_transparent_30%),linear-gradient(180deg,_#fbfaf6_0%,_#f6f1e8_100%)] px-4 py-6 sm:px-6 lg:px-8">
+      <Link
+        to="/"
+        aria-label="Go home"
+        className="fixed right-4 top-4 z-30 inline-flex size-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-lg transition-colors hover:bg-muted sm:right-6 sm:top-6"
+      >
+        <Home className="h-4 w-4" />
+      </Link>
       <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl flex-col gap-6 lg:grid lg:items-center lg:grid-cols-[1.05fr_0.95fr]">
         <section className="order-2 relative overflow-hidden rounded-[2rem] border border-white/60 bg-[var(--leaf)] px-8 py-10 text-white shadow-[0_25px_80px_rgba(15,23,42,0.35)] sm:px-10 sm:py-12 lg:order-1">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(166,199,111,0.28),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.08),_transparent_24%)]" />
@@ -161,7 +179,7 @@ function AuthPage() {
         </section>
 
         <section className="order-1 rounded-[2rem] border border-border/70 bg-card/95 p-5 shadow-[0_20px_70px_rgba(15,23,42,0.16)] sm:p-8 lg:order-2">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Welcome</p>
               <h2 className="mt-2 font-display text-3xl leading-tight">
@@ -173,13 +191,6 @@ function AuthPage() {
                   : "Create a verified account and keep your address private."}
               </p>
             </div>
-            <Link
-              to="/"
-              aria-label="Go home"
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition-colors hover:bg-muted"
-            >
-              <Home className="h-4 w-4" />
-            </Link>
           </div>
 
           {feedback && (

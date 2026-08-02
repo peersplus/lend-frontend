@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
@@ -13,6 +13,7 @@ import { LOGO_URL } from "@/lib/brand";
 export function SiteHeader() {
   const { user } = useAuth();
   const { isSuperadmin } = useRole();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   const primary = [
@@ -51,14 +52,21 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           {user && <NotificationBell />}
-          <Link
-            to="/items"
-            search={{ lend: "1" }}
+          <button
+            type="button"
+            onClick={() => {
+              navigate({
+                to: "/items",
+                search: { lend: "1", cat: undefined, lendOpen: String(Date.now()) },
+              });
+            }}
             data-header-cta
-            className="hidden items-center gap-1.5 rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground shadow-sm shadow-leaf/20 transition-transform hover:-translate-y-0.5 hover:bg-leaf/90 sm:inline-flex"
+            className="inline-flex items-center gap-1.5 rounded-full bg-leaf px-3 py-2 text-sm font-semibold text-leaf-foreground shadow-sm shadow-leaf/20 transition-transform hover:-translate-y-0.5 hover:bg-leaf/90 sm:px-4"
+            aria-label="Post a lend"
           >
-            <span aria-hidden className="text-base leading-none text-leaf-foreground">+</span> Post a Lend
-          </Link>
+            <span aria-hidden className="text-base leading-none text-leaf-foreground">+</span>
+            <span className="hidden sm:inline">Post a Lend</span>
+          </button>
           <UserMenu />
           <button
             type="button"

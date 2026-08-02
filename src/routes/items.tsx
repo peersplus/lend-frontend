@@ -50,6 +50,7 @@ export const Route = createFileRoute("/items")({
   validateSearch: (s: Record<string, unknown>) => ({
     lend: typeof s.lend === "string" ? s.lend : undefined,
     cat: typeof s.cat === "string" ? s.cat : undefined,
+    lendOpen: typeof s.lendOpen === "string" ? s.lendOpen : undefined,
   }),
   head: () =>
     buildSeoHead({
@@ -70,7 +71,7 @@ function normalizeImageList(item: Pick<Item, "image_url" | "image_urls">): strin
 }
 
 function ItemsPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { isSuperadmin } = useRole();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -79,7 +80,7 @@ function ItemsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-  const [lendStep, setLendStep] = useState<1 | 2 | 3>(1);
+  const [lendStep, setLendStep] = useState<1 | 2>(1);
   const [requesting, setRequesting] = useState<Item | null>(null);
   const [editing, setEditing] = useState<Item | null>(null);
   const [myBookings, setMyBookings] = useState<BookingRequest[]>([]);
@@ -105,21 +106,9 @@ function ItemsPage() {
   const currencyCode = getCurrencyCode();
 
   const titleSuggestions = useMemo(
-    () => buildItemTitleSuggestions(form.category, Boolean(form.image_urls[0] || form.image_url)),
-    [form.category, form.image_urls, form.image_url],
+    () => buildItemTitleSuggestions(form.category, false),
+    [form.category],
   );
-
-  function updateCoverImage(path: string | null) {
-    setForm((prev) => {
-      if (path) {
-        const next = [path, ...prev.image_urls.filter((entry) => entry !== path)];
-        return { ...prev, image_url: path, image_urls: next.slice(0, 5) };
-      }
-
-      const next = prev.image_urls.slice(1);
-      return { ...prev, image_url: next[0] || "", image_urls: next };
-    });
-  }
   
 
   useEffect(() => {
@@ -209,17 +198,25 @@ function ItemsPage() {
 
   // Prefill "Lend something" form when arriving from a request card.
   useEffect(() => {
-    if (!user) return;
-    if (search.lend || search.cat) {
-      setForm((f) => ({
-        ...f,
-        title: f.title,
-        category: search.lend ?? f.category,
-      }));
-      
+    if (!search.lend && !search.cat && !search.lendOpen) return;
+    if (authLoading) return;
+
+    if (!user) {
+      setShowAuthPrompt(true);
+      navigate({ to: "/items", search: { lend: undefined, cat: undefined, lendOpen: undefined }, replace: true });
+      return;
     }
+
+    setForm((f) => ({
+      ...f,
+      category: search.cat ?? f.category,
+    }));
+    setLendStep(1);
+    setShowForm(true);
+    navigate({ to: "/items", search: { lend: undefined, cat: undefined, lendOpen: undefined }, replace: true });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, search.lend, search.cat]);
+  }, [user, authLoading, search.lend, search.cat, search.lendOpen]);
 
 
 
@@ -227,7 +224,7 @@ function ItemsPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!user) { navigate({ to: "/auth", search: { redirectTo: undefined } }); return; }
     setSaving(true);
     try {
       await createItemApi({
@@ -237,8 +234,8 @@ function ItemsPage() {
         price_mode: form.price_mode,
         price_amount: form.price_mode === "rent" && form.price_amount ? Number(form.price_amount) : null,
         deposit_amount: form.deposit_amount ? Number(form.deposit_amount) : null,
-        image_url: form.image_urls[0] || form.image_url || null,
-        image_urls: form.image_urls,
+        image_url: null,
+        image_urls: [],
         video_url: form.video_url || null,
         building_name: form.building_name || null,
         address: form.address || null,
@@ -314,7 +311,7 @@ function ItemsPage() {
     }
   }
 
-  function validateLendStep(step: 1 | 2 | 3) {
+  function validateLendStep(step: 1 | 2) {
     if (step === 1) {
       if (!form.title.trim()) {
         toast.error("Please add an item title.");
@@ -497,7 +494,7 @@ function ItemsPage() {
                 List your first item
               </button>
             ) : (
-              <Link to="/auth" className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground">
+              <Link to="/auth" search={{ redirectTo: undefined }} className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground">
                 Sign in to list
               </Link>
             )}
@@ -839,17 +836,16 @@ function ItemsPage() {
           <form onClick={(e) => e.stopPropagation()} onSubmit={handleCreate} className="w-full max-w-lg space-y-2 overflow-y-auto rounded-3xl bg-card p-4 shadow-2xl sm:max-h-[88vh] sm:p-5">
             <h2 className="font-display text-2xl">Lend something</h2>
             <div className="rounded-xl border border-border bg-background/70 p-1.5">
-              <div className="grid grid-cols-3 gap-1.5 text-xs font-semibold uppercase tracking-wide">
+              <div className="grid grid-cols-2 gap-1.5 text-xs font-semibold uppercase tracking-wide">
                 {[
                   { id: 1, label: "Details" },
-                  { id: 2, label: "Price" },
-                  { id: 3, label: "Photos" },
+                  { id: 2, label: "Price & location" },
                 ].map((step) => (
                   <button
                     key={step.id}
                     type="button"
                     onClick={() => {
-                      const target = step.id as 1 | 2 | 3;
+                      const target = step.id as 1 | 2;
                       if (target <= lendStep || validateLendStep(lendStep)) setLendStep(target);
                     }}
                     className={`rounded-lg px-2 py-1.5 ${lendStep === step.id ? "bg-leaf text-leaf-foreground" : "text-muted-foreground hover:bg-muted"}`}
@@ -864,13 +860,6 @@ function ItemsPage() {
               <>
                 <div className="space-y-2 rounded-2xl border border-border bg-background/70 p-2.5">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">AI-assisted starter</p>
-                  <PhotoUpload
-                    value={form.image_urls[0] || form.image_url || null}
-                    onChange={updateCoverImage}
-                    folder="items"
-                    dense
-                    label={form.image_urls[0] || form.image_url ? "Replace cover image" : "Upload a cover image"}
-                  />
                   <div>
                     <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Suggested names</label>
                     <div className="flex flex-wrap gap-2">
@@ -885,7 +874,7 @@ function ItemsPage() {
                         </button>
                       ))}
                     </div>
-                    <p className="mt-1.5 text-xs text-muted-foreground">Upload a photo and choose a name, or type your own title below.</p>
+                    <p className="mt-1.5 text-xs text-muted-foreground">Pick a smart title now. Photos and video can be added on the detail page after save.</p>
                   </div>
                 </div>
                 <input required placeholder="What are you sharing? (e.g. Extension ladder)"
@@ -924,75 +913,6 @@ function ItemsPage() {
                     Borrower will be shown this amount up-front and asked to consent. If the item comes back damaged, they pay this full amount in cash at return.
                   </p>
                 </div>
-              </>
-            )}
-
-            {lendStep === 3 && (
-              <>
-                <div>
-                  <label className="mb-2 block text-xs font-semibold text-muted-foreground uppercase tracking-wide">More photos and video (optional)</label>
-                  <div className="space-y-2.5">
-                    <PhotoUpload
-                      value={form.video_url || null}
-                      onChange={(path) => {
-                        setForm((prev) => ({ ...prev, video_url: path || "" }));
-                      }}
-                      folder="items"
-                      accept="video"
-                      label="Upload 360 video"
-                      dense
-                    />
-                    <PhotoUpload
-                      value={form.image_urls[0] || null}
-                      onChange={(path) => {
-                        updateCoverImage(path);
-                      }}
-                      folder="items"
-                      label="Main image"
-                      dense
-                    />
-                    {form.image_urls.slice(1).length > 0 && (
-                      <div className="grid grid-cols-3 gap-2">
-                        {form.image_urls.slice(1).map((img, index) => (
-                          <div key={`${img}-${index}`} className="relative overflow-hidden rounded-lg border border-border">
-                            <PhotoImg path={img} alt="Additional item" className="h-20 w-full object-cover" />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setForm((prev) => {
-                                  const next = [...prev.image_urls];
-                                  next.splice(index + 1, 1);
-                                  return { ...prev, image_urls: next, image_url: next[0] || "" };
-                                });
-                              }}
-                              className="absolute right-1 top-1 rounded-full bg-black/70 px-2 py-0.5 text-xs text-white"
-                            >
-                              x
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {form.image_urls.length < 5 && (
-                      <PhotoUpload
-                        value={null}
-                        onChange={(path) => {
-                          if (!path) return;
-                          setForm((prev) => ({
-                            ...prev,
-                            image_urls: [...prev.image_urls, path].slice(0, 5),
-                            image_url: prev.image_urls[0] || path,
-                          }));
-                        }}
-                        folder="items"
-                        label="Add more images"
-                        dense
-                      />
-                    )}
-                    <p className="text-xs text-muted-foreground">You can skip now and add more photos directly from the item card later.</p>
-                  </div>
-                </div>
-
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input placeholder="Building / society"
                     value={form.building_name} onChange={(e) => setForm({ ...form, building_name: e.target.value })}
@@ -1020,18 +940,18 @@ function ItemsPage() {
               {lendStep > 1 && (
                 <button
                   type="button"
-                  onClick={() => setLendStep((prev) => (prev - 1) as 1 | 2 | 3)}
+                  onClick={() => setLendStep((prev) => (prev - 1) as 1 | 2)}
                   className="rounded-xl border border-border bg-background py-2.5 text-sm font-semibold"
                 >
                   Back
                 </button>
               )}
-              {lendStep < 3 ? (
+              {lendStep < 2 ? (
                 <button
                   type="button"
                   onClick={() => {
                     if (!validateLendStep(lendStep)) return;
-                    setLendStep((prev) => (prev + 1) as 1 | 2 | 3);
+                    setLendStep((prev) => (prev + 1) as 1 | 2);
                   }}
                   className="rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground"
                 >
@@ -1058,13 +978,17 @@ function ItemsPage() {
             <div className="grid gap-2 sm:grid-cols-2">
               <button
                 type="button"
-                onClick={() => setShowAuthPrompt(false)}
+                onClick={() => {
+                  setShowAuthPrompt(false);
+                  navigate({ to: "/items", search: { lend: undefined, cat: undefined, lendOpen: undefined }, replace: true });
+                }}
                 className="rounded-xl border border-border py-2.5 text-sm font-semibold"
               >
                 Keep browsing
               </button>
               <Link
                 to="/auth"
+                search={{ redirectTo: `/items?lend=1&lendOpen=${Date.now()}${search.cat ? `&cat=${encodeURIComponent(search.cat)}` : ""}` }}
                 className="rounded-xl bg-leaf py-2.5 text-center text-sm font-semibold text-leaf-foreground"
                 onClick={() => setShowAuthPrompt(false)}
               >

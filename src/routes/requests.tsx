@@ -412,13 +412,18 @@ function RequestsPage() {
                       >
                         🤝 I can help — chat
                       </button>
-                      <Link
-                        to="/items"
-                        search={{ lend: r.title, cat: r.category } as never}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigate({
+                            to: "/items",
+                            search: { lend: r.title, cat: r.category, lendOpen: String(Date.now()) } as never,
+                          });
+                        }}
                         className="rounded-full border border-leaf bg-background px-4 py-2 text-center text-sm font-semibold text-leaf hover:bg-leaf/10"
                       >
                         🎁 I have this — lend it
-                      </Link>
+                      </button>
                     </div>
                   )}
 
