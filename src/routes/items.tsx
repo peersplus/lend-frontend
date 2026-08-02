@@ -610,7 +610,7 @@ function ItemsPage() {
                   <div className="mt-auto space-y-2 pt-3">
                     <button
                       type="button"
-                      onClick={() => navigate({ to: "/items/$itemId", params: { itemId: item.id }, search: { lend: undefined, cat: undefined } })}
+                      onClick={() => navigate({ to: "/items/$itemId", params: { itemId: item.id }, search: { lend: undefined, cat: undefined, lendOpen: undefined } })}
                       className="inline-flex w-full items-center justify-center rounded-full border border-input bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"
                     >
                       View details
