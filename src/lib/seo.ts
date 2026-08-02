@@ -1,5 +1,5 @@
 const DEFAULT_SITE_URL = "https://peersplus.com";
-const DEFAULT_OG_IMAGE_PATH = "/peers-plus-logo.png?v=20260802";
+const DEFAULT_OG_IMAGE_PATH = "/og-logos.png?v=20260802";
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "") || DEFAULT_SITE_URL;
