@@ -77,7 +77,7 @@ export function NotificationBell() {
                   <p className="text-sm font-semibold">Neighborhood inbox</p>
                   <p className="text-xs text-muted-foreground">Nearby requests and activity</p>
                 </div>
-                <div className="max-h-[68vh] overflow-y-auto">
+               <div className="max-h-[68vh] overflow-y-auto">
                   {items.length === 0 ? (
                     <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                       No notifications yet.
@@ -86,7 +86,7 @@ export function NotificationBell() {
                     items.map((n) => (
                       <Link
                         key={n.id}
-                        to="/requests"
+                        to="/bookings"
                         onClick={() => setOpen(false)}
                         className="block border-b border-border/50 px-4 py-3 hover:bg-accent"
                       >
@@ -124,7 +124,7 @@ export function NotificationBell() {
                 items.map((n) => (
                   <Link
                     key={n.id}
-                    to="/requests"
+                    to="/bookings"
                     onClick={() => setOpen(false)}
                     className="block border-b border-border/50 px-4 py-3 hover:bg-accent"
                   >
