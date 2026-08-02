@@ -398,6 +398,9 @@ function ItemsPage() {
         <div className="border-b border-border/60 bg-card/40">
           <div className="mx-auto flex max-w-7xl px-4 py-3 sm:justify-end sm:px-6">
             <button onClick={() => { setLendStep(1); setShowForm(true); }} className="w-full rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90 sm:w-auto">
+              id="items-open-lend-form-top-button"
+              name="openLendFormTop"
+              data-testid="items-open-lend-form-top-button"
               + Lend something
             </button>
           </div>
@@ -418,12 +421,18 @@ function ItemsPage() {
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_auto_auto_auto_auto] lg:items-center">
           <input
             type="search"
+            id="items-filter-search-input"
+            name="itemsSearch"
+            data-testid="items-filter-search-input"
             value={filters.q}
             onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
             placeholder="Search title, description, building…"
             className="w-full rounded-full border border-input bg-background px-4 py-2 text-sm outline-none focus:border-leaf lg:min-w-[220px]"
           />
           <select
+            id="items-filter-category-select"
+            name="itemsCategory"
+            data-testid="items-filter-category-select"
             value={filters.category}
             onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
             className="w-full rounded-full border border-input bg-background px-3 py-2 text-sm sm:w-auto"
@@ -436,6 +445,9 @@ function ItemsPage() {
               <button
                 key={p}
                 type="button"
+                id={`items-filter-price-${p}-button`}
+                name={`itemsPrice${p}`}
+                data-testid={`items-filter-price-${p}-button`}
                 onClick={() => setFilters((f) => ({ ...f, price: p }))}
                 className={`px-3 py-2 ${filters.price === p ? "bg-leaf text-leaf-foreground" : "bg-background hover:bg-muted"}`}
               >
@@ -445,13 +457,16 @@ function ItemsPage() {
           </div>
           {user && (
             <label className="flex items-center gap-2 rounded-full border border-input bg-background px-3 py-2 text-sm sm:w-fit">
-              <input type="checkbox" checked={filters.mine} onChange={(e) => setFilters((f) => ({ ...f, mine: e.target.checked }))} />
+              <input id="items-filter-only-mine-checkbox" name="itemsOnlyMine" data-testid="items-filter-only-mine-checkbox" type="checkbox" checked={filters.mine} onChange={(e) => setFilters((f) => ({ ...f, mine: e.target.checked }))} />
               Only mine
             </label>
           )}
           {(filters.q || filters.category || filters.price !== "all" || filters.mine) && (
             <button
               type="button"
+              id="items-filter-clear-button"
+              name="itemsClearFilters"
+              data-testid="items-filter-clear-button"
               onClick={() => setFilters({ q: "", category: "", price: "all", mine: false })}
               className="rounded-full border border-input bg-background px-3 py-2 text-sm hover:bg-muted sm:w-fit"
             >
@@ -461,6 +476,9 @@ function ItemsPage() {
           <div className="grid grid-cols-2 overflow-hidden rounded-full border border-input sm:w-fit">
             <button
               type="button"
+              id="items-view-grid-button"
+              name="itemsViewGrid"
+              data-testid="items-view-grid-button"
               onClick={() => setViewMode("grid")}
               className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold ${viewMode === "grid" ? "bg-leaf text-leaf-foreground" : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
               aria-label="Grid view"
@@ -469,6 +487,9 @@ function ItemsPage() {
             </button>
             <button
               type="button"
+              id="items-view-list-button"
+              name="itemsViewList"
+              data-testid="items-view-list-button"
               onClick={() => setViewMode("list")}
               className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold ${viewMode === "list" ? "bg-leaf text-leaf-foreground" : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground"}`}
               aria-label="List view"
@@ -491,6 +512,9 @@ function ItemsPage() {
             <p className="mb-4 text-muted-foreground">Nothing listed yet — be the first neighbor to share.</p>
             {user ? (
               <button onClick={() => { setLendStep(1); setShowForm(true); }} className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground">
+                id="items-empty-open-lend-form-button"
+                name="openLendFormEmptyState"
+                data-testid="items-empty-open-lend-form-button"
                 List your first item
               </button>
             ) : (
@@ -610,6 +634,9 @@ function ItemsPage() {
                   <div className="mt-auto space-y-2 pt-3">
                     <button
                       type="button"
+                      id={`item-${item.id}-view-details-button`}
+                      name={`itemViewDetails-${item.id}`}
+                      data-testid={`item-${item.id}-view-details-button`}
                       onClick={() => navigate({ to: "/items/$itemId", params: { itemId: item.id }, search: { lend: undefined, cat: undefined, lendOpen: undefined } })}
                       className="inline-flex w-full items-center justify-center rounded-full border border-input bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"
                     >
@@ -619,6 +646,9 @@ function ItemsPage() {
 
                   {user?.uid !== item.owner_id && !showRequestActions && (
                     <button
+                      id={`item-${item.id}-request-button`}
+                      name={`itemRequest-${item.id}`}
+                      data-testid={`item-${item.id}-request-button`}
                       onClick={() => {
                         if (!user) { setShowAuthPrompt(true); return; }
                         setRequesting(item);
@@ -642,6 +672,9 @@ function ItemsPage() {
                       <div className="mt-2 flex flex-wrap gap-2">
                         <button
                           type="button"
+                          id={`item-${item.id}-cancel-request-button`}
+                          name={`itemCancelRequest-${item.id}`}
+                          data-testid={`item-${item.id}-cancel-request-button`}
                           onClick={() => setCancelBooking(myBooking!)}
                           disabled={busyBookingId === myBooking?.id}
                           className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
@@ -651,6 +684,9 @@ function ItemsPage() {
                         {myBooking?.status === 'requested' && (
                           <button
                             type="button"
+                            id={`item-${item.id}-remind-owner-button`}
+                            name={`itemRemindOwner-${item.id}`}
+                            data-testid={`item-${item.id}-remind-owner-button`}
                             onClick={() => handleRemindRequest(myBooking)}
                             disabled={busyBookingId === myBooking.id}
                             className="rounded-full bg-leaf px-3 py-1.5 text-xs font-semibold text-leaf-foreground disabled:opacity-50"
@@ -749,6 +785,9 @@ function ItemsPage() {
 
                       <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <button
+                          id={`item-${item.id}-edit-button`}
+                          name={`itemEdit-${item.id}`}
+                          data-testid={`item-${item.id}-edit-button`}
                           onClick={() => setEditing(item)}
                           className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
                         >
@@ -756,12 +795,18 @@ function ItemsPage() {
                         </button>
                         <button
                           type="button"
+                          id={`item-${item.id}-manage-images-button`}
+                          name={`itemManageImages-${item.id}`}
+                          data-testid={`item-${item.id}-manage-images-button`}
                           onClick={() => setCardUploadItemId((prev) => (prev === item.id ? null : item.id))}
                           className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
                         >
                           {cardUploadItemId === item.id ? "Hide images" : "Manage images"}
                         </button>
                         <button
+                          id={`item-${item.id}-delete-button`}
+                          name={`itemDelete-${item.id}`}
+                          data-testid={`item-${item.id}-delete-button`}
                           onClick={() => setDeleteItemId(item.id)}
                           className="rounded-full border border-destructive/50 bg-background px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 sm:col-span-2"
                         >
@@ -833,7 +878,7 @@ function ItemsPage() {
 
       {showForm && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => { setShowForm(false); setLendStep(1); }}>
-          <form onClick={(e) => e.stopPropagation()} onSubmit={handleCreate} className="w-full max-w-lg space-y-2 overflow-y-auto rounded-3xl bg-card p-4 shadow-2xl sm:max-h-[88vh] sm:p-5">
+          <form id="lend-form" name="lendForm" data-testid="lend-form" onClick={(e) => e.stopPropagation()} onSubmit={handleCreate} className="w-full max-w-lg space-y-2 overflow-y-auto rounded-3xl bg-card p-4 shadow-2xl sm:max-h-[88vh] sm:p-5">
             <h2 className="font-display text-2xl">Lend something</h2>
             <div className="rounded-xl border border-border bg-background/70 p-1.5">
               <div className="grid grid-cols-2 gap-1.5 text-xs font-semibold uppercase tracking-wide">
@@ -844,6 +889,9 @@ function ItemsPage() {
                   <button
                     key={step.id}
                     type="button"
+                    id={`lend-form-step-${step.id}-button`}
+                    name={`lendFormStep${step.id}`}
+                    data-testid={`lend-form-step-${step.id}-button`}
                     onClick={() => {
                       const target = step.id as 1 | 2;
                       if (target <= lendStep || validateLendStep(lendStep)) setLendStep(target);
@@ -867,6 +915,9 @@ function ItemsPage() {
                         <button
                           key={suggestion}
                           type="button"
+                          id={`lend-form-suggested-title-${suggestion.toLowerCase().replace(/\s+/g, "-")}`}
+                          name="lendFormSuggestedTitle"
+                          data-testid="lend-form-suggested-title"
                           onClick={() => setForm((prev) => ({ ...prev, title: suggestion }))}
                           className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-leaf hover:text-leaf"
                         >
@@ -878,12 +929,21 @@ function ItemsPage() {
                   </div>
                 </div>
                 <input required placeholder="What are you sharing? (e.g. Extension ladder)"
+                  id="lend-form-title-input"
+                  name="lendTitle"
+                  data-testid="lend-form-title-input"
                   value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
                   className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
                 <textarea placeholder="Anything neighbors should know? Condition, pickup notes…"
+                  id="lend-form-description-textarea"
+                  name="lendDescription"
+                  data-testid="lend-form-description-textarea"
                   value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
                   rows={2} className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
                 <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  id="lend-form-category-select"
+                  name="lendCategory"
+                  data-testid="lend-form-category-select"
                   className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
                   {categories.map((c) => (<option key={c}>{c}</option>))}
                 </select>
@@ -893,6 +953,9 @@ function ItemsPage() {
             {lendStep === 2 && (
               <>
                 <select value={form.price_mode}
+                  id="lend-form-price-mode-select"
+                  name="lendPriceMode"
+                  data-testid="lend-form-price-mode-select"
                   onChange={(e) => setForm({ ...form, price_mode: e.target.value as "free" | "rent" })}
                   className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm">
                   <option value="free">Free to borrow</option>
@@ -900,11 +963,17 @@ function ItemsPage() {
                 </select>
                 {form.price_mode === "rent" && (
                   <input type="number" min="1" step="1" required placeholder={`Price per day (${currencyCode})`}
+                    id="lend-form-price-amount-input"
+                    name="lendPriceAmount"
+                    data-testid="lend-form-price-amount-input"
                     value={form.price_amount} onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
                     className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
                 )}
                 <div>
                   <input type="number" min="0" step="1" required
+                    id="lend-form-deposit-amount-input"
+                    name="lendDepositAmount"
+                    data-testid="lend-form-deposit-amount-input"
                     placeholder={`Replacement value if damaged (${currencyCode})`}
                     value={form.deposit_amount}
                     onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })}
@@ -915,14 +984,23 @@ function ItemsPage() {
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input placeholder="Building / society"
+                    id="lend-form-building-input"
+                    name="lendBuildingName"
+                    data-testid="lend-form-building-input"
                     value={form.building_name} onChange={(e) => setForm({ ...form, building_name: e.target.value })}
                     className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
                   <input placeholder="Address (shown at pickup only)"
+                    id="lend-form-address-input"
+                    name="lendAddress"
+                    data-testid="lend-form-address-input"
                     value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
                     className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm" />
                 </div>
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={useMyLocation}
+                    id="lend-form-use-location-button"
+                    name="lendUseMyLocation"
+                    data-testid="lend-form-use-location-button"
                     className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">
                     <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> Use my location</span>
                   </button>
@@ -934,12 +1012,18 @@ function ItemsPage() {
             )}
             <div className="grid gap-2 pt-2 sm:grid-cols-3">
               <button type="button" onClick={() => { setShowForm(false); setLendStep(1); }}
+                id="lend-form-cancel-button"
+                name="lendFormCancel"
+                data-testid="lend-form-cancel-button"
                 className="rounded-xl border border-border bg-background py-2.5 text-sm font-semibold">
                 Cancel
               </button>
               {lendStep > 1 && (
                 <button
                   type="button"
+                  id="lend-form-back-button"
+                  name="lendFormBack"
+                  data-testid="lend-form-back-button"
                   onClick={() => setLendStep((prev) => (prev - 1) as 1 | 2)}
                   className="rounded-xl border border-border bg-background py-2.5 text-sm font-semibold"
                 >
@@ -949,6 +1033,9 @@ function ItemsPage() {
               {lendStep < 2 ? (
                 <button
                   type="button"
+                  id="lend-form-next-button"
+                  name="lendFormNext"
+                  data-testid="lend-form-next-button"
                   onClick={() => {
                     if (!validateLendStep(lendStep)) return;
                     setLendStep((prev) => (prev + 1) as 1 | 2);
@@ -959,6 +1046,9 @@ function ItemsPage() {
                 </button>
               ) : (
                 <button disabled={saving}
+                  id="lend-form-submit-button"
+                  name="lendFormSubmit"
+                  data-testid="lend-form-submit-button"
                   className="rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground sm:col-start-3">
                   {saving ? "Sharing..." : "Share with neighbors"}
                 </button>
@@ -978,6 +1068,9 @@ function ItemsPage() {
             <div className="grid gap-2 sm:grid-cols-2">
               <button
                 type="button"
+                id="lend-auth-prompt-keep-browsing-button"
+                name="lendAuthPromptKeepBrowsing"
+                data-testid="lend-auth-prompt-keep-browsing-button"
                 onClick={() => {
                   setShowAuthPrompt(false);
                   navigate({ to: "/items", search: { lend: undefined, cat: undefined, lendOpen: undefined }, replace: true });
@@ -988,6 +1081,8 @@ function ItemsPage() {
               </button>
               <Link
                 to="/auth"
+                id="lend-auth-prompt-signin-link"
+                data-testid="lend-auth-prompt-signin-link"
                 search={{ redirectTo: `/items?lend=1&lendOpen=${Date.now()}${search.cat ? `&cat=${encodeURIComponent(search.cat)}` : ""}` }}
                 className="rounded-xl bg-leaf py-2.5 text-center text-sm font-semibold text-leaf-foreground"
                 onClick={() => setShowAuthPrompt(false)}

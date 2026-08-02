@@ -54,6 +54,9 @@ export function SiteHeader() {
           {user && <NotificationBell />}
           <button
             type="button"
+            id="header-post-lend-button"
+            name="headerPostLend"
+            data-testid="header-post-lend-button"
             onClick={() => {
               navigate({
                 to: "/items",

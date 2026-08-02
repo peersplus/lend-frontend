@@ -141,6 +141,8 @@ function AuthPage() {
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(170,210,139,0.35),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(248,203,141,0.24),_transparent_30%),linear-gradient(180deg,_#fbfaf6_0%,_#f6f1e8_100%)] px-4 py-6 sm:px-6 lg:px-8">
       <Link
         to="/"
+        id="auth-home-top-link"
+        data-testid="auth-home-top-link"
         aria-label="Go home"
         className="fixed right-4 top-4 z-30 inline-flex size-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-lg transition-colors hover:bg-muted sm:right-6 sm:top-6"
       >
@@ -207,6 +209,9 @@ function AuthPage() {
 
           <button
             type="button"
+            id="auth-google-signin-button"
+            name="authGoogleSignin"
+            data-testid="auth-google-signin-button"
             onClick={handleGoogle}
             className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-background py-3 text-sm font-semibold transition-colors hover:bg-muted"
           >
@@ -225,6 +230,9 @@ function AuthPage() {
               <>
                 <input
                   required
+                  id="auth-signup-display-name-input"
+                  name="displayName"
+                  data-testid="auth-signup-display-name-input"
                   placeholder="Your name"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
@@ -232,6 +240,9 @@ function AuthPage() {
                 />
                 <input
                   required
+                  id="auth-signup-neighborhood-input"
+                  name="neighborhood"
+                  data-testid="auth-signup-neighborhood-input"
                   placeholder="Neighborhood (e.g. Maplewood)"
                   value={neighborhood}
                   onChange={(e) => setNeighborhood(e.target.value)}
@@ -242,6 +253,9 @@ function AuthPage() {
             <input
               required
               type="email"
+              id="auth-email-input"
+              name="email"
+              data-testid="auth-email-input"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -252,6 +266,9 @@ function AuthPage() {
                 required
                 type={showPassword ? "text" : "password"}
                 minLength={6}
+                id="auth-password-input"
+                name="password"
+                data-testid="auth-password-input"
                 placeholder="Password (min 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -259,6 +276,9 @@ function AuthPage() {
               />
               <button
                 type="button"
+                id="auth-toggle-password-button"
+                name="togglePasswordVisibility"
+                data-testid="auth-toggle-password-button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
                 aria-label={showPassword ? "Hide password" : "Show password"}
@@ -270,6 +290,9 @@ function AuthPage() {
               <div className="flex justify-end">
                 <button
                   type="button"
+                  id="auth-forgot-password-open-button"
+                  name="openForgotPassword"
+                  data-testid="auth-forgot-password-open-button"
                   onClick={() => setForgotOpen(true)}
                   className="text-xs font-semibold text-leaf underline underline-offset-4"
                 >
@@ -279,6 +302,9 @@ function AuthPage() {
             )}
             <button
               type="submit"
+              id="auth-submit-button"
+              name="authSubmit"
+              data-testid="auth-submit-button"
               disabled={busy}
               className="w-full rounded-2xl bg-leaf py-3 text-sm font-semibold text-leaf-foreground shadow-lg shadow-leaf/20 transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60"
             >
@@ -290,6 +316,9 @@ function AuthPage() {
             {mode === "signin" ? "New neighbor? " : "Already a member? "}
             <button
               type="button"
+              id="auth-switch-mode-button"
+              name="switchAuthMode"
+              data-testid="auth-switch-mode-button"
               onClick={() => {
                 setFeedback(null);
                 setMode(mode === "signin" ? "signup" : "signin");
@@ -310,6 +339,9 @@ function AuthPage() {
               </p>
               <input
                 type="email"
+                id="auth-forgot-password-email-input"
+                name="forgotPasswordEmail"
+                data-testid="auth-forgot-password-email-input"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -318,6 +350,9 @@ function AuthPage() {
               <div className="grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
+                  id="auth-forgot-password-cancel-button"
+                  name="cancelForgotPassword"
+                  data-testid="auth-forgot-password-cancel-button"
                   onClick={() => setForgotOpen(false)}
                   className="rounded-xl border border-border py-2.5 text-sm font-semibold"
                 >
@@ -325,6 +360,9 @@ function AuthPage() {
                 </button>
                 <button
                   type="button"
+                  id="auth-forgot-password-submit-button"
+                  name="submitForgotPassword"
+                  data-testid="auth-forgot-password-submit-button"
                   onClick={() => void handleForgotPassword()}
                   disabled={forgotBusy}
                   className="rounded-xl bg-leaf py-2.5 text-sm font-semibold text-leaf-foreground disabled:opacity-60"
