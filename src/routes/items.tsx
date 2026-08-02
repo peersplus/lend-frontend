@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { createItemApi, createBookingApi, deleteItemApi, listItemsApi, listBookingsApi, updateItemApi, updateBookingApi } from "@/lib/api-peers";
+import { createItemApi, createBookingApi, deleteItemApi, listItemsApi, listBookingsApi, listPublicBookingFeedbackApi, updateItemApi, updateBookingApi } from "@/lib/api-peers";
 import { useRole } from "@/hooks/useRole";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -15,7 +15,7 @@ import { toast } from "@/lib/sonner";
 import { buildSeoHead } from "@/lib/seo";
 import { formatCurrency, getCurrencyCode } from "@/lib/money";
 import { buildItemTitleSuggestions } from "@/lib/item-suggestions";
-import { ChevronLeft, ChevronRight, ImagePlus, LayoutGrid, List, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImagePlus, LayoutGrid, List, MapPin, ShieldCheck, Star } from "lucide-react";
 
 
 
@@ -45,6 +45,19 @@ type BookingRequest = {
   status: string;
   urgency?: string | null;
 };
+
+type PublicBookingFeedback = {
+  booking_id: string;
+  rating: number;
+  feedback: string;
+  item_title: string;
+  borrower_name: string;
+  created_at: string;
+};
+
+function normalizeTitleForFeedback(value: string | null | undefined): string {
+  return String(value || "").trim().toLowerCase();
+}
 
 export const Route = createFileRoute("/items")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -84,6 +97,8 @@ function ItemsPage() {
   const [requesting, setRequesting] = useState<Item | null>(null);
   const [editing, setEditing] = useState<Item | null>(null);
   const [myBookings, setMyBookings] = useState<BookingRequest[]>([]);
+  const [publicFeedbackRows, setPublicFeedbackRows] = useState<PublicBookingFeedback[]>([]);
+  const [expandedFeedbackByItem, setExpandedFeedbackByItem] = useState<Record<string, boolean>>({});
   const [busyBookingId, setBusyBookingId] = useState<string | null>(null);
   const [cancelBooking, setCancelBooking] = useState<BookingRequest | null>(null);
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
@@ -156,6 +171,35 @@ function ItemsPage() {
       setMyBookings([]);
     }
   }
+
+  async function loadPublicFeedback() {
+    try {
+      const rows = await listPublicBookingFeedbackApi(120);
+      setPublicFeedbackRows(Array.isArray(rows) ? (rows as PublicBookingFeedback[]) : []);
+    } catch {
+      setPublicFeedbackRows([]);
+    }
+  }
+
+  const feedbackByItemTitle = useMemo(() => {
+    const grouped = new Map<string, PublicBookingFeedback[]>();
+    for (const row of publicFeedbackRows) {
+      const key = normalizeTitleForFeedback(row.item_title);
+      if (!key) continue;
+      const list = grouped.get(key) ?? [];
+      list.push(row);
+      grouped.set(key, list);
+    }
+
+    for (const [, list] of grouped) {
+      list.sort((a, b) => {
+        if (b.rating !== a.rating) return b.rating - a.rating;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+    }
+
+    return grouped;
+  }, [publicFeedbackRows]);
   const listed = useMemo(() => {
     const base = me.lat == null || me.lng == null
       ? items.map((i) => ({ i, km: null as number | null }))
@@ -175,6 +219,7 @@ function ItemsPage() {
   useEffect(() => {
     void load();
     void loadMyBookings();
+    void loadPublicFeedback();
   }, [user]);
 
   useEffect(() => {
@@ -532,7 +577,12 @@ function ItemsPage() {
             {listed.map(({ i: item, km }) => {
               const myBooking = myBookings.find((booking) => booking.item_id === item.id);
               const showRequestActions = user?.uid !== item.owner_id && myBooking && ['requested', 'approved'].includes(myBooking.status);
+              const isMyLend = user?.uid === item.owner_id;
+              const isMyBorrow = Boolean(myBooking);
               const images = normalizeImageList(item);
+              const itemFeedback = feedbackByItemTitle.get(normalizeTitleForFeedback(item.title)) ?? [];
+              const hasTrustedFeedback = itemFeedback.length > 0;
+              const isFeedbackExpanded = expandedFeedbackByItem[item.id] ?? false;
               const activeImageIndex = images.length ? ((activeImageByItemId[item.id] ?? 0) % images.length) : 0;
 
               return (
@@ -596,13 +646,42 @@ function ItemsPage() {
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="min-w-0 flex-1 text-base font-semibold leading-snug sm:text-lg">{item.title}</h3>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="min-w-0 text-base font-semibold leading-snug sm:text-lg">{item.title}</h3>
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                        {isMyBorrow && (
+                          <span className="inline-flex items-center rounded-full border border-leaf/30 bg-leaf/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-leaf">
+                            I borrow
+                          </span>
+                        )}
+                        {isMyLend && (
+                          <span className="inline-flex items-center rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-700">
+                            I lend
+                          </span>
+                        )}
+                        {hasTrustedFeedback && (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                            <ShieldCheck className="h-3 w-3" /> Trusted
+                          </span>
+                        )}
+                      </div>
+                    </div>
                     {(item.building_name || item.address) && (
                       <button
                         type="button"
                         title={[item.building_name, item.address].filter(Boolean).join(" · ")}
-                        onMouseEnter={() => toast.info([item.building_name, item.address].filter(Boolean).join(" · "), { id: `loc-${item.id}` })}
-                        onClick={() => toast.info([item.building_name, item.address].filter(Boolean).join(" · "), { id: `loc-${item.id}` })}
+                        onMouseEnter={() =>  {
+                          toast.dismiss();
+                          toast.info([item.building_name, item.address].filter(Boolean).join(" · "), { id: `loc-${item.id}` });
+                        }}
+                        onClick={() => {
+                          if (item.building_name != null && item.address != null) {
+                            const url = `https://www.google.com/maps/search/?api=1&query=${item.building_name},${item.address}`;
+                            window.open(url, "_blank", "noopener,noreferrer");
+                          } else {
+                            toast.error("Location not available for this item.");
+                          }
+                        }}
                         className="shrink-0 rounded-full border border-input bg-background p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
                         aria-label="Show location"
                       >
@@ -611,6 +690,43 @@ function ItemsPage() {
                     )}
                   </div>
                   <p className="line-clamp-2 text-sm text-muted-foreground">{item.description ?? item.category}</p>
+
+                  {hasTrustedFeedback && (
+                    <div className="mt-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5">
+                      <button
+                        type="button"
+                        id={`item-${item.id}-toggle-feedback-button`}
+                        name={`itemToggleFeedback-${item.id}`}
+                        data-testid={`item-${item.id}-toggle-feedback-button`}
+                        onClick={() => {
+                          setExpandedFeedbackByItem((prev) => ({ ...prev, [item.id]: !isFeedbackExpanded }));
+                        }}
+                        className="flex w-full items-center justify-between gap-2 text-left"
+                      >
+                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+                          <ShieldCheck className="h-3.5 w-3.5" />
+                          Trusted borrower feedback ({itemFeedback.length})
+                        </span>
+                        <span className="text-xs font-semibold text-emerald-700">{isFeedbackExpanded ? "Collapse" : "Expand"}</span>
+                      </button>
+
+                      {isFeedbackExpanded && (
+                        <div className="mt-2 space-y-2">
+                          {itemFeedback.slice(0, 3).map((entry) => (
+                            <article key={`${item.id}-${entry.booking_id}`} className="rounded-lg border border-emerald-500/20 bg-background/80 p-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="truncate text-xs font-semibold text-foreground">{entry.borrower_name || "Neighbor"}</p>
+                                <p className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-amber-600">
+                                  <Star className="h-3 w-3 fill-current" /> {Math.max(1, Math.min(5, Number(entry.rating || 0)))}/5
+                                </p>
+                              </div>
+                              <p className="mt-1 text-xs text-muted-foreground">"{entry.feedback || "Trusted borrower experience."}"</p>
+                            </article>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {images.length > 1 && (
                     <div className="mt-2 flex items-center gap-1.5">
