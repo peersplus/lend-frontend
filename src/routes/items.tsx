@@ -398,9 +398,6 @@ function ItemsPage() {
         <div className="border-b border-border/60 bg-card/40">
           <div className="mx-auto flex max-w-7xl px-4 py-3 sm:justify-end sm:px-6">
             <button onClick={() => { setLendStep(1); setShowForm(true); }} className="w-full rounded-full bg-leaf px-4 py-2 text-sm font-semibold text-leaf-foreground hover:bg-leaf/90 sm:w-auto">
-              id="items-open-lend-form-top-button"
-              name="openLendFormTop"
-              data-testid="items-open-lend-form-top-button"
               + Lend something
             </button>
           </div>
@@ -511,10 +508,13 @@ function ItemsPage() {
           <div className="rounded-3xl border border-dashed border-border bg-card p-12 text-center">
             <p className="mb-4 text-muted-foreground">Nothing listed yet — be the first neighbor to share.</p>
             {user ? (
-              <button onClick={() => { setLendStep(1); setShowForm(true); }} className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground">
+              <button
+                onClick={() => { setLendStep(1); setShowForm(true); }}
+                className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground"
                 id="items-empty-open-lend-form-button"
                 name="openLendFormEmptyState"
                 data-testid="items-empty-open-lend-form-button"
+              >
                 List your first item
               </button>
             ) : (
