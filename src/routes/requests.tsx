@@ -56,6 +56,7 @@ function RequestsPage() {
   const [offersByReq, setOffersByReq] = useState<Record<string, Offer[]>>({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [postingRequest, setPostingRequest] = useState(false);
   const [editing, setEditing] = useState<Request | null>(null);
   const [query, setQuery] = useState("");
   const [filterCat, setFilterCat] = useState<string>("All");
@@ -184,6 +185,7 @@ function RequestsPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    setPostingRequest(true);
     try {
       const profile = await import('@/lib/api-peers').then((m) => m.getMyPeerProfileApi());
       const data = await createRequestApi({
@@ -199,12 +201,15 @@ function RequestsPage() {
       setRows((prev) => [data as Request, ...prev]);
     } catch (error: any) {
       if (isUnauthorizedError(error)) {
+        setPostingRequest(false);
         setShowAuthPrompt(true);
         return;
       }
+      setPostingRequest(false);
       toast.error(error.message || 'Unable to post request');
       return;
     }
+    setPostingRequest(false);
     setShowForm(false);
     setForm({ title: "", description: "", category: "Tools", urgency: "normal", radius_km: 5, image_url: "" });
     toast.success("Request posted — your neighborhood has been notified.");
@@ -300,8 +305,8 @@ function RequestsPage() {
                 label="Snap what you need"
               />
             </div>
-            <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-              Notify my neighbors
+            <button disabled={postingRequest} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60">
+              {postingRequest ? "Sending request..." : "Notify my neighbors"}
             </button>
           </form>
         )}
