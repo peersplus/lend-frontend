@@ -67,6 +67,16 @@ function BookingsPage() {
   }
 
   useEffect(() => {
+    if (!user) {
+      setShowAuthPrompt(true);
+      setLoading(false);
+      setRows([]);
+      return;
+    }
+    setShowAuthPrompt(false);
+  }, [user]);
+
+  useEffect(() => {
     if (!user) return;
     (async () => {
       try {
@@ -80,7 +90,11 @@ function BookingsPage() {
 
 
   const load = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setRows([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const data = await listBookingsApi(tab);
@@ -154,16 +168,6 @@ function BookingsPage() {
     toast.success("Schedule updated.");
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen grid place-items-center bg-background">
-        <Link to="/auth" className="rounded-full bg-leaf px-6 py-3 text-sm font-semibold text-leaf-foreground">
-          Sign in to see bookings
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
@@ -185,7 +189,11 @@ function BookingsPage() {
           ))}
         </div>
 
-        {loading ? (
+        {!user ? (
+          <div className="rounded-3xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
+            Sign in to see your borrowed and lent bookings.
+          </div>
+        ) : loading ? (
           <CenteredLoader label="Loading bookings..." />
         ) : rows.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">
@@ -226,9 +234,9 @@ function BookingsPage() {
               You can stay on this bookings page. Sign in to continue actions like approve, cancel, dispatch, or return.
             </p>
             <div className="grid gap-2 sm:grid-cols-2">
-              <button type="button" onClick={() => setShowAuthPrompt(false)} className="rounded-xl border border-border py-2.5 text-sm font-semibold">
-                Stay here
-              </button>
+              <Link to="/" onClick={() => setShowAuthPrompt(false)} className="rounded-xl border border-border py-2.5 text-center text-sm font-semibold">
+                Back home
+              </Link>
               <Link to="/auth" onClick={() => setShowAuthPrompt(false)} className="rounded-xl bg-leaf py-2.5 text-center text-sm font-semibold text-leaf-foreground">
                 Sign in
               </Link>
