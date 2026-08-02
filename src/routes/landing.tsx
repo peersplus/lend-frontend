@@ -4,6 +4,7 @@ import heroGarden from "@/assets/hero-garden.jpg";
 import heroHospital from "@/assets/hero-hospital.jpg";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { buildSeoHead } from "@/lib/seo";
 
 /**
  * Standalone marketing landing page for peersplus.com.
@@ -13,29 +14,13 @@ import { SiteFooter } from "@/components/SiteFooter";
  */
 
 export const Route = createFileRoute("/landing")({
-  head: () => ({
-    meta: [
-      { title: "Peers Plus — Borrow, Lend & Help Your Neighbors" },
-      {
-        name: "description",
-        content:
-          "Peers Plus is your neighborhood platform to borrow tools, medical gear, baby equipment and more from verified neighbors. Free to join, built on trust, powered by community.",
-      },
-      { property: "og:title", content: "Peers Plus — Borrow, Lend & Help Your Neighbors" },
-      {
-        property: "og:description",
-        content:
-          "The neighborhood library of things. Borrow, lend, and help — safely and locally.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Peers Plus — Borrow, Lend & Help Your Neighbors" },
-      {
-        name: "twitter:description",
-        content: "The neighborhood library of things. Borrow, lend, and help — safely and locally.",
-      },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Peers Plus — Borrow, Lend & Help Your Neighbors",
+      description:
+        "Peers Plus is your neighborhood platform to borrow tools, medical gear, baby equipment and more from verified neighbors. Free to join, built on trust, powered by community.",
+      path: "/landing",
+    }),
   component: LandingPage,
 });
 

@@ -1,16 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About us — Peers Plus" },
-      { name: "description", content: "Peers Plus is a free community platform where neighbors share things, help each other, and keep useful items out of landfills." },
-      { property: "og:title", content: "About us — Peers Plus" },
-      { property: "og:description", content: "Why we built Peers Plus — and the small idea that runs the whole thing." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "About us — Peers Plus",
+      description:
+        "Peers Plus is a free community platform where neighbors share things, help each other, and keep useful items out of landfills.",
+      path: "/about",
+    }),
   component: AboutPage,
 });
 

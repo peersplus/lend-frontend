@@ -12,6 +12,7 @@ import { CenteredLoader } from "@/components/CenteredLoader";
 import { haversineKm, formatDistance } from "@/lib/geo";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "@/lib/sonner";
+import { buildSeoHead } from "@/lib/seo";
 import { ChevronLeft, ChevronRight, ImagePlus, LayoutGrid, List, MapPin } from "lucide-react";
 
 
@@ -48,14 +49,13 @@ export const Route = createFileRoute("/items")({
     lend: typeof s.lend === "string" ? s.lend : undefined,
     cat: typeof s.cat === "string" ? s.cat : undefined,
   }),
-  head: () => ({
-    meta: [
-      { title: "Browse nearby items — Peers Plus" },
-      { name: "description", content: "Discover tools, medical gear, party supplies and more available to borrow or rent from verified neighbors." },
-      { property: "og:title", content: "Browse nearby items — Peers Plus" },
-      { property: "og:description", content: "Borrow or rent household items from verified neighbors near you." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Browse nearby items — Peers Plus",
+      description:
+        "Discover tools, medical gear, party supplies and more available to borrow or rent from verified neighbors.",
+      path: "/items",
+    }),
   component: ItemsPage,
 });
 

@@ -14,6 +14,7 @@ import { CenteredLoader } from "@/components/CenteredLoader";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { SITE_URL } from "../lib/seo";
 
 function NotFoundComponent() {
   return (
@@ -79,10 +80,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
+      { title: "Peers Plus and Help" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      {
+        name: "description",
+        content:
+          "Peers Plus helps neighbors borrow, lend, and share household items in a trusted local community.",
+      },
       { name: "author", content: "Peers Plus and Help" },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Peers Plus" },
+      { property: "og:image", content: `${SITE_URL}/peers-plus-logo.png` },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: `${SITE_URL}/peers-plus-logo.png` },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

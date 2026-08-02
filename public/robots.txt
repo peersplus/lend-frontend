@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://peersplus.com/sitemap.xml
+Sitemap: https://lend.peersplus.com/sitemap.xml

@@ -1,16 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "Contact support — Peers Plus" },
-      { name: "description", content: "Reach the Peers Plus team by email for support, safety reports, and partnership questions." },
-      { property: "og:title", content: "Contact support — Peers Plus" },
-      { property: "og:description", content: "Email peersplushr@gmail.com — we're a small team and we read every message." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Contact support — Peers Plus",
+      description:
+        "Reach the Peers Plus team by email for support, safety reports, and partnership questions.",
+      path: "/contact",
+    }),
   component: ContactPage,
 });
 

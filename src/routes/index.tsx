@@ -5,33 +5,20 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { HomeTrustedFeedback } from "@/components/HomeTrustedFeedback";
 import { useReveal } from "@/hooks/useReveal";
+import { buildSeoHead } from "@/lib/seo";
 import heroElectronics from "@/assets/hero-electronics.jpg";
 import heroGarden from "@/assets/hero-garden.jpg";
 import heroHospital from "@/assets/hero-hospital.jpg";
 
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Peers Plus and Help — Borrow, lend, and share with your neighbors" },
-      {
-        name: "description",
-        content:
-          "A trusted neighborhood platform to borrow, rent, or receive household items from verified people nearby. Tools, medical gear, party supplies, baby equipment and more.",
-      },
-      { property: "og:title", content: "Peers Plus and Help — Your neighborhood library of things" },
-      {
-        property: "og:description",
-        content:
-          "Borrow a ladder, lend a hand. Access what you need from verified neighbors — for free or a small fee.",
-      },
-      { name: "twitter:title", content: "Peers Plus and Help" },
-      {
-        name: "twitter:description",
-        content: "Borrow, rent, or share household items with verified neighbors nearby.",
-      },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Peers Plus and Help — Borrow, lend, and share with your neighbors",
+      description:
+        "A trusted neighborhood platform to borrow, rent, or receive household items from verified people nearby. Tools, medical gear, party supplies, baby equipment and more.",
+      path: "/",
+    }),
   component: Home,
 });
 

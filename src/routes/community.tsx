@@ -1,16 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/community")({
-  head: () => ({
-    meta: [
-      { title: "Community code — Peers Plus" },
-      { name: "description", content: "The shared values that keep Peers Plus kind, honest and welcoming for every neighbor." },
-      { property: "og:title", content: "Community code — Peers Plus" },
-      { property: "og:description", content: "Be kind. Be honest. Be on time. Take care of borrowed things. Speak up." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Community code — Peers Plus",
+      description: "The shared values that keep Peers Plus kind, honest and welcoming for every neighbor.",
+      path: "/community",
+    }),
   component: CommunityPage,
 });
 

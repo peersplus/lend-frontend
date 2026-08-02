@@ -1,7 +1,7 @@
 import logoAsset from "@/assets/peers-plus-logo-transparent.png.asset.json";
 
 /** Public site origin — used to build absolute URLs (emails, OG tags). */
-export const SITE_URL = "lend.peersplus.com";
+export const SITE_URL = "https://www.peersplus.com";
 
 /** Relative CDN URL — safe for in-app <img src>. */
 export const LOGO_URL = logoAsset.url;
