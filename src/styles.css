@@ -100,6 +100,20 @@
 }
 
 @layer base {
+  @keyframes orbit-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  .orbit-float {
+    animation: orbit-float 4.2s ease-in-out infinite;
+  }
+
   * {
     border-color: var(--color-border);
   }

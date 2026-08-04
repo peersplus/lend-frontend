@@ -8,9 +8,11 @@ import { HomeTrustedFeedback } from "@/components/HomeTrustedFeedback";
 import { useReveal } from "@/hooks/useReveal";
 import { buildSeoHead } from "@/lib/seo";
 import { detectNearbyAreaLabel } from "@/lib/nearby-area";
+import { getFestivalSpotlight } from "@/lib/seasonal";
 import heroElectronics from "@/assets/hero-electronics.jpg";
 import heroGarden from "@/assets/hero-garden.jpg";
 import heroHospital from "@/assets/hero-hospital.jpg";
+import { DAY_THEMES } from "@/lib/utils";
 
 
 export const Route = createFileRoute("/")({
@@ -62,127 +64,6 @@ const firstTimeGuide = [
   },
 ];
 
-const DAY_THEMES: Record<number, {
-  badge: string;
-  headline: string;
-  accent: string;
-  description: string;
-  audience: string[];
-}> = {
-  0: {
-    badge: "Sunday reset and family prep",
-    headline: "Plan your week",
-    accent: "without overspending.",
-    description: "Borrow what your home needs for the coming week and return when you're done.",
-    audience: ["Family prep", "Home reset", "Weekend chores"],
-  },
-  1: {
-    badge: "Monday essentials",
-    headline: "Start your week",
-    accent: "with less stress.",
-    description: "Need a laptop stand, baby gear, or quick kitchen support? Your neighborhood already has it.",
-    audience: ["Busy professionals", "Caregivers", "Parents"],
-  },
-  2: {
-    badge: "Tuesday practical sharing",
-    headline: "Borrow practical tools",
-    accent: "for everyday fixes.",
-    description: "From drills to cleaning machines, find short-use items nearby instead of buying new.",
-    audience: ["Home fixes", "Tool sharing", "Savings first"],
-  },
-  3: {
-    badge: "Midweek support",
-    headline: "Get help faster",
-    accent: "when schedules get tight.",
-    description: "Request a ride, extra hands, or urgent neighborhood support with verified members.",
-    audience: ["Midweek rush", "Local help", "Verified support"],
-  },
-  4: {
-    badge: "Thursday event prep",
-    headline: "Prepare gatherings",
-    accent: "without buying one-time items.",
-    description: "Borrow party, kitchen, and hosting essentials before weekend plans begin.",
-    audience: ["Party prep", "Kitchen gear", "Host smart"],
-  },
-  5: {
-    badge: "Friday community vibe",
-    headline: "Weekend starts",
-    accent: "with smarter sharing.",
-    description: "Find camping, sports, and celebration items from neighbors around you.",
-    audience: ["Weekend plans", "Outdoor gear", "Social sharing"],
-  },
-  6: {
-    badge: "Saturday action day",
-    headline: "Get things done",
-    accent: "with neighborhood resources.",
-    description: "Handle repairs, family activities, and events using trusted local borrowing.",
-    audience: ["Projects day", "Family time", "Community trust"],
-  },
-};
-
-const FESTIVAL_SPOTLIGHTS: Array<{
-  id: string;
-  label: string;
-  start: string; // MM-DD
-  end: string;   // MM-DD
-  heroLine: string;
-  categories: string[];
-}> = [
-  {
-    id: "new-year",
-    label: "New Year Week",
-    start: "01-01",
-    end: "01-10",
-    heroLine: "New year, lighter home. Borrow before you buy.",
-    categories: ["Party", "Kitchen", "Cleaning"],
-  },
-  {
-    id: "holi-season",
-    label: "Holi Season",
-    start: "03-10",
-    end: "03-20",
-    heroLine: "Festival prep made easy with shared party and cleaning gear.",
-    categories: ["Party", "Cleaning", "Kitchen"],
-  },
-  {
-    id: "rakhi-month",
-    label: "Rakhi Month",
-    start: "08-01",
-    end: "08-31",
-    heroLine: "Welcome loved ones with shared kitchen and hosting essentials.",
-    categories: ["Kitchen", "Party", "Furniture"],
-  },
-  {
-    id: "festive-quarter",
-    label: "Festive Season",
-    start: "10-01",
-    end: "11-10",
-    heroLine: "Celebrate smarter with neighborhood sharing for gifts and gatherings.",
-    categories: ["Party", "Kitchen", "Electronics"],
-  },
-  {
-    id: "christmas-week",
-    label: "Christmas Week",
-    start: "12-15",
-    end: "12-31",
-    heroLine: "Holiday hosting feels easier with trusted nearby borrowing.",
-    categories: ["Party", "Kitchen", "Baby"],
-  },
-];
-
-function monthDayNumber(value: string) {
-  const [month, day] = value.split("-").map(Number);
-  return month * 100 + day;
-}
-
-function getFestivalSpotlight(date: Date) {
-  const current = (date.getMonth() + 1) * 100 + date.getDate();
-  return FESTIVAL_SPOTLIGHTS.find((entry) => {
-    const start = monthDayNumber(entry.start);
-    const end = monthDayNumber(entry.end);
-    return start <= end ? current >= start && current <= end : current >= start || current <= end;
-  }) || null;
-}
 
 const flowSteps = [
   {
@@ -375,28 +256,13 @@ function Home() {
 
             <div className="relative lg:col-span-5" data-reveal="right" data-reveal-delay="120" data-scrub="parallax-slow">
               <HeroCarousel />
-              <div className="pointer-events-none absolute -bottom-4 -right-2 rounded-2xl border border-border/70 bg-card/90 px-4 py-2 text-xs font-semibold text-muted-foreground shadow-lg">
-                {festivalSpotlight ? `${festivalSpotlight.label} now live` : "Built for everyday trust and easier sharing"}
-              </div>
-              {festivalSpotlight && (
-                <div className="absolute -top-4 left-1/2 z-20 w-[92%] -translate-x-1/2 rounded-2xl border border-accent/30 bg-background/95 p-3 shadow-lg backdrop-blur">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">Festival picks</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {festivalSpotlight.categories.map((category) => (
-                      <Link
-                        key={category}
-                        to="/items"
-                        search={{ lend: undefined, cat: category, lendOpen: undefined }}
-                        className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium text-foreground hover:bg-muted"
-                      >
-                        {category}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+             
+             
+
+            
             </div>
           </div>
+           
         </section>
 
         {/* First-time explainer */}
