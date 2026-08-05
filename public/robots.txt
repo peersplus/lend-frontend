@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: https://turfopen.lovable.app/
+Disallow: /turfopen/
 
 Sitemap: https://peersplus.com/sitemap.xml
