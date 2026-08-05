@@ -70,7 +70,7 @@ export function SiteHeader() {
             <span aria-hidden className="text-base leading-none text-leaf-foreground">+</span>
             <span className="hidden sm:inline">Post a Lend</span>
           </button>
-          <div className="w-[96px] sm:w-[168px]">
+          <div className="w-auto sm:w-[168px]">
             <UserMenu />
           </div>
           <button
