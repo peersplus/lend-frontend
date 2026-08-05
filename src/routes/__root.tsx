@@ -160,21 +160,37 @@ function RootShell({ children }: { children: ReactNode }) {
             `,
           }}
         />
-        {/* Microsoft Clarity */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "vzgpa3n5ug");`,
-          }}
-        />
         <HeadContent />
       </head>
       <body>
         {children}
         <Scripts />
+        {/* Defer Microsoft Clarity so it doesn't compete with critical rendering path. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                function loadClarity() {
+                  if (window.__clarityLoaded) return;
+                  window.__clarityLoaded = true;
+                  (function(c,l,a,r,i,t,y){
+                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                  })(window, document, "clarity", "script", "vzgpa3n5ug");
+                }
+
+                if ("requestIdleCallback" in window) {
+                  requestIdleCallback(loadClarity, { timeout: 3500 });
+                } else {
+                  window.addEventListener("load", function () {
+                    setTimeout(loadClarity, 1200);
+                  }, { once: true });
+                }
+              })();
+            `,
+          }}
+        />
       </body>
     </html>
   );
