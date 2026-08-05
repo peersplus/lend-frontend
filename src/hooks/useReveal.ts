@@ -10,9 +10,12 @@ import { useEffect } from "react";
 export function useReveal() {
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const enableScrub = window.matchMedia("(min-width: 1024px)").matches;
 
     const revealEls = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-    const scrubEls = Array.from(document.querySelectorAll<HTMLElement>("[data-scrub]"));
+    const scrubEls = enableScrub
+      ? Array.from(document.querySelectorAll<HTMLElement>("[data-scrub]"))
+      : [];
 
     if (reduce) {
       revealEls.forEach((el) => el.classList.add("is-revealed"));
@@ -43,6 +46,13 @@ export function useReveal() {
     revealEls.forEach((el) => io.observe(el));
 
     // Scrub: update a --scrub custom prop based on element position in viewport.
+    if (!scrubEls.length) {
+      document.documentElement.style.setProperty("--page-scrub", "0");
+      return () => {
+        io.disconnect();
+      };
+    }
+
     let raf = 0;
     const updateScrub = () => {
       const vh = window.innerHeight || 1;

@@ -197,7 +197,7 @@ function Home() {
                   {launchAreaLine}
                 </span>
               </div>
-              <h1 className="mb-6 text-balance font-display text-5xl leading-[1.04] md:text-7xl">
+              <h1 className="mb-6 min-h-[2.4em] text-balance font-display text-5xl leading-[1.04] md:min-h-[2.15em] md:text-7xl">
                 {dayTheme.headline} <span className="italic text-leaf">{dayTheme.accent}</span>
               </h1>
               <p className="mb-7 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
