@@ -46,8 +46,8 @@ export function SiteFooter() {
         <div>
           <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Get in touch</p>
           <p className="text-muted-foreground">Questions, reports, or ideas?</p>
-          <a href="mailto:support@peersplus.com" className="mt-1 inline-block font-medium text-leaf hover:underline">
-            support@peersplus.com
+          <a href="mailto:peersplushr@gmail.com" className="mt-1 inline-block font-medium text-leaf hover:underline">
+            peersplushr@gmail.com
           </a>
         </div>
       </div>

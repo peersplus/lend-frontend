@@ -56,7 +56,7 @@ function CommunityPage() {
         <h2 className="mt-10 font-display text-2xl italic">Enforcement</h2>
         <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
           Reports go to a human. Depending on severity we may warn, temporarily suspend, or permanently remove an
-          account. Email <a className="text-leaf underline" href="mailto:support@peersplus.com">support@peersplus.com</a> with
+          account. Email <a className="text-leaf underline" href="mailto:peersplushr@gmail.com">peersplushr@gmail.com</a> with
           the request or booking link and a short description.
         </p>
       </main>

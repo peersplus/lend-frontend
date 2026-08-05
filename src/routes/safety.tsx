@@ -68,7 +68,7 @@ function SafetyPage() {
         <Section title="If something goes wrong">
           <ul className="list-disc space-y-2 pl-5">
             <li>Keep the conversation inside Peers Plus — screenshots and photos help us support you.</li>
-            <li>Email <a className="text-leaf underline" href="mailto:support@peersplus.com">support@peersplus.com</a> with the booking or request link.</li>
+            <li>Email <a className="text-leaf underline" href="mailto:peersplushr@gmail.com">peersplushr@gmail.com</a> with the booking or request link.</li>
             <li>Block the other user from your <Link to="/settings" className="text-leaf underline">settings</Link> if you feel unsafe.</li>
           </ul>
         </Section>

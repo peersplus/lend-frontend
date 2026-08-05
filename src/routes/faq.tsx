@@ -116,7 +116,7 @@ function FAQPage() {
                 For account issues, safety concerns, or partnership questions, the team reads every message.
               </p>
               <a
-                href="mailto:support@peersplus.com?subject=PeersPlus%20support"
+                href="mailto:peersplushr@gmail.com?subject=PeersPlus%20support"
                 className="mt-5 inline-flex items-center justify-center rounded-full bg-leaf px-5 py-2.5 text-sm font-semibold text-leaf-foreground transition-colors hover:bg-leaf/90"
               >
                 Email support
