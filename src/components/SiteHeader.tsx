@@ -5,6 +5,8 @@ import { useRole } from "@/hooks/useRole";
 import { NotificationBell } from "@/components/NotificationBell";
 import { UserMenu } from "@/components/UserMenu";
 import { LOGO_URL } from "@/lib/brand";
+import logo320Webp from "@/assets/optimized/peers-plus-logo-320.webp";
+import logo320Png from "@/assets/optimized/peers-plus-logo-320.png";
 
 /**
  * Shared top navigation used across every page.
@@ -30,11 +32,17 @@ export function SiteHeader() {
     <nav className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2" aria-label="Peers Plus home">
-          <img
-            src={LOGO_URL}
-            alt="Peers Plus"
-            className="h-9 w-auto sm:h-10"
-          />
+          <picture>
+            <source srcSet={logo320Webp} type="image/webp" />
+            <img
+              src={logo320Png || LOGO_URL}
+              alt="Peers Plus"
+              width={320}
+              height={79}
+              decoding="async"
+              className="h-9 w-auto sm:h-10"
+            />
+          </picture>
         </Link>
 
         <div className="hidden items-center gap-5 md:flex">

@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { LOGO_URL } from "@/lib/brand";
+import logo320Webp from "@/assets/optimized/peers-plus-logo-320.webp";
+import logo320Png from "@/assets/optimized/peers-plus-logo-320.png";
 
 /** Shared footer with links to trust pages and support contact. */
 export function SiteFooter() {
@@ -7,7 +9,18 @@ export function SiteFooter() {
     <footer className="mt-16 border-t border-leaf/20 bg-leaf/10">
       <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 text-sm md:grid-cols-4">
         <div>
-          <img src={LOGO_URL} alt="PeersPlus" className="h-8 w-auto" />
+          <picture>
+            <source srcSet={logo320Webp} type="image/webp" />
+            <img
+              src={logo320Png || LOGO_URL}
+              alt="PeersPlus"
+              width={320}
+              height={79}
+              loading="lazy"
+              decoding="async"
+              className="h-8 w-auto"
+            />
+          </picture>
           <p className="mt-3 text-xs text-muted-foreground">
             PeersPlus: Neighbours sharing and helping neighbours.
           </p>

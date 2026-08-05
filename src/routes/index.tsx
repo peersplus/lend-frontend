@@ -9,9 +9,15 @@ import { useReveal } from "@/hooks/useReveal";
 import { buildSeoHead } from "@/lib/seo";
 import { detectNearbyAreaLabel } from "@/lib/nearby-area";
 import { getFestivalSpotlight } from "@/lib/seasonal";
-import heroElectronics from "@/assets/hero-electronics.jpg";
-import heroGarden from "@/assets/hero-garden.jpg";
-import heroHospital from "@/assets/hero-hospital.jpg";
+import heroElectronics600Jpg from "@/assets/optimized/hero-electronics-600.jpg";
+import heroElectronics480Webp from "@/assets/optimized/hero-electronics-480.webp";
+import heroElectronics800Webp from "@/assets/optimized/hero-electronics-800.webp";
+import heroGarden600Jpg from "@/assets/optimized/hero-garden-600.jpg";
+import heroGarden480Webp from "@/assets/optimized/hero-garden-480.webp";
+import heroGarden800Webp from "@/assets/optimized/hero-garden-800.webp";
+import heroHospital600Jpg from "@/assets/optimized/hero-hospital-600.jpg";
+import heroHospital480Webp from "@/assets/optimized/hero-hospital-480.webp";
+import heroHospital800Webp from "@/assets/optimized/hero-hospital-800.webp";
 import { DAY_THEMES } from "@/lib/utils";
 
 
@@ -327,21 +333,66 @@ function Home() {
 
             <div className="grid gap-3 sm:grid-cols-2" data-reveal="right" data-reveal-delay="120">
               <div className="relative overflow-hidden rounded-2xl border border-border bg-background" style={{ transform: "perspective(900px) rotateY(-7deg) rotateX(2deg)" }}>
-                <img src={heroElectronics} alt="Neighbor sharing electronics" className="h-40 w-full object-cover" />
+                <picture>
+                  <source
+                    srcSet={`${heroElectronics480Webp} 480w, ${heroElectronics800Webp} 800w`}
+                    sizes="(min-width: 640px) 365px, 100vw"
+                    type="image/webp"
+                  />
+                  <img
+                    src={heroElectronics600Jpg}
+                    alt="Neighbor sharing electronics"
+                    width={600}
+                    height={600}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-40 w-full object-cover"
+                  />
+                </picture>
                 <div className="p-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Borrow</p>
                   <p className="text-sm">Find useful items near you in minutes.</p>
                 </div>
               </div>
               <div className="relative overflow-hidden rounded-2xl border border-border bg-background" style={{ transform: "perspective(900px) rotateY(7deg) rotateX(2deg)" }}>
-                <img src={heroGarden} alt="Neighbor lending garden tools" className="h-40 w-full object-cover" />
+                <picture>
+                  <source
+                    srcSet={`${heroGarden480Webp} 480w, ${heroGarden800Webp} 800w`}
+                    sizes="(min-width: 640px) 365px, 100vw"
+                    type="image/webp"
+                  />
+                  <img
+                    src={heroGarden600Jpg}
+                    alt="Neighbor lending garden tools"
+                    width={600}
+                    height={600}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-40 w-full object-cover"
+                  />
+                </picture>
                 <div className="p-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Lend</p>
                   <p className="text-sm">List once, help your block often.</p>
                 </div>
               </div>
               <div className="relative overflow-hidden rounded-2xl border border-border bg-background sm:col-span-2" style={{ transform: "perspective(900px) rotateX(2deg)" }}>
-                <img src={heroHospital} alt="Community support for hospital visit" className="h-44 w-full object-cover" />
+                <picture>
+                  <source
+                    srcSet={`${heroHospital480Webp} 480w, ${heroHospital800Webp} 800w`}
+                    sizes="(min-width: 640px) 740px, 100vw"
+                    type="image/webp"
+                  />
+                  <img
+                    src={heroHospital600Jpg}
+                    alt="Community support for hospital visit"
+                    width={600}
+                    height={600}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-44 w-full object-cover"
+                  />
+                </picture>
                 <div className="flex flex-wrap items-center justify-between gap-2 p-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Help</p>

@@ -1,16 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
-import heroHandoff from "@/assets/hero-handoff.jpg";
-import heroHospital from "@/assets/hero-hospital.jpg";
-import heroBaby from "@/assets/hero-baby.jpg";
-import heroKitchen from "@/assets/hero-kitchen.jpg";
-import heroGarden from "@/assets/hero-garden.jpg";
-import heroElectronics from "@/assets/hero-electronics.jpg";
+import heroHandoff600Jpg from "@/assets/optimized/hero-handoff-600.jpg";
+import heroHandoff480Webp from "@/assets/optimized/hero-handoff-480.webp";
+import heroHandoff800Webp from "@/assets/optimized/hero-handoff-800.webp";
+import heroHospital600Jpg from "@/assets/optimized/hero-hospital-600.jpg";
+import heroHospital480Webp from "@/assets/optimized/hero-hospital-480.webp";
+import heroHospital800Webp from "@/assets/optimized/hero-hospital-800.webp";
+import heroBaby600Jpg from "@/assets/optimized/hero-baby-600.jpg";
+import heroBaby480Webp from "@/assets/optimized/hero-baby-480.webp";
+import heroBaby800Webp from "@/assets/optimized/hero-baby-800.webp";
+import heroKitchen600Jpg from "@/assets/optimized/hero-kitchen-600.jpg";
+import heroKitchen480Webp from "@/assets/optimized/hero-kitchen-480.webp";
+import heroKitchen800Webp from "@/assets/optimized/hero-kitchen-800.webp";
+import heroGarden600Jpg from "@/assets/optimized/hero-garden-600.jpg";
+import heroGarden480Webp from "@/assets/optimized/hero-garden-480.webp";
+import heroGarden800Webp from "@/assets/optimized/hero-garden-800.webp";
+import heroElectronics600Jpg from "@/assets/optimized/hero-electronics-600.jpg";
+import heroElectronics480Webp from "@/assets/optimized/hero-electronics-480.webp";
+import heroElectronics800Webp from "@/assets/optimized/hero-electronics-800.webp";
 import { getFestivalSpotlight } from "@/lib/seasonal";
 import { DAY_THEMES } from "@/lib/utils";
 
 type Slide = {
   id: string;
   src: string;
+  srcSet: string;
+  sizes: string;
   alt: string;
   emoji: string;
   category: string;
@@ -25,10 +39,14 @@ type Slide = {
   }>;
 };
 
+const HERO_CAROUSEL_SIZES = "(min-width: 1024px) 420px, (min-width: 640px) 380px, 72vw";
+
 const SLIDES: Slide[] = [
   {
     id: "tools",
-    src: heroHandoff,
+    src: heroHandoff600Jpg,
+    srcSet: `${heroHandoff480Webp} 480w, ${heroHandoff800Webp} 800w`,
+    sizes: HERO_CAROUSEL_SIZES,
     alt: "A neighbor handing a toolbox with a drill and hammer to another neighbor on a warm front porch",
     emoji: "🔧",
     category: "Tools",
@@ -45,7 +63,9 @@ const SLIDES: Slide[] = [
   },
   {
     id: "medical",
-    src: heroHospital,
+    src: heroHospital600Jpg,
+    srcSet: `${heroHospital480Webp} 480w, ${heroHospital800Webp} 800w`,
+    sizes: HERO_CAROUSEL_SIZES,
     alt: "A kind neighbor walking with an elderly woman to a community clinic in soft morning light",
     emoji: "🩺",
     category: "Hospital companion",
@@ -62,7 +82,9 @@ const SLIDES: Slide[] = [
   },
   {
     id: "baby",
-    src: heroBaby,
+    src: heroBaby600Jpg,
+    srcSet: `${heroBaby480Webp} 480w, ${heroBaby800Webp} 800w`,
+    sizes: HERO_CAROUSEL_SIZES,
     alt: "A neighbor handing a stroller and folded baby chair to a young mother on a sunlit porch",
     emoji: "🍼",
     category: "Baby & family",
@@ -79,7 +101,9 @@ const SLIDES: Slide[] = [
   },
   {
     id: "kitchen",
-    src: heroKitchen,
+    src: heroKitchen600Jpg,
+    srcSet: `${heroKitchen480Webp} 480w, ${heroKitchen800Webp} 800w`,
+    sizes: HERO_CAROUSEL_SIZES,
     alt: "A neighbor lending a stand mixer and blender at a warm home entrance",
     emoji: "🍳",
     category: "Kitchen",
@@ -96,7 +120,9 @@ const SLIDES: Slide[] = [
   },
   {
     id: "garden",
-    src: heroGarden,
+    src: heroGarden600Jpg,
+    srcSet: `${heroGarden480Webp} 480w, ${heroGarden800Webp} 800w`,
+    sizes: HERO_CAROUSEL_SIZES,
     alt: "Neighbors sharing a lawnmower and hedge trimmer on a green front lawn",
     emoji: "🌿",
     category: "Garden",
@@ -113,7 +139,9 @@ const SLIDES: Slide[] = [
   },
   {
     id: "electronics",
-    src: heroElectronics,
+    src: heroElectronics600Jpg,
+    srcSet: `${heroElectronics480Webp} 480w, ${heroElectronics800Webp} 800w`,
+    sizes: HERO_CAROUSEL_SIZES,
     alt: "A neighbor lending a laptop and projector at an apartment door in warm evening light",
     emoji: "💻",
     category: "Electronics",
@@ -266,12 +294,16 @@ export function HeroCarousel() {
         <div className="absolute inset-14 overflow-hidden rounded-full border-4 border-white/80 ring-1 ring-bark/8 shadow-xl sm:inset-16">
           {slides.map((s, idx) => (
             <img
-              key={s.src}
+              key={s.id}
               src={s.src}
+              srcSet={s.srcSet}
+              sizes={s.sizes}
               alt={s.alt}
               width={1200}
               height={1408}
               loading={idx === 0 ? "eager" : "lazy"}
+              fetchPriority={idx === 0 ? "high" : "auto"}
+              decoding="async"
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${
                 idx === i ? "opacity-100" : "opacity-0"
               }`}
