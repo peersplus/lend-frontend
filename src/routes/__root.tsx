@@ -15,6 +15,9 @@ import { CenteredLoader } from "@/components/CenteredLoader";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SITE_URL } from "../lib/seo";
+import nunitoSans400LatinWoff2 from "@fontsource/nunito-sans/files/nunito-sans-latin-400-normal.woff2?url";
+import poppins700LatinWoff2 from "@fontsource/poppins/files/poppins-latin-700-normal.woff2?url";
+import poppins700ItalicLatinWoff2 from "@fontsource/poppins/files/poppins-latin-700-italic.woff2?url";
 
 function NotFoundComponent() {
   return (
@@ -109,6 +112,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      {
+        rel: "preload",
+        href: nunitoSans400LatinWoff2,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: poppins700LatinWoff2,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: poppins700ItalicLatinWoff2,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "shortcut icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "apple-touch-icon", href: "/favicon.ico" },
