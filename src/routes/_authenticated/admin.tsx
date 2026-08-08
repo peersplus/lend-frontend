@@ -5,16 +5,16 @@ import { getFirebaseIdToken } from "@/lib/firebase";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { toast } from "@/lib/sonner";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({
-    meta: [
-      { title: "Admin — Peers Plus | Lend Peers Plus" },
-      { name: "description", content: "Superadmin overview of all Peers Plus activity." },
-      { property: "og:title", content: "Admin — Peers Plus" },
-      { property: "og:description", content: "Manage requests, items, and bookings across the neighborhood." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Admin — Peers Plus | Lend Peers Plus",
+      description: "Superadmin overview of all Peers Plus activity.",
+      path: "/admin",
+      noIndex: true,
+    }),
   component: AdminPage,
 });
 

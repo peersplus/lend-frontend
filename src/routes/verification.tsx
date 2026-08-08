@@ -1,16 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/verification")({
-  head: () => ({
-    meta: [
-      { title: "Verification — Peers Plus" },
-      { name: "description", content: "How Peers Plus verifies neighbors so you know who you're borrowing from and lending to." },
-      { property: "og:title", content: "Verification — Peers Plus" },
-      { property: "og:description", content: "Email, phone, address, and photo checks that build trust between neighbors." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Verification — Peers Plus",
+      description: "How Peers Plus verifies neighbors so you know who you're borrowing from and lending to.",
+      path: "/verification",
+    }),
   component: VerificationPage,
 });
 

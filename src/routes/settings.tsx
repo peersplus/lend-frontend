@@ -10,16 +10,16 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { CenteredLoader } from "@/components/CenteredLoader";
 import { requestLocation } from "@/lib/geolocate";
 import { toast } from "@/lib/sonner";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/settings")({
-  head: () => ({
-    meta: [
-      { title: "Notification settings — Peers Plus" },
-      { name: "description", content: "Set your neighborhood, radius, and how you want to be pinged when neighbors need help." },
-      { property: "og:title", content: "Notification settings — Peers Plus" },
-      { property: "og:description", content: "Control your Peers Plus alerts — in-app, push, and email." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Notification settings — Peers Plus",
+      description: "Set your neighborhood, radius, and how you want to be pinged when neighbors need help.",
+      path: "/settings",
+      noIndex: true,
+    }),
   component: SettingsPage,
 });
 

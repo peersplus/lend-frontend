@@ -109,6 +109,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: `${SITE_URL}/og-logos.png?v=20260802` },
       { name: "twitter:image:alt", content: "Peers Plus logo" },
+      ...(import.meta.env.VITE_GOOGLE_SITE_VERIFICATION
+        ? [{ name: "google-site-verification", content: import.meta.env.VITE_GOOGLE_SITE_VERIFICATION as string }]
+        : []),
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -145,6 +148,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Peers Plus",
+    url: SITE_URL,
+    logo: `${SITE_URL}/og-logos.png?v=20260802`,
+  };
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Peers Plus",
+    url: SITE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_URL}/items?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html lang="en">
       <head>
@@ -159,6 +182,14 @@ function RootShell({ children }: { children: ReactNode }) {
               gtag('config', 'G-VQ9XW9Z3FS');
             `,
           }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <HeadContent />
       </head>

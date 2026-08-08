@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { createBookingApi, listBookingsApi, listItemsApi, updateBookingApi, updateItemApi } from "@/lib/api-peers";
 import { toast } from "@/lib/sonner";
+import { buildSeoHead } from "@/lib/seo";
 
 type Item = {
   id: string;
@@ -44,12 +45,12 @@ function normalizeImageList(item: Pick<Item, "image_url" | "image_urls">): strin
 
 export const Route = createFileRoute("/items/$itemId")({
   component: ItemDetailsPage,
-  head: ({ params }) => ({
-    meta: [
-      { title: `Item details ${params.itemId} - Peers Plus` },
-      { name: "description", content: "Review item photos, pricing and pickup details before requesting." },
-    ],
-  }),
+  head: ({ params }) =>
+    buildSeoHead({
+      title: `Item details ${params.itemId} - Peers Plus`,
+      description: "Review item photos, pricing and pickup details before requesting.",
+      path: `/items/${params.itemId}`,
+    }),
 });
 
 function ItemDetailsPage() {

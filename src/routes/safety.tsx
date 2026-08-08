@@ -1,16 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/safety")({
-  head: () => ({
-    meta: [
-      { title: "Safety guide — Peers Plus" },
-      { name: "description", content: "Simple habits that keep neighborly borrowing, lending and helping safe on Peers Plus." },
-      { property: "og:title", content: "Safety guide — Peers Plus" },
-      { property: "og:description", content: "Meeting neighbors, handling items, and staying safe in-person and in-app." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Safety guide — Peers Plus",
+      description: "Simple habits that keep neighborly borrowing, lending and helping safe on Peers Plus.",
+      path: "/safety",
+    }),
   component: SafetyPage,
 });
 

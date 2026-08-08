@@ -1,16 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: "Privacy — Peers Plus" },
-      { name: "description", content: "What Peers Plus collects, how we use it, and the controls you have over your neighborhood data." },
-      { property: "og:title", content: "Privacy — Peers Plus" },
-      { property: "og:description", content: "Plain-language summary of the data Peers Plus stores and how it's used." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Privacy — Peers Plus",
+      description: "What Peers Plus collects, how we use it, and the controls you have over your neighborhood data.",
+      path: "/privacy",
+    }),
   component: PrivacyPage,
 });
 

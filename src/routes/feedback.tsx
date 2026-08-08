@@ -4,14 +4,15 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useAuth } from "@/hooks/useAuth";
 import { submitAppFeedbackApi } from "@/lib/api-peers";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/feedback")({
-  head: () => ({
-    meta: [
-      { title: "Feedback and ideas - Peers Plus" },
-      { name: "description", content: "Share your product feedback and feature ideas with the Peers Plus team." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Feedback and ideas - Peers Plus",
+      description: "Share your product feedback and feature ideas with the Peers Plus team.",
+      path: "/feedback",
+    }),
   component: FeedbackPage,
 });
 

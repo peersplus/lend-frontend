@@ -5,14 +5,16 @@ import { createMessageApi, listMessagesApi } from "@/lib/api-peers";
 import { UserMenu } from "@/components/UserMenu";
 import { CenteredLoader } from "@/components/CenteredLoader";
 import { toast } from "@/lib/sonner";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/chat/request/$requestId/$peerId")({
-  head: () => ({
-    meta: [
-      { title: "Neighbor chat — Peers Plus" },
-      { name: "description", content: "Coordinate with a neighbor who offered to help on your request." },
-    ],
-  }),
+  head: ({ params }) =>
+    buildSeoHead({
+      title: "Neighbor chat — Peers Plus",
+      description: "Coordinate with a neighbor who offered to help on your request.",
+      path: `/chat/request/${params.requestId}/${params.peerId}`,
+      noIndex: true,
+    }),
   component: RequestChatPage,
 });
 
@@ -34,7 +36,7 @@ function RequestChatPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!user) { window.location.assign("/auth"); return; }
 
     (async () => {
       try {
@@ -113,7 +115,7 @@ function RequestChatPage() {
               <p className="mt-6 text-center text-sm text-muted-foreground">Say hi 👋 — offer help, ask timing, share what you can do.</p>
             )}
             {messages.map((m) => {
-              const mine = m.sender_id === user!.id;
+              const mine = m.sender_id === user!.uid;
               return (
                 <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${mine ? "bg-leaf text-leaf-foreground" : "bg-muted text-foreground"}`}>

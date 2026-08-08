@@ -8,16 +8,16 @@ import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { CenteredLoader } from "@/components/CenteredLoader";
 import { toast } from "@/lib/sonner";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/profile")({
-  head: () => ({
-    meta: [
-      { title: "Your profile — Peers Plus" },
-      { name: "description", content: "Manage how neighbors see you on Peers Plus — name, photo, phone, building and address." },
-      { property: "og:title", content: "Your profile — Peers Plus" },
-      { property: "og:description", content: "Edit your Peers Plus neighbor profile." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Your profile — Peers Plus",
+      description: "Manage how neighbors see you on Peers Plus — name, photo, phone, building and address.",
+      path: "/profile",
+      noIndex: true,
+    }),
   component: ProfilePage,
 });
 
@@ -34,7 +34,7 @@ function ProfilePage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!user) { navigate({ to: "/auth", search: { redirectTo: undefined } }); return; }
     (async () => {
       try {
         const data = await getMyPeerProfileApi();

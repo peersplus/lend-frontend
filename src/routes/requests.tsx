@@ -11,6 +11,7 @@ import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { CenteredLoader } from "@/components/CenteredLoader";
 import { toast } from "@/lib/sonner";
+import { buildSeoHead } from "@/lib/seo";
 
 
 
@@ -34,14 +35,12 @@ type Request = {
 };
 
 export const Route = createFileRoute("/requests")({
-  head: () => ({
-    meta: [
-      { title: "Neighborhood requests — Peers Plus" },
-      { name: "description", content: "Ask nearby neighbors for what you need — tools, medical gear, urgent help." },
-      { property: "og:title", content: "Neighborhood requests — Peers Plus" },
-      { property: "og:description", content: "Post a request and every neighbor inside your radius gets notified." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Neighborhood requests — Peers Plus",
+      description: "Ask nearby neighbors for what you need — tools, medical gear, urgent help.",
+      path: "/requests",
+    }),
   component: RequestsPage,
 });
 
@@ -314,7 +313,7 @@ function RequestsPage() {
         {!user && (
           <div className="mb-8 rounded-lg border border-dashed border-border bg-card p-6 text-center">
             <p className="text-sm text-muted-foreground">
-              <Link to="/auth" className="text-primary underline">Sign in</Link> to post a request and receive nearby alerts.
+              <Link to="/auth" search={{ redirectTo: undefined }} className="text-primary underline">Sign in</Link> to post a request and receive nearby alerts.
             </p>
           </div>
         )}
@@ -519,7 +518,7 @@ function RequestsPage() {
               <button type="button" onClick={() => setShowAuthPrompt(false)} className="rounded-xl border border-border py-2.5 text-sm font-semibold">
                 Keep viewing
               </button>
-              <Link to="/auth" onClick={() => setShowAuthPrompt(false)} className="rounded-xl bg-leaf py-2.5 text-center text-sm font-semibold text-leaf-foreground">
+              <Link to="/auth" search={{ redirectTo: undefined }} onClick={() => setShowAuthPrompt(false)} className="rounded-xl bg-leaf py-2.5 text-center text-sm font-semibold text-leaf-foreground">
                 Sign in
               </Link>
             </div>

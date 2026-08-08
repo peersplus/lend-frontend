@@ -6,14 +6,16 @@ import { UserMenu } from "@/components/UserMenu";
 import { PhotoImg } from "@/components/PhotoImg";
 import { CenteredLoader } from "@/components/CenteredLoader";
 import { toast } from "@/lib/sonner";
+import { buildSeoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/chat/$bookingId")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `Chat — Peers Plus` },
-      { name: "description", content: `Private conversation with your neighbor about booking ${params.bookingId}.` },
-    ],
-  }),
+  head: ({ params }) =>
+    buildSeoHead({
+      title: "Chat — Peers Plus",
+      description: `Private conversation with your neighbor about booking ${params.bookingId}.`,
+      path: `/chat/${params.bookingId}`,
+      noIndex: true,
+    }),
   component: ChatPage,
 });
 
@@ -38,7 +40,7 @@ function ChatPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!user) { window.location.assign("/auth"); return; }
 
     (async () => {
       try {

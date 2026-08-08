@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /turfopen/
+Disallow: https://api-lend.peersplus.com/
 
 Sitemap: https://peersplus.com/sitemap.xml

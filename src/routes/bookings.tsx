@@ -8,6 +8,7 @@ import { PhotoUpload } from "@/components/PhotoUpload";
 import { PhotoImg } from "@/components/PhotoImg";
 import { CenteredLoader } from "@/components/CenteredLoader";
 import { toast } from "@/lib/sonner";
+import { buildSeoHead } from "@/lib/seo";
 
 type Booking = {
   id: string;
@@ -42,14 +43,13 @@ type Booking = {
 
 
 export const Route = createFileRoute("/bookings")({
-  head: () => ({
-    meta: [
-      { title: "Your bookings — Peers Plus" },
-      { name: "description", content: "Track items you've borrowed and lent to neighbors: pickup, return, and payment." },
-      { property: "og:title", content: "Your bookings — Peers Plus" },
-      { property: "og:description", content: "Manage pickup, return, and cash payment for community rentals." },
-    ],
-  }),
+  head: () =>
+    buildSeoHead({
+      title: "Your bookings — Peers Plus",
+      description: "Track items you've borrowed and lent to neighbors: pickup, return, and payment.",
+      path: "/bookings",
+      noIndex: true,
+    }),
   component: BookingsPage,
 });
 
@@ -237,9 +237,9 @@ function BookingsPage() {
               <Link to="/" onClick={() => setShowAuthPrompt(false)} className="rounded-xl border border-border py-2.5 text-center text-sm font-semibold">
                 Back home
               </Link>
-              <Link to="/auth" onClick={() => setShowAuthPrompt(false)} className="rounded-xl bg-leaf py-2.5 text-center text-sm font-semibold text-leaf-foreground">
+              <a href="/auth" onClick={() => setShowAuthPrompt(false)} className="rounded-xl bg-leaf py-2.5 text-center text-sm font-semibold text-leaf-foreground">
                 Sign in
-              </Link>
+              </a>
             </div>
           </div>
         </div>
