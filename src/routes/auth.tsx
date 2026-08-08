@@ -23,8 +23,7 @@ export const Route = createFileRoute("/auth")({
       title: "Join Peers Plus — Sign in or create your neighbor account",
       description:
         "Verify your address, meet the neighbors, and start borrowing or lending items nearby.",
-      path: "/auth",
-      noIndex: true,
+      path: "/auth"
     }),
   component: AuthPage,
 });
