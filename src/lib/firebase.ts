@@ -71,6 +71,27 @@ export function getFirebaseAuthErrorMessage(error: unknown): { title: string; de
   const code = typeof error === "object" && error !== null && "code" in error
     ? String((error as { code?: string }).code || "")
     : "";
+  const rawMessage = typeof error === "object" && error !== null && "message" in error
+    ? String((error as { message?: string }).message || "")
+    : "";
+  const nestedApiMessage = typeof error === "object" && error !== null && "errors" in error
+    ? String(((error as { errors?: Array<{ message?: string }> }).errors || [])[0]?.message || "")
+    : "";
+  const normalized = `${code} ${rawMessage} ${nestedApiMessage}`.toUpperCase();
+
+  if (normalized.includes("TOO_MANY_ATTEMPTS_TRY_LATER") || normalized.includes("AUTH/TOO-MANY-REQUESTS")) {
+    return {
+      title: "Please verify your email first",
+      description: "Open the verification link sent to your email, then try signing in again.",
+    };
+  }
+
+  if (rawMessage.toLowerCase().includes("please verify your email before signing in")) {
+    return {
+      title: "Please verify your email first",
+      description: "Open the verification link sent to your email, then try signing in again.",
+    };
+  }
 
   switch (code) {
     case "auth/email-already-in-use":
